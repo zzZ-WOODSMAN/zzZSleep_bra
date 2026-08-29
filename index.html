@@ -1088,7 +1088,7 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
-                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10  ملفات أو مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات و10 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
@@ -1131,7 +1131,7 @@
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <button class="btn btn-dark" onclick="openBloggerExplainerVideo()"><i class="fa-solid fa-circle-play"></i> مشاهدة فيديو الشرح</button>
                         <button class="btn" onclick="copyBloggerCleanupTemplateCode()"><i class="fa-regular fa-copy"></i> نسخ قالب التنظيف</button>
-                        <button class="btn" onclick="copyBloggerTemplateCode()"><i class="fa-regular fa-copy"></i> نسخ كود القالب (Template) <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
+                        <button class="btn" onclick="copyBloggerTemplateCode()"><i class="fa-regular fa-copy"></i> نسخ كود القالب (Template)</button>
                         <button class="btn" onclick="copyBloggerFormattingCode()"><i class="fa-regular fa-copy"></i> نسخ كود التنسيق (Layout)</button>
                     </div>
                     <div class="build-app-warning" id="blogger-notes-box" style="margin-top: 15px;">
@@ -1255,7 +1255,7 @@
             </div>
             <div class="card-body">
                 <div id="site-loader" class="loader">جاري جلب الملفات من GitHub...</div>
-                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات و3 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
                 <ul id="site-files-list" class="file-list"></ul>
             </div>
         </div>
@@ -1279,7 +1279,7 @@
                         <strong>صفحة التحميل (Loader)</strong>
                         <div id="site-loader-status" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">جاري التحقق...</div>
                     </div>
-                    <button class="btn btn-sm" onclick="customizeSiteLoaderPage()">تخصيص Loader <i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-sm" onclick="customizeSiteLoaderPage()">تخصيص Loader <i class="fa-solid fa-pen"></i> <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 </div>
             </div>
         </div>
@@ -1301,7 +1301,7 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
-                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات أو مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات و10 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
@@ -5392,7 +5392,6 @@ function showEditorWarningBanner() {
     }
 
     function copyBloggerTemplateCode() {
-        if (!smRequirePremium("نسخ كود القالب (Template)")) return;
         copyRawCodeToClipboard(BLOGGER_TEMPLATE_CODE, "✅ تم نسخ كود القالب بنجاح!");
     }
 
@@ -5523,9 +5522,6 @@ function showEditorWarningBanner() {
 
     async function spCreateFolder(basePath) {
         if (!basePath) basePath = SITE_FOLDER;
-        let currentFolderCount = 0;
-        try { currentFolderCount = smCountSitePageFolders(await smFetchRepoTree()); } catch (e) { /* في حال فشل الجلب نسمح بالمتابعة */ }
-        if (!smCheckLimit(currentFolderCount, SM_LIMITS.maxPageFolders, "إنشاء أكثر من 3 مجلدات للصفحات")) return;
         let folderName = prompt("أدخل اسم المجلد الجديد (يفضل بالإنجليزي بدون فراغات):");
         if (!folderName) return;
         folderName = folderName.trim().replace(/[\\/]+/g, "_");
@@ -7471,6 +7467,7 @@ function showEditorWarningBanner() {
     }
 
     function customizeSiteLoaderPage() {
+        if (!smRequirePremium("تخصيص صفحة التحميل (Loader)")) return;
         if (siteLoaderFileInfo) {
             editFile(siteLoaderFileInfo.path, siteLoaderFileInfo.sha);
         } else {
