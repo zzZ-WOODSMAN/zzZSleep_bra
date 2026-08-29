@@ -3952,14 +3952,24 @@
     }
 
     function openVarDialog(modeType, editKey = null, isSite = false) {
+        const lightVarsRef = isSite ? siteDynamicLightVars : dynamicLightVars;
+        const darkVarsRef = isSite ? siteDynamicDarkVars : dynamicDarkVars;
+
+        if (!editKey) {
+            const countRef = (modeType === 'dark') ? darkVarsRef : lightVarsRef;
+            const currentCount = Object.keys(countRef).length;
+            const maxAllowed = (modeType === 'dark') ? SM_LIMITS.maxDarkColorVars : SM_LIMITS.maxLightColorVars;
+            const label = (modeType === 'dark')
+                ? "إضافة أكثر من 15 متغير لون للوضع الداكن"
+                : "إضافة أكثر من 15 متغير لون للوضع الفاتح";
+            if (!smCheckLimit(currentCount, maxAllowed, label)) return;
+        }
+
         const overlay = document.getElementById("customVarDialog");
         const title = document.getElementById("customDialogTitle");
         const body = document.getElementById("customDialogBody");
         const confirmBtn = document.getElementById("customDialogConfirmBtn");
         const cancelBtn = document.getElementById("customDialogCancelBtn");
-
-        const lightVarsRef = isSite ? siteDynamicLightVars : dynamicLightVars;
-        const darkVarsRef = isSite ? siteDynamicDarkVars : dynamicDarkVars;
 
         let currentNameVal = editKey ? editKey : "";
         let currentColorVal = "#800ffc";
@@ -8504,7 +8514,7 @@ const SM_LIC_BRANCH = "main"; // عدّلها إن كان الفرع الرئي�
    ضع هنا رابط قاعدتك (مثال: https://your-project-id-default-rtdb.firebaseio.com)
    ملاحظة: يجب أن تسمح قواعد القاعدة بالقراءة/الكتابة على مسار subscriptions/
    أو استخدم متغير SM_FIREBASE_AUTH أدناه إن كنت تستخدم سر قاعدة بيانات (Database Secret). */
-const SM_FIREBASE_DB_URL = "https://umlog-box-default-rtdb.firebaseio.com";
+const SM_FIREBASE_DB_URL = "https://YOUR-PROJECT-default-rtdb.firebaseio.com";
 const SM_FIREBASE_AUTH = ""; // اختياري: ضع Database Secret هنا إن كانت قواعدك تتطلب مصادقة
 
 /* --- أنماط الهيدر المخصصة للخطة الإحترافية فقط (مثل الشريط السفلي العائم) --- */
