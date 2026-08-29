@@ -889,7 +889,7 @@
                 <div class="form-group">
                     <label>نوع اللوجو:</label>
                     <select id="app-logo-type" onchange="toggleAppLogoTypeControls(true)">
-                        <option value="image">صورة 👑 (مدفوع)</option>
+                        <option value="image" id="app-logo-image-option">صورة 👑 (مدفوع)</option>
                         <option value="text">نص</option>
                     </select>
                 </div>
@@ -1049,7 +1049,7 @@
             </div>
             <div class="card-body">
                 <div id="loader" class="loader">جاري جلب الملفات من GitHub...</div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
                 <ul id="files-list" class="file-list"></ul>
             </div>
         </div>
@@ -1088,7 +1088,7 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات  مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفاتأو مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
@@ -1172,7 +1172,7 @@
                         <div class="form-group">
                             <label>نوع اللوجو:</label>
                             <select id="site-logo-type" onchange="toggleSiteLogoTypeControls(true)">
-                                <option value="image">صورة 👑 (مدفوع)</option>
+                                <option value="image" id="site-logo-image-option">صورة 👑 (مدفوع)</option>
                                 <option value="text">نص</option>
                             </select>
                         </div>
@@ -1255,7 +1255,7 @@
             </div>
             <div class="card-body">
                 <div id="site-loader" class="loader">جاري جلب الملفات من GitHub...</div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات و3 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات و3 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
                 <ul id="site-files-list" class="file-list"></ul>
             </div>
         </div>
@@ -1301,7 +1301,7 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
-                <p style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات أو مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات و10 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
@@ -1432,7 +1432,7 @@
                 <button type="button" class="btn btn-sm btn-dark" onclick="openVarDialogForCurrentFile('light')">إضافة متغير للوضع الفاتح <i class="fa-solid fa-plus"></i></button>
                 <button type="button" class="btn btn-sm btn-dark theme-dark-dependent-control" onclick="openVarDialogForCurrentFile('dark')">إضافة متغير للوضع الداكن <i class="fa-solid fa-plus"></i></button>
             </div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin: 4px 0 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 15 متغير فاتح و15 متغير داكن — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
+            <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 4px 0 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 15 متغير فاتح و15 متغير داكن — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
             <div class="custom-vars-container" id="customVarsContainer">
                 <span style="font-weight: bold; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 5px;">قائمة المتغيرات المخصصة المضافة (خاصة بهذه الصفحة حسب مكانها: var.json أو site/var.json):</span>
@@ -8753,6 +8753,17 @@ function smManualRefreshProStatus() {
 function smUpdateProUI() {
     const crownBtn = document.getElementById("sm-pro-crown-btn");
     const badge = document.getElementById("sm-pro-badge");
+
+    // إظهار/إخفاء كل شارات ورسائل "مدفوع" في اللوحة: تختفي بمجرد التفعيل أو إلغاء فرض الاشتراك عالمياً
+    const showPaidIndicators = smLicenseSettings.premium && !smIsPro;
+    document.querySelectorAll(".sm-pro-badge-inline, .sm-pro-limit-hint").forEach(el => {
+        el.style.display = showPaidIndicators ? "" : "none";
+    });
+    const appLogoImgOpt = document.getElementById("app-logo-image-option");
+    if (appLogoImgOpt) appLogoImgOpt.textContent = showPaidIndicators ? "صورة 👑 (مدفوع)" : "صورة";
+    const siteLogoImgOpt = document.getElementById("site-logo-image-option");
+    if (siteLogoImgOpt) siteLogoImgOpt.textContent = showPaidIndicators ? "صورة 👑 (مدفوع)" : "صورة";
+
     if (!crownBtn || !badge) return;
 
     if (!smLicenseSettings.premium) {
