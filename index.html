@@ -8626,7 +8626,7 @@ const SM_LIMITS = {
 };
 
 /* --- الحالة العامة --- */
-let smLicenseSettings = { premium: true, buyLink: "n/a" }; // تُحمَّل من settings.json
+let smLicenseSettings = { premium: true, buyLink: "n/a", price: "" }; // تُحمَّل من settings.json
 let smIsPro = false;
 let smLicenseSettingsLoaded = false;
 
@@ -8644,6 +8644,7 @@ function smLoadLicenseSettings() {
             const premiumRaw = data && (data.premium !== undefined ? data.premium : data["premium"]);
             smLicenseSettings.premium = (premiumRaw === true || premiumRaw === "true");
             smLicenseSettings.buyLink = (data && (data["buy-link"] || data.buyLink)) || "n/a";
+            smLicenseSettings.price = (data && data.price) ? String(data.price) : "";
         })
         .catch(() => {
             // في حال تعذر الوصول للإعدادات، نفترض تفعيل الاشتراك (الوضع الأكثر أماناً) دون تغيير رابط الشراء
@@ -8858,7 +8859,7 @@ function smOpenLicenseDialog(triggeredByFeature) {
         : "";
 
     const buyBtnHtml = (smLicenseSettings.buyLink && smLicenseSettings.buyLink !== "n/a")
-        ? `<button class="btn" style="width:100%; margin-top:8px; background-color:#d4af37;" onclick="window.open('${smLicenseSettings.buyLink}', '_blank')"><i class="fa-solid fa-cart-shopping"></i> شراء رمز التفعيل</button>`
+        ? `<button class="btn" style="width:100%; margin-top:8px; background-color:#d4af37;" onclick="window.open('${smLicenseSettings.buyLink}', '_blank')"><i class="fa-solid fa-cart-shopping"></i> شراء رمز التفعيل${smLicenseSettings.price ? ` بـ (${smLicenseSettings.price})` : ""}</button>`
         : "";
 
     bodyHtml = `
