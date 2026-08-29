@@ -394,6 +394,21 @@
             max-width: 100%;
         }
 
+        .sm-pro-badge-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: linear-gradient(135deg,#f5c518,#d4af37);
+            color: #3a2c00;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 1px 7px;
+            border-radius: 10px;
+            margin-inline-start: 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
         .preview-toggle-bar {
             display: flex;
             background: var(--find-bar-bg);
@@ -874,7 +889,7 @@
                 <div class="form-group">
                     <label>نوع اللوجو:</label>
                     <select id="app-logo-type" onchange="toggleAppLogoTypeControls(true)">
-                        <option value="image">صورة</option>
+                        <option value="image">صورة 👑 (مدفوع)</option>
                         <option value="text">نص</option>
                     </select>
                 </div>
@@ -952,7 +967,7 @@
                         <input type="text" id="app-close-msg" placeholder="مثال: تم إغلاق التطبيق نهائياً ولن يعمل بعد الآن.">
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-sm btn-dark" style="flex:1;" onclick="customizeStatusPage('close')"><i class="fa-solid fa-pen"></i> تخصيص صفحة الإغلاق</button>
+                        <button class="btn btn-sm btn-dark" style="flex:1;" onclick="customizeStatusPage('close')"><i class="fa-solid fa-pen"></i> تخصيص صفحة الإغلاق <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                         <button class="btn btn-sm btn-danger" onclick="deleteStatusPage('close')"><i class="fa-solid fa-trash"></i> حذف الصفحة</button>
                     </div>
                 </div>
@@ -971,7 +986,7 @@
                         <input type="text" id="app-maintenance-msg" placeholder="مثال: التطبيق تحت الصيانة الدورية الآن، سنعود قريباً!">
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-sm btn-dark" style="flex:1;" onclick="customizeStatusPage('maintenance')"><i class="fa-solid fa-pen"></i> تخصيص صفحة الصيانة</button>
+                        <button class="btn btn-sm btn-dark" style="flex:1;" onclick="customizeStatusPage('maintenance')"><i class="fa-solid fa-pen"></i> تخصيص صفحة الصيانة <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                         <button class="btn btn-sm btn-danger" onclick="deleteStatusPage('maintenance')"><i class="fa-solid fa-trash"></i> حذف الصفحة</button>
                     </div>
                 </div>
@@ -1011,7 +1026,7 @@
                 <h2 style="margin: 0; border: none; padding: 0;"><i class="fa-solid fa-chevron-down toggle-icon"></i>ترتيب وظهور وتعديل أسماء الصفحات في القائمة الجانبية</h2>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); refreshPagesList();">إعادة تحميل للصفحات <i class="fa-solid fa-rotate"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); hideAllPages();">إخفاء جميع الصفحات <i class="fa-solid fa-eye-slash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); hideAllPages();">إخفاء جميع الصفحات <i class="fa-solid fa-eye-slash"></i> <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 </div>
             </div>
             <div class="card-body">
@@ -1034,6 +1049,7 @@
             </div>
             <div class="card-body">
                 <div id="loader" class="loader">جاري جلب الملفات من GitHub...</div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
                 <ul id="files-list" class="file-list"></ul>
             </div>
         </div>
@@ -1050,7 +1066,7 @@
                         <strong>صفحة 404</strong>
                         <div id="app-404-status" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">جاري التحقق...</div>
                     </div>
-                    <button class="btn btn-sm" onclick="customizeApp404Page()">تخصيص صفحة 404 <i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-sm" onclick="customizeApp404Page()">تخصيص صفحة 404 <i class="fa-solid fa-pen"></i> <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 </div>
             </div>
         </div>
@@ -1072,6 +1088,7 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات  مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
@@ -1114,7 +1131,7 @@
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <button class="btn btn-dark" onclick="openBloggerExplainerVideo()"><i class="fa-solid fa-circle-play"></i> مشاهدة فيديو الشرح</button>
                         <button class="btn" onclick="copyBloggerCleanupTemplateCode()"><i class="fa-regular fa-copy"></i> نسخ قالب التنظيف</button>
-                        <button class="btn" onclick="copyBloggerTemplateCode()"><i class="fa-regular fa-copy"></i> نسخ كود القالب (Template)</button>
+                        <button class="btn" onclick="copyBloggerTemplateCode()"><i class="fa-regular fa-copy"></i> نسخ كود القالب (Template) <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                         <button class="btn" onclick="copyBloggerFormattingCode()"><i class="fa-regular fa-copy"></i> نسخ كود التنسيق (Layout)</button>
                     </div>
                     <div class="build-app-warning" id="blogger-notes-box" style="margin-top: 15px;">
@@ -1155,7 +1172,7 @@
                         <div class="form-group">
                             <label>نوع اللوجو:</label>
                             <select id="site-logo-type" onchange="toggleSiteLogoTypeControls(true)">
-                                <option value="image">صورة</option>
+                                <option value="image">صورة 👑 (مدفوع)</option>
                                 <option value="text">نص</option>
                             </select>
                         </div>
@@ -1213,7 +1230,7 @@
                 <h2 style="margin: 0; border: none; padding: 0;"><i class="fa-solid fa-chevron-down toggle-icon"></i>ترتيب وظهور وتعديل أسماء الصفحات في القائمة الجانبية</h2>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); refreshSitePagesList();">إعادة تحميل للصفحات <i class="fa-solid fa-rotate"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); hideAllSitePages();">إخفاء جميع الصفحات <i class="fa-solid fa-eye-slash"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); hideAllSitePages();">إخفاء جميع الصفحات <i class="fa-solid fa-eye-slash"></i> <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 </div>
             </div>
             <div class="card-body">
@@ -1238,6 +1255,7 @@
             </div>
             <div class="card-body">
                 <div id="site-loader" class="loader">جاري جلب الملفات من GitHub...</div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin: 0 0 8px;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 6 صفحات و3 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
                 <ul id="site-files-list" class="file-list"></ul>
             </div>
         </div>
@@ -1254,7 +1272,7 @@
                         <strong>صفحة 404</strong>
                         <div id="site-404-status" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">جاري التحقق...</div>
                     </div>
-                    <button class="btn btn-sm" onclick="customizeSite404Page()">تخصيص صفحة 404 <i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-sm" onclick="customizeSite404Page()">تخصيص صفحة 404 <i class="fa-solid fa-pen"></i> <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
                     <div>
@@ -1283,6 +1301,7 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
+                <p style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات أو مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
@@ -1342,7 +1361,7 @@
             <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
                 <span style="font-weight: bold; font-size: 0.95rem; color: #e74c3c;"><i class="fa-solid fa-key me-1"></i> أمان الصفحة:</span>
                 <label style="display:inline-flex; align-items:center; gap:5px; cursor:pointer; font-weight:bold; font-size: 0.85rem;">
-                    <input type="checkbox" id="enable-page-password" onchange="togglePasswordInputVisibility()"> تفعيل كلمة مرور للصفحة؟
+                    <input type="checkbox" id="enable-page-password" onchange="togglePasswordInputVisibility()"> تفعيل كلمة مرور للصفحة؟ <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span>
                 </label>
             </div>
             <div id="page-password-container" style="display: none; width: 100%; margin-top: 5px;">
@@ -1413,6 +1432,7 @@
                 <button type="button" class="btn btn-sm btn-dark" onclick="openVarDialogForCurrentFile('light')">إضافة متغير للوضع الفاتح <i class="fa-solid fa-plus"></i></button>
                 <button type="button" class="btn btn-sm btn-dark theme-dark-dependent-control" onclick="openVarDialogForCurrentFile('dark')">إضافة متغير للوضع الداكن <i class="fa-solid fa-plus"></i></button>
             </div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin: 4px 0 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 15 متغير فاتح و15 متغير داكن — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
             <div class="custom-vars-container" id="customVarsContainer">
                 <span style="font-weight: bold; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 5px;">قائمة المتغيرات المخصصة المضافة (خاصة بهذه الصفحة حسب مكانها: var.json أو site/var.json):</span>
@@ -1430,16 +1450,16 @@
 
             <div id="headerStyleChipsRow" style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%;">
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-classic" onclick="selectHeaderStyle('classic', this)" style="outline: 2px solid var(--accent-color); outline-offset: 2px;">افتراضي</button>
-                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-glass" onclick="selectHeaderStyle('glass', this)">زجاجي شفاف</button>
+                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-glass" onclick="selectHeaderStyle('glass', this)">زجاجي شفاف <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-gradient" onclick="selectHeaderStyle('gradient', this)">تدرج لوني</button>
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-material" onclick="selectHeaderStyle('material', this)">ماتيريال</button>
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-ios" onclick="selectHeaderStyle('ios', this)">عنوان كبير (iOS)</button>
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-bottom-classic" onclick="selectHeaderStyle('bottom-classic', this)">شريط سفلي (Bottom Navbar)</button>
-                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-bottom-pill" onclick="selectHeaderStyle('bottom-pill', this)">شريط سفلي عائم</button>
-                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-neon" onclick="selectHeaderStyle('neon', this)">توهج نيون</button>
+                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-bottom-pill" onclick="selectHeaderStyle('bottom-pill', this)">شريط سفلي عائم <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
+                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-neon" onclick="selectHeaderStyle('neon', this)">توهج نيون <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-minimal" onclick="selectHeaderStyle('minimal', this)">بسيط أنيق</button>
-                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-neumorphism" onclick="selectHeaderStyle('neumorphism', this)">نيومورفيزم (Soft UI)</button>
-                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-app-vibrant" onclick="selectHeaderStyle('app-vibrant', this)">تطبيقات (Vibrant App)</button>
+                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-neumorphism" onclick="selectHeaderStyle('neumorphism', this)">نيومورفيزم (Soft UI) <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
+                <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-app-vibrant" onclick="selectHeaderStyle('app-vibrant', this)">تطبيقات (Vibrant App) <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 <button type="button" class="btn btn-sm btn-dark header-style-chip" id="header-style-chip-custom" onclick="openHeaderCssDialog()">مخصص (Custom CSS) <i class="fa-solid fa-code"></i></button>
             </div>
 
