@@ -1,0 +1,14 @@
+[
+  {
+    "file": "home.html",
+    "title": "home",
+    "icon": "fa-solid fa-file",
+    "hidden": true
+  },
+  {
+    "file": "index.html",
+    "title": "index",
+    "icon": "fa-solid fa-file",
+    "hidden": true
+  }
+]
