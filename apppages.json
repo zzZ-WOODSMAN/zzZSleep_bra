@@ -1,38 +1,38 @@
 {
   "apk_version.json": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "apppages.json": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "checkser.json": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "home.html": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "order.json": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "splash.html": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "splash_config.json": {
-    "op": "update",
-    "timestamp": 1789222366507
+    "op": "sync",
+    "timestamp": 1789222378284
   },
   "tl.html": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   },
   "version.txt": {
     "op": "sync",
-    "timestamp": 1789222057152
+    "timestamp": 1789222378284
   }
 }
