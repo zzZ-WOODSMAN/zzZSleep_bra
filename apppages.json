@@ -2,5 +2,9 @@
   "order.json": {
     "op": "update",
     "timestamp": 1789215837249
+  },
+  "version.txt": {
+    "op": "update",
+    "timestamp": 1789215838431
   }
 }
