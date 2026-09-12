@@ -34,5 +34,9 @@
   "splash.html": {
     "op": "update",
     "timestamp": 1789221572907
+  },
+  "splash_config.json": {
+    "op": "update",
+    "timestamp": 1789221574967
   }
 }
