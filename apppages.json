@@ -38,5 +38,9 @@
   "splash_config.json": {
     "op": "update",
     "timestamp": 1789221574967
+  },
+  "version.txt": {
+    "op": "update",
+    "timestamp": 1789221575780
   }
 }
