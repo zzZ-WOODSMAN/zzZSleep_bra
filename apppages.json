@@ -12,8 +12,8 @@
     "timestamp": 1789222378284
   },
   "order.json": {
-    "op": "sync",
-    "timestamp": 1789222378284
+    "op": "update",
+    "timestamp": 1789224007202
   },
   "splash.html": {
     "op": "update",
