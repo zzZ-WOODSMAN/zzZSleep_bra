@@ -1,46 +1,34 @@
 {
   "home.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "tl.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "site/7.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "site/a.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "site/h.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "site/home.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "site/lol.html": {
     "op": "sync",
-    "timestamp": 1789221489964
+    "timestamp": 1789221576999
   },
   "site/o.html": {
     "op": "sync",
-    "timestamp": 1789221489964
-  },
-  "splash.html": {
-    "op": "update",
-    "timestamp": 1789221572907
-  },
-  "splash_config.json": {
-    "op": "update",
-    "timestamp": 1789221574967
-  },
-  "version.txt": {
-    "op": "update",
-    "timestamp": 1789221575780
+    "timestamp": 1789221576999
   }
 }
