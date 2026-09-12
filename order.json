@@ -1,37 +1,13 @@
 [
   {
-    "file": "doo.html",
-    "title": "doo",
-    "icon": "fa-solid fa-file",
-    "hidden": true
-  },
-  {
-    "file": "home.html",
-    "title": "home",
-    "icon": "fa-solid fa-file",
-    "hidden": true
-  },
-  {
-    "file": "index (39).html",
-    "title": "index (39)",
-    "icon": "fa-solid fa-file",
-    "hidden": true
-  },
-  {
     "file": "index.html",
     "title": "index",
     "icon": "fa-solid fa-file",
     "hidden": true
   },
   {
-    "file": "loo.html",
-    "title": "loo",
-    "icon": "fa-solid fa-file",
-    "hidden": true
-  },
-  {
-    "file": "too.html",
-    "title": "too",
+    "file": "tl.html",
+    "title": "tl",
     "icon": "fa-solid fa-file",
     "hidden": true
   }
