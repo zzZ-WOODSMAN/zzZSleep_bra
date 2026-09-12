@@ -43,6 +43,19 @@
     color:#fff;
     text-align:center;
   }
+  .fade-black{
+    position:absolute;
+    inset:0;
+    background:#000;
+    opacity:0;
+    pointer-events:none;
+    z-index:50;
+    animation: toBlack 2.2s ease forwards 2600ms;
+  }
+  @keyframes toBlack{
+    from{opacity:0;}
+    to{opacity:1;}
+  }
 
   /* animated grid backdrop like a builder canvas */
   .grid{
@@ -225,8 +238,7 @@
     <div class="logo-ring"></div>
     <div class="logo-core">
       <svg viewBox="0 0 24 24"><path d="M4 13h5v7H4zM10 4h5v16h-5zM16 9h5v11h-5z"/></svg>
-    
-</div>
+    </div>
   </div>
 
   <div class="brand">GITIX</div>
@@ -240,6 +252,7 @@
   </div>
 
   <div class="loader"><div class="loader-fill"></div></div>
+  <div class="fade-black"></div>
 </div>
 
 <script>
@@ -262,7 +275,7 @@
 </html>
 <script>
     
-    setTimeout(function () { window.location.href = "home.html"; }, 2500);
+    setTimeout(function () { window.location.href = "home.html"; }, 3800);
 </script>
 </body>
 </html>
