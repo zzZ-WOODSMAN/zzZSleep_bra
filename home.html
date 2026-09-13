@@ -1495,7 +1495,7 @@
 
     <input type="file" id="storage-upload-input" style="display:none;" multiple onchange="smHandleFileUpload(event)">
     <input type="file" id="sp-upload-input" accept=".html,.htm" style="display:none;" multiple onchange="spHandleFileUpload(event)">
-    <input type="file" id="smSplashGitixUploadInput" accept=".gitix" style="display:none" onchange="handleGitixFileUpload(event)">
+    <input type="file" id="smSplashRosTrickUploadInput" accept=".RosTrick" style="display:none" onchange="handleRosTrickFileUpload(event)">
 
     <div id="editor-container" class="card">
         <div class="header-bar">
@@ -1849,8 +1849,8 @@
         fontMode: "google", fontGoogleName: "cairo", fontCustomUrl: "", fontUploadedDataUrl: "", fontUploadedFileName: "",
         logoBorderEnabled: false, logoBorderColor: "#ffffff", logoBorderRadius: null, // null = تبقى كما كانت افتراضيًا قبل هذه الميزة
         textAnimation: "default", textAnimDirection: "", // default = تبقى أنيميشن كل قالب كما كانت قبل هذه الميزة
-        // ثيمات Splash المستوردة من ملفات gitix (أو من مكتبة الثيمات الخارجية) — كل ثيم يُضاف كبطاقة مستقلة في المعرض ولا يستبدل غيره
-        gitixThemes: [], gitixColors: []
+        // ثيمات Splash المستوردة من ملفات RosTrick (أو من مكتبة الثيمات الخارجية) — كل ثيم يُضاف كبطاقة مستقلة في المعرض ولا يستبدل غيره
+        RosTrickThemes: [], RosTrickColors: []
     };
 
     const SM_GOOGLE_FONTS = [
@@ -1949,20 +1949,20 @@
         }
     ];
 
-    /* ============ يبني كائن قالب مؤقت من تعريف ثيم gitix مستورَد (كل ثيم مستورد = بطاقة مستقلة في المعرض) ============ */
-    function smBuildGitixTemplateObject(def) {
+    /* ============ يبني كائن قالب مؤقت من تعريف ثيم RosTrick مستورَد (كل ثيم مستورد = بطاقة مستقلة في المعرض) ============ */
+    function smBuildRosTrickTemplateObject(def) {
         return {
             id: def.id, label: def.themeName || "ثيم مستورد", icon: def.iconClass || "fa-solid fa-box-open",
-            requiresLogo: false, isGitix: true, gitixDef: def,
-            build: (ctx) => ({ style: ctx.gitixColorVarsCss || "", body: ctx.gitixBodyHtml || "" })
+            requiresLogo: false, isRosTrick: true, RosTrickDef: def,
+            build: (ctx) => ({ style: ctx.RosTrickColorVarsCss || "", body: ctx.RosTrickBodyHtml || "" })
         };
     }
 
     function smGetSplashTemplate(id) {
         const builtIn = SM_SPLASH_TEMPLATES.find(t => t.id === id);
         if (builtIn) return builtIn;
-        const gitixDef = (smSplashState.gitixThemes || []).find(g => g.id === id);
-        if (gitixDef) return smBuildGitixTemplateObject(gitixDef);
+        const RosTrickDef = (smSplashState.RosTrickThemes || []).find(g => g.id === id);
+        if (RosTrickDef) return smBuildRosTrickTemplateObject(RosTrickDef);
         return SM_SPLASH_TEMPLATES[0];
     }
 
@@ -2044,8 +2044,8 @@
         };
     }
 
-    /* ============ يستبدل الوسوم النائبة {{APP_NAME}} و {{LOGO_URL}} داخل كود ثيم gitix المستورد بالقيم الفعلية الحالية ============ */
-    function smResolveGitixPlaceholders(html, appName, logoUrl) {
+    /* ============ يستبدل الوسوم النائبة {{APP_NAME}} و {{LOGO_URL}} داخل كود ثيم RosTrick المستورد بالقيم الفعلية الحالية ============ */
+    function smResolveRosTrickPlaceholders(html, appName, logoUrl) {
         if (!html) return "";
         return html
             .replace(/\{\{\s*APP_NAME\s*\}\}/g, appName || "")
@@ -2057,19 +2057,19 @@
         const logoUrl = state.logoUploadedPath ? smBuildAssetPublicUrl(state.logoUploadedPath) : "";
         const fontInfo = smResolveSplashFont(state);
         const activeTpl = smGetSplashTemplate(state.template);
-        let gitixColorVarsCss = "";
-        if (activeTpl.isGitix && Array.isArray(state.gitixColors) && state.gitixColors.length) {
-            gitixColorVarsCss = ":root{" + state.gitixColors.map((c, i) => `--sm-gitix-color-${i + 1}:${c};`).join("") + "}";
+        let RosTrickColorVarsCss = "";
+        if (activeTpl.isRosTrick && Array.isArray(state.RosTrickColors) && state.RosTrickColors.length) {
+            RosTrickColorVarsCss = ":root{" + state.RosTrickColors.map((c, i) => `--sm-RosTrick-color-${i + 1}:${c};`).join("") + "}";
         }
-        const rawGitixBody = (activeTpl.isGitix && activeTpl.gitixDef) ? activeTpl.gitixDef.bodyHtml : "";
+        const rawRosTrickBody = (activeTpl.isRosTrick && activeTpl.RosTrickDef) ? activeTpl.RosTrickDef.bodyHtml : "";
         return {
             ctx: {
                 logoUrl, appName, customHtml: state.customHtml,
                 gradientColors: state.gradientColors, spinnerColor: state.spinnerColor, dotsColor: state.dotsColor,
                 fontFamilyCss: fontInfo.fontFamilyCss,
                 logoImgStyleAttr: smBuildLogoImgStyle(state),
-                gitixColorVarsCss,
-                gitixBodyHtml: smResolveGitixPlaceholders(rawGitixBody, appName, logoUrl)
+                RosTrickColorVarsCss,
+                RosTrickBodyHtml: smResolveRosTrickPlaceholders(rawRosTrickBody, appName, logoUrl)
             },
             fontHeadExtra: fontInfo.headExtra,
             appName
@@ -2287,8 +2287,8 @@ ${parts.body}
     /* ============ عرض/إخفاء مجموعة رفع الشعار حسب التصميم المختار ============ */
     function smSplashUpdateVisibleGroups(templateId) {
         const tpl = smGetSplashTemplate(templateId);
-        const isGitix = !!tpl.isGitix;
-        const def = tpl.gitixDef || {};
+        const isRosTrick = !!tpl.isRosTrick;
+        const def = tpl.RosTrickDef || {};
         const logoGroup = document.getElementById("smSplashLogoGroup");
         const customGroup = document.getElementById("smSplashCustomGroup");
         const gradientGroup = document.getElementById("smSplashGradientGroup");
@@ -2297,7 +2297,7 @@ ${parts.body}
         const fontGroup = document.getElementById("smSplashFontGroup");
         const textAnimGroup = document.getElementById("smSplashTextAnimGroup");
         const textAnimDirGroup = document.getElementById("smSplashTextAnimDirGroup");
-        const gitixColorsGroup = document.getElementById("smSplashGitixColorsGroup");
+        const RosTrickColorsGroup = document.getElementById("smSplashRosTrickColorsGroup");
         const logoBorderSubGroup = document.getElementById("smSplashLogoBorderSubGroup");
         const durationInput = document.getElementById("smSplashDurationInput");
         const durationLockedNote = document.getElementById("smSplashDurationLockedNote");
@@ -2306,8 +2306,8 @@ ${parts.body}
 
         /* تخصيص مدة العرض: قفل الحقل إن كان الثيم يمنع التخصيص، أو فرض حد أدنى إن كان يحدده */
         if (durationInput) {
-            const durationLocked = isGitix && def.allowDurationChange === false;
-            const durationMinVal = (isGitix && def.allowDurationChange !== false && def.minDurationMs) ? def.minDurationMs : null;
+            const durationLocked = isRosTrick && def.allowDurationChange === false;
+            const durationMinVal = (isRosTrick && def.allowDurationChange !== false && def.minDurationMs) ? def.minDurationMs : null;
             if (durationLocked) {
                 durationInput.value = def.durationMs;
                 durationInput.setAttribute("disabled", "disabled");
@@ -2327,18 +2327,18 @@ ${parts.body}
             }
         }
 
-        const showLogo = tpl.requiresLogo || (isGitix && def.allowUploadPhoto);
+        const showLogo = tpl.requiresLogo || (isRosTrick && def.allowUploadPhoto);
         if (logoGroup) logoGroup.style.display = showLogo ? "block" : "none";
         if (customGroup) customGroup.style.display = tpl.isCustom ? "block" : "none";
         if (gradientGroup) gradientGroup.style.display = (templateId === "gradient") ? "block" : "none";
         if (spinnerGroup) spinnerGroup.style.display = (templateId === "spinner") ? "block" : "none";
         if (dotsGroup) dotsGroup.style.display = (templateId === "dots") ? "block" : "none";
-        if (gitixColorsGroup) gitixColorsGroup.style.display = (isGitix && def.allowChangeColors && def.maxColors > 0) ? "block" : "none";
-        if (logoBorderSubGroup) logoBorderSubGroup.style.display = (showLogo && (!isGitix || def.borderChange)) ? "block" : "none";
+        if (RosTrickColorsGroup) RosTrickColorsGroup.style.display = (isRosTrick && def.allowChangeColors && def.maxColors > 0) ? "block" : "none";
+        if (logoBorderSubGroup) logoBorderSubGroup.style.display = (showLogo && (!isRosTrick || def.borderChange)) ? "block" : "none";
 
-        // "تخصيص الخط" و"طريقة عرض/أنيميشن النص" مستقلَّان تمامًا عن بعضهما لثيمات gitix (fontschange / fontsdraw كل على حدة)
-        const showFontControls = !tpl.isCustom && (!isGitix || def.fontsChange);
-        const showTextAnimControls = !tpl.isCustom && (!isGitix || def.fontsDraw);
+        // "تخصيص الخط" و"طريقة عرض/أنيميشن النص" مستقلَّان تمامًا عن بعضهما لثيمات RosTrick (fontschange / fontsdraw كل على حدة)
+        const showFontControls = !tpl.isCustom && (!isRosTrick || def.fontsChange);
+        const showTextAnimControls = !tpl.isCustom && (!isRosTrick || def.fontsDraw);
         if (fontGroup) fontGroup.style.display = showFontControls ? "block" : "none";
         if (textAnimGroup) textAnimGroup.style.display = showTextAnimControls ? "block" : "none";
         if (textAnimDirGroup) textAnimDirGroup.style.display = (showTextAnimControls && (smSplashState.textAnimation || "default") !== "default") ? "block" : "none";
@@ -2348,12 +2348,12 @@ ${parts.body}
         smSplashState.template = id;
         document.querySelectorAll(".sm-splash-chip").forEach(el => el.classList.remove("sm-splash-chip-active"));
         if (btnEl) btnEl.classList.add("sm-splash-chip-active");
-        // عند اختيار ثيم gitix، تُطبَّق مدة العرض الافتراضية الخاصة بهذا الثيم تلقائيًا كقيمة مبدئية
+        // عند اختيار ثيم RosTrick، تُطبَّق مدة العرض الافتراضية الخاصة بهذا الثيم تلقائيًا كقيمة مبدئية
         const tpl = smGetSplashTemplate(id);
-        if (tpl.isGitix && tpl.gitixDef && typeof tpl.gitixDef.durationMs === "number") {
-            smSplashState.durationMs = tpl.gitixDef.durationMs;
+        if (tpl.isRosTrick && tpl.RosTrickDef && typeof tpl.RosTrickDef.durationMs === "number") {
+            smSplashState.durationMs = tpl.RosTrickDef.durationMs;
             const durationInput = document.getElementById("smSplashDurationInput");
-            if (durationInput) durationInput.value = tpl.gitixDef.durationMs;
+            if (durationInput) durationInput.value = tpl.RosTrickDef.durationMs;
         }
         smSplashUpdateVisibleGroups(id);
         smUpdateSplashPreview();
@@ -2361,13 +2361,13 @@ ${parts.body}
 
     function smUseRecommendedSplashDuration() {
         const tpl = smGetSplashTemplate(smSplashState.template);
-        if (tpl.isGitix && tpl.gitixDef && tpl.gitixDef.allowDurationChange === false) {
+        if (tpl.isRosTrick && tpl.RosTrickDef && tpl.RosTrickDef.allowDurationChange === false) {
             showAndroidToast("🔒 هذا الثيم لا يسمح بتخصيص مدة العرض.");
             return;
         }
         let recommended = SM_SPLASH_RECOMMENDED_MS;
-        if (tpl.isGitix && tpl.gitixDef && tpl.gitixDef.minDurationMs) {
-            recommended = Math.max(recommended, tpl.gitixDef.minDurationMs);
+        if (tpl.isRosTrick && tpl.RosTrickDef && tpl.RosTrickDef.minDurationMs) {
+            recommended = Math.max(recommended, tpl.RosTrickDef.minDurationMs);
         }
         const input = document.getElementById("smSplashDurationInput");
         if (input) input.value = recommended;
@@ -2386,11 +2386,11 @@ ${parts.body}
         let val = parseInt(input.value, 10);
         if (isNaN(val)) val = SM_SPLASH_RECOMMENDED_MS;
         val = Math.min(15000, Math.max(300, val));
-        if (tpl.isGitix && tpl.gitixDef) {
-            if (tpl.gitixDef.allowDurationChange === false) {
-                val = tpl.gitixDef.durationMs;
-            } else if (tpl.gitixDef.minDurationMs && val < tpl.gitixDef.minDurationMs) {
-                val = tpl.gitixDef.minDurationMs;
+        if (tpl.isRosTrick && tpl.RosTrickDef) {
+            if (tpl.RosTrickDef.allowDurationChange === false) {
+                val = tpl.RosTrickDef.durationMs;
+            } else if (tpl.RosTrickDef.minDurationMs && val < tpl.RosTrickDef.minDurationMs) {
+                val = tpl.RosTrickDef.minDurationMs;
             }
         }
         input.value = val;
@@ -2447,7 +2447,7 @@ ${parts.body}
         smUpdateSplashPreview();
     }
 
-    /* ============ ثيمات Splash المستوردة: رفع ملف gitix (JSON بامتداد مخصص) أو استيراد من مكتبة الثيمات الخارجية ============ */
+    /* ============ ثيمات Splash المستوردة: رفع ملف RosTrick (JSON بامتداد مخصص) أو استيراد من مكتبة الثيمات الخارجية ============ */
     const SM_SPLASH_THEME_LIBRARY_URL = "tl.html"; // ضع هنا رابط موقع مكتبة ثيمات Splash الفعلي عند توفره
     const SM_SPLASH_THEME_STORAGE_KEY = "sm_selected_splash_theme"; // المفتاح المتوقع تخزين الثيم المختار تحته في localStorage
 
@@ -2473,14 +2473,14 @@ ${parts.body}
         }
         try {
             const parsed = JSON.parse(raw);
-            smApplyGitixPackage(parsed, parsed.name || "ثيم من المكتبة");
+            smApplyRosTrickPackage(parsed, parsed.name || "ثيم من المكتبة");
             showAndroidToast("✅ تم استيراد الثيم من المكتبة بنجاح.");
         } catch (e) {
             alert("❌ بيانات الثيم المحفوظة في المتصفح غير صالحة.");
         }
     }
 
-    /* ============ نافذة "إضافة ثيم": رفع ملف gitix مباشرةً، أو الانتقال إلى مكتبة الثيمات الخارجية ============ */
+    /* ============ نافذة "إضافة ثيم": رفع ملف RosTrick مباشرةً، أو الانتقال إلى مكتبة الثيمات الخارجية ============ */
     function smShowAddThemeDialog() {
         const hasLibraryPick = (() => {
             try { return !!localStorage.getItem(SM_SPLASH_THEME_STORAGE_KEY); } catch (e) { return false; }
@@ -2488,7 +2488,7 @@ ${parts.body}
         const body = `
             <div class="form-group">
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    <button type="button" class="btn" onclick="closeCustomDialog(); triggerGitixUpload();"><i class="fa-solid fa-upload"></i> رفع ملف ثيم (gitix.)</button>
+                    <button type="button" class="btn" onclick="closeCustomDialog(); triggerRosTrickUpload();"><i class="fa-solid fa-upload"></i> رفع ملف ثيم (RosTrick.)</button>
                     <button type="button" class="btn btn-dark" onclick="smOpenSplashThemeLibrary()"><i class="fa-solid fa-arrow-up-right-from-square"></i> الانتقال لمكتبة الثيمات</button>
                 </div>
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px;">مكتبة الثيمات موقع مستقل ينفتح في تبويب جديد. بعد اختيار ثيم هناك، عُد وافتح "إضافة ثيم" مجددًا لاستيراده.</p>
@@ -2498,29 +2498,29 @@ ${parts.body}
         openCustomDialog("➕ إضافة ثيم", body, null, null, true);
     }
 
-    function triggerGitixUpload() {
-        const input = document.getElementById("smSplashGitixUploadInput");
+    function triggerRosTrickUpload() {
+        const input = document.getElementById("smSplashRosTrickUploadInput");
         if (!input) return;
         input.value = "";
         input.click();
     }
 
-    function handleGitixFileUpload(event) {
+    function handleRosTrickFileUpload(event) {
         const file = (event.target.files || [])[0];
         if (!file) return;
-        if (!/\.gitix$/i.test(file.name)) {
-            alert("⚠️ الرجاء اختيار ملف بصيغة .gitix فقط (مثال: Rainbow.gitix).");
+        if (!/\.RosTrick$/i.test(file.name)) {
+            alert("⚠️ الرجاء اختيار ملف بصيغة .RosTrick فقط (مثال: Rainbow.RosTrick).");
             event.target.value = "";
             return;
         }
         const reader = new FileReader();
         reader.onload = function () {
             try {
-                const parsed = JSON.parse(reader.result); // ملف gitix هو JSON بامتداد مخصص، يُحوَّل مباشرة عبر JSON.parse
-                smApplyGitixPackage(parsed, file.name);
-                showAndroidToast("✅ تم استيراد ثيم Splash من ملف gitix بنجاح.");
+                const parsed = JSON.parse(reader.result); // ملف RosTrick هو JSON بامتداد مخصص، يُحوَّل مباشرة عبر JSON.parse
+                smApplyRosTrickPackage(parsed, file.name);
+                showAndroidToast("✅ تم استيراد ثيم Splash من ملف RosTrick بنجاح.");
             } catch (e) {
-                alert("❌ ملف gitix غير صالح أو تالف (يجب أن يكون محتواه بصيغة JSON صحيحة).");
+                alert("❌ ملف RosTrick غير صالح أو تالف (يجب أن يكون محتواه بصيغة JSON صحيحة).");
             }
             event.target.value = "";
         };
@@ -2531,24 +2531,24 @@ ${parts.body}
         reader.readAsText(file);
     }
 
-    /* ============ يقرأ حزمة الثيم (سواء من ملف gitix أو من مكتبة الثيمات) ويفعّلها كقالب Splash حالي ============ */
-    let smGitixIdCounter = 0;
-    function smGenerateGitixId() {
-        smGitixIdCounter++;
-        return "gitix_" + Date.now() + "_" + smGitixIdCounter;
+    /* ============ يقرأ حزمة الثيم (سواء من ملف RosTrick أو من مكتبة الثيمات) ويفعّلها كقالب Splash حالي ============ */
+    let smRosTrickIdCounter = 0;
+    function smGenerateRosTrickId() {
+        smRosTrickIdCounter++;
+        return "RosTrick_" + Date.now() + "_" + smRosTrickIdCounter;
     }
 
-    /* ============ يحذف بطاقة ثيم gitix مستورد من المعرض بعد تأكيد المستخدم ============ */
-    function smDeleteGitixTheme(id, evt) {
+    /* ============ يحذف بطاقة ثيم RosTrick مستورد من المعرض بعد تأكيد المستخدم ============ */
+    function smDeleteRosTrickTheme(id, evt) {
         if (evt) evt.stopPropagation(); // منع فتح/اختيار الكرت نفسه عند الضغط على زر الحذف الصغير عليه
-        const def = (smSplashState.gitixThemes || []).find(g => g.id === id);
+        const def = (smSplashState.RosTrickThemes || []).find(g => g.id === id);
         const name = def ? def.themeName : "هذا الثيم";
         if (!confirm(`هل تريد حذف الثيم "${name}" من المعرض؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
 
-        smSplashState.gitixThemes = (smSplashState.gitixThemes || []).filter(g => g.id !== id);
+        smSplashState.RosTrickThemes = (smSplashState.RosTrickThemes || []).filter(g => g.id !== id);
         if (smSplashState.template === id) {
             smSplashState.template = "classic";
-            smSplashState.gitixColors = [];
+            smSplashState.RosTrickColors = [];
         }
 
         openCustomDialog("🎨 تخصيص صفحة Splash", smRenderSplashEditorBody(), smSaveSplashConfig, "حفظ ونشر Splash", true);
@@ -2558,16 +2558,16 @@ ${parts.body}
     }
 
     /* ============ يضيف الثيم المستورَد كبطاقة جديدة في المعرض دون استبدال أي ثيم مستورد سابقًا ============ */
-    function smApplyGitixPackage(parsed, sourceName) {
+    function smApplyRosTrickPackage(parsed, sourceName) {
         // اسم الثيم يُجلب من محتوى الملف نفسه (المفتاح themena) وليس من اسم الملف؛ اسم الملف يُستخدم فقط كاحتياط إن لم يوجد المفتاح
-        const themeName = (typeof parsed.themena === "string" && parsed.themena.trim()) ? parsed.themena.trim() : (sourceName ? sourceName.replace(/\.gitix$/i, "") : "ثيم مستورد");
+        const themeName = (typeof parsed.themena === "string" && parsed.themena.trim()) ? parsed.themena.trim() : (sourceName ? sourceName.replace(/\.RosTrick$/i, "") : "ثيم مستورد");
 
-        if (!Array.isArray(smSplashState.gitixThemes)) smSplashState.gitixThemes = [];
+        if (!Array.isArray(smSplashState.RosTrickThemes)) smSplashState.RosTrickThemes = [];
         // كشف التكرار: إن وُجد ثيم مستورد سابقًا بنفس الاسم (بغض النظر عن حالة الأحرف)، يُحدَّث محتواه بدل إضافة بطاقة مكررة جديدة
-        const existing = smSplashState.gitixThemes.find(g => (g.themeName || "").trim().toLowerCase() === themeName.toLowerCase());
+        const existing = smSplashState.RosTrickThemes.find(g => (g.themeName || "").trim().toLowerCase() === themeName.toLowerCase());
 
         const def = {
-            id: existing ? existing.id : smGenerateGitixId(),
+            id: existing ? existing.id : smGenerateRosTrickId(),
             themeName: themeName,
             fileName: sourceName || "",
             iconClass: (typeof parsed.ticonf === "string" && parsed.ticonf.trim()) ? parsed.ticonf.trim() : "",
@@ -2575,10 +2575,10 @@ ${parts.body}
             allowChangeColors: parsed.allowchangescolor === "active",
             maxColors: Math.max(0, Math.min(10, parseInt(parsed.howmuchcolorwillbechangemax, 10) || 0)),
             fontsChange: parsed.fontschange === "active",
-            // fontsdraw هو المفتاح الحالي لتخصيص طريقة عرض/أنيميشن النص؛ activetextcus يبقى مدعومًا كاسم قديم بديل لأي ملفات gitix أُنشئت قبل هذا التعديل
+            // fontsdraw هو المفتاح الحالي لتخصيص طريقة عرض/أنيميشن النص؛ activetextcus يبقى مدعومًا كاسم قديم بديل لأي ملفات RosTrick أُنشئت قبل هذا التعديل
             fontsDraw: (parsed.fontsdraw === true || parsed.activetextcus === true),
             borderChange: parsed.borderchange === "active",
-            // تخصيص مدة العرض: إن لم يتضمّن ملف gitix هذه الحقول (ثيمات قديمة قبل هذه الميزة)، يبقى التخصيص مفعّلًا افتراضيًا بلا أي قيد أدنى
+            // تخصيص مدة العرض: إن لم يتضمّن ملف RosTrick هذه الحقول (ثيمات قديمة قبل هذه الميزة)، يبقى التخصيص مفعّلًا افتراضيًا بلا أي قيد أدنى
             allowDurationChange: (typeof parsed.allowdurationchange === "undefined") ? true : parsed.allowdurationchange === "active",
             durationMs: Math.min(15000, Math.max(300, parseInt(parsed.durationms, 10) || SM_SPLASH_RECOMMENDED_MS)),
             minDurationMs: Math.min(15000, Math.max(300, parseInt(parsed.mindurationms, 10) || 300)),
@@ -2587,16 +2587,16 @@ ${parts.body}
         if (def.minDurationMs > def.durationMs) def.durationMs = def.minDurationMs; // أمان: لا تقل المدة الافتراضية عن الحد الأدنى المحدد لنفس الثيم
 
         if (existing) {
-            const idx = smSplashState.gitixThemes.indexOf(existing);
-            smSplashState.gitixThemes[idx] = def;
+            const idx = smSplashState.RosTrickThemes.indexOf(existing);
+            smSplashState.RosTrickThemes[idx] = def;
             showAndroidToast("✅ يوجد ثيم بنفس الاسم مسبقًا — تم تحديث محتواه: " + themeName);
         } else {
-            smSplashState.gitixThemes.push(def);
+            smSplashState.RosTrickThemes.push(def);
         }
 
         smSplashState.template = def.id;
         smSplashState.durationMs = def.durationMs; // كل ثيم مستورد يحمل مدة عرض افتراضية خاصة به
-        smSplashState.gitixColors = (def.allowChangeColors && def.maxColors > 0) ? ["#18bc9c"] : [];
+        smSplashState.RosTrickColors = (def.allowChangeColors && def.maxColors > 0) ? ["#18bc9c"] : [];
         if (!def.fontsDraw) {
             smSplashState.textAnimation = "default";
         }
@@ -2608,48 +2608,48 @@ ${parts.body}
     }
 
     /* ============ ألوان الثيم المستورد الحالي (عددها الأقصى يحدده تعريف ذلك الثيم بالذات) ============ */
-    function smRenderGitixColorsHtml() {
+    function smRenderRosTrickColorsHtml() {
         const activeTpl = smGetSplashTemplate(smSplashState.template);
-        const max = (activeTpl.gitixDef && activeTpl.gitixDef.maxColors) || 0;
-        if (!Array.isArray(smSplashState.gitixColors) || !smSplashState.gitixColors.length) {
-            smSplashState.gitixColors = max > 0 ? ["#18bc9c"] : [];
+        const max = (activeTpl.RosTrickDef && activeTpl.RosTrickDef.maxColors) || 0;
+        if (!Array.isArray(smSplashState.RosTrickColors) || !smSplashState.RosTrickColors.length) {
+            smSplashState.RosTrickColors = max > 0 ? ["#18bc9c"] : [];
         }
-        const colors = smSplashState.gitixColors;
+        const colors = smSplashState.RosTrickColors;
         const inputs = colors.map((c, i) => `
             <span style="display:inline-flex; align-items:center; gap:4px; margin:3px;">
-                <input type="color" value="${c}" oninput="smOnGitixColorChange(${i}, this.value)" style="width:42px; height:34px; padding:0; border:none; cursor:pointer;">
-                ${colors.length > 1 ? `<button type="button" class="btn btn-sm" style="padding:2px 8px;" onclick="smRemoveGitixColor(${i})">✕</button>` : ""}
+                <input type="color" value="${c}" oninput="smOnRosTrickColorChange(${i}, this.value)" style="width:42px; height:34px; padding:0; border:none; cursor:pointer;">
+                ${colors.length > 1 ? `<button type="button" class="btn btn-sm" style="padding:2px 8px;" onclick="smRemoveRosTrickColor(${i})">✕</button>` : ""}
             </span>`).join("");
         const addBtn = colors.length < max
-            ? `<button type="button" class="btn btn-sm" onclick="smAddGitixColor()"><i class="fa-solid fa-plus"></i> إضافة لون (${colors.length}/${max})</button>`
+            ? `<button type="button" class="btn btn-sm" onclick="smAddRosTrickColor()"><i class="fa-solid fa-plus"></i> إضافة لون (${colors.length}/${max})</button>`
             : `<span style="font-size:0.75rem; color:var(--text-muted);">وصلت للحد الأقصى (${max} ألوان)</span>`;
-        return `<div id="smSplashGitixColorsInner" style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">${inputs}${addBtn}</div>`;
+        return `<div id="smSplashRosTrickColorsInner" style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">${inputs}${addBtn}</div>`;
     }
 
-    function smRefreshGitixColorsUI() {
-        const inner = document.getElementById("smSplashGitixColorsInner");
-        if (inner) inner.outerHTML = smRenderGitixColorsHtml();
+    function smRefreshRosTrickColorsUI() {
+        const inner = document.getElementById("smSplashRosTrickColorsInner");
+        if (inner) inner.outerHTML = smRenderRosTrickColorsHtml();
         smUpdateSplashPreview();
     }
 
-    function smAddGitixColor() {
+    function smAddRosTrickColor() {
         const activeTpl = smGetSplashTemplate(smSplashState.template);
-        const max = (activeTpl.gitixDef && activeTpl.gitixDef.maxColors) || 0;
-        if (!Array.isArray(smSplashState.gitixColors)) smSplashState.gitixColors = [];
-        if (smSplashState.gitixColors.length >= max) return;
-        smSplashState.gitixColors.push("#ffffff");
-        smRefreshGitixColorsUI();
+        const max = (activeTpl.RosTrickDef && activeTpl.RosTrickDef.maxColors) || 0;
+        if (!Array.isArray(smSplashState.RosTrickColors)) smSplashState.RosTrickColors = [];
+        if (smSplashState.RosTrickColors.length >= max) return;
+        smSplashState.RosTrickColors.push("#ffffff");
+        smRefreshRosTrickColorsUI();
     }
 
-    function smRemoveGitixColor(idx) {
-        if (!Array.isArray(smSplashState.gitixColors) || smSplashState.gitixColors.length <= 1) return;
-        smSplashState.gitixColors.splice(idx, 1);
-        smRefreshGitixColorsUI();
+    function smRemoveRosTrickColor(idx) {
+        if (!Array.isArray(smSplashState.RosTrickColors) || smSplashState.RosTrickColors.length <= 1) return;
+        smSplashState.RosTrickColors.splice(idx, 1);
+        smRefreshRosTrickColorsUI();
     }
 
-    function smOnGitixColorChange(idx, value) {
-        if (!Array.isArray(smSplashState.gitixColors)) smSplashState.gitixColors = [];
-        smSplashState.gitixColors[idx] = value;
+    function smOnRosTrickColorChange(idx, value) {
+        if (!Array.isArray(smSplashState.RosTrickColors)) smSplashState.RosTrickColors = [];
+        smSplashState.RosTrickColors[idx] = value;
         smUpdateSplashPreview();
     }
 
@@ -2868,17 +2868,17 @@ ${parts.body}
     /* ============ بناء HTML جسم المحرر (تُستدعى بعد جلب الإعدادات الحالية) ============ */
     function smRenderSplashEditorBody() {
         const galleryTemplates = SM_SPLASH_TEMPLATES.filter(t => !t.hidden)
-            .concat((smSplashState.gitixThemes || []).map(g => smBuildGitixTemplateObject(g)));
+            .concat((smSplashState.RosTrickThemes || []).map(g => smBuildRosTrickTemplateObject(g)));
         const chipsHtml = galleryTemplates.map(t => {
             const active = t.id === smSplashState.template ? " sm-splash-chip-active" : "";
-            const chipBtn = `<button type="button" class="btn btn-sm btn-dark sm-splash-chip${active}" onclick="smSelectSplashTemplate('${t.id}', this)" style="${t.isGitix ? 'padding-inline-end:26px;' : ''}">
+            const chipBtn = `<button type="button" class="btn btn-sm btn-dark sm-splash-chip${active}" onclick="smSelectSplashTemplate('${t.id}', this)" style="${t.isRosTrick ? 'padding-inline-end:26px;' : ''}">
                 <i class="${t.icon}"></i> ${t.label}
             </button>`;
-            if (!t.isGitix) {
+            if (!t.isRosTrick) {
                 return `<span style="display:inline-block; margin:4px;">${chipBtn}</span>`;
             }
             // بطاقات الثيمات المستوردة فقط تحمل زر حذف صغيرًا فوقها (التصاميم الجاهزة لا يمكن حذفها)
-            const deleteBtn = `<button type="button" onclick="smDeleteGitixTheme('${t.id}', event)" title="حذف هذا الثيم" style="position:absolute; top:-6px; left:-6px; width:18px; height:18px; border-radius:50%; background:#e74c3c; color:#fff; border:none; font-size:10px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">✕</button>`;
+            const deleteBtn = `<button type="button" onclick="smDeleteRosTrickTheme('${t.id}', event)" title="حذف هذا الثيم" style="position:absolute; top:-6px; left:-6px; width:18px; height:18px; border-radius:50%; background:#e74c3c; color:#fff; border:none; font-size:10px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">✕</button>`;
             return `<span style="position:relative; display:inline-block; margin:4px;">${chipBtn}${deleteBtn}</span>`;
         }).join("") + `<button type="button" class="btn btn-sm sm-splash-chip" onclick="smShowAddThemeDialog()" style="margin:4px;" title="إضافة ثيم جديد يُضاف كبطاقة جديدة">
                 <i class="fa-solid fa-plus"></i> إضافة ثيم
@@ -2896,9 +2896,9 @@ ${parts.body}
         }).join("");
 
         const durationActiveTpl = smGetSplashTemplate(smSplashState.template);
-        const durationDef = durationActiveTpl.gitixDef || {};
-        const durationIsLocked = durationActiveTpl.isGitix && durationDef.allowDurationChange === false;
-        const durationMinForRender = (durationActiveTpl.isGitix && durationDef.allowDurationChange !== false && durationDef.minDurationMs) ? durationDef.minDurationMs : null;
+        const durationDef = durationActiveTpl.RosTrickDef || {};
+        const durationIsLocked = durationActiveTpl.isRosTrick && durationDef.allowDurationChange === false;
+        const durationMinForRender = (durationActiveTpl.isRosTrick && durationDef.allowDurationChange !== false && durationDef.minDurationMs) ? durationDef.minDurationMs : null;
 
         return `
             <div class="form-group">
@@ -2920,12 +2920,12 @@ ${parts.body}
             <div class="form-group">
                 <label>اختر تصميمًا جاهزًا (أو ثيمًا مستوردًا):</label>
                 <div style="display:flex; flex-wrap:wrap;">${chipsHtml}</div>
-                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">كل ثيم gitix يُرفع (سواء من ملف .gitix أو من مكتبة الثيمات) يُضاف كبطاقة جديدة هنا بجانب البقية، دون أن يستبدل أي ثيم مستورد سابقًا. استخدم زر "+ إضافة ثيم" في نهاية صف الكروت أعلاه.${(smSplashState.gitixThemes || []).length ? " (عدد الثيمات المستوردة حاليًا: " + smSplashState.gitixThemes.length + ")" : ""}</p>
+                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">كل ثيم RosTrick يُرفع (سواء من ملف .RosTrick أو من مكتبة الثيمات) يُضاف كبطاقة جديدة هنا بجانب البقية، دون أن يستبدل أي ثيم مستورد سابقًا. استخدم زر "+ إضافة ثيم" في نهاية صف الكروت أعلاه.${(smSplashState.RosTrickThemes || []).length ? " (عدد الثيمات المستوردة حاليًا: " + smSplashState.RosTrickThemes.length + ")" : ""}</p>
             </div>
-            <div class="form-group" id="smSplashGitixColorsGroup" style="display:none;">
-                <label>ألوان الثيم المستورد (حتى ${(smGetSplashTemplate(smSplashState.template).gitixDef && smGetSplashTemplate(smSplashState.template).gitixDef.maxColors) || 0} ألوان):</label>
-                ${smRenderGitixColorsHtml()}
-                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">تُتاح هذه الألوان كمتغيّرات CSS (--sm-gitix-color-1، --sm-gitix-color-2 ...) يمكن لكود الثيم المستورَد استخدامها في تصميمه.</p>
+            <div class="form-group" id="smSplashRosTrickColorsGroup" style="display:none;">
+                <label>ألوان الثيم المستورد (حتى ${(smGetSplashTemplate(smSplashState.template).RosTrickDef && smGetSplashTemplate(smSplashState.template).RosTrickDef.maxColors) || 0} ألوان):</label>
+                ${smRenderRosTrickColorsHtml()}
+                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">تُتاح هذه الألوان كمتغيّرات CSS (--sm-RosTrick-color-1، --sm-RosTrick-color-2 ...) يمكن لكود الثيم المستورَد استخدامها في تصميمه.</p>
             </div>
             <div class="form-group" id="smSplashGradientGroup" style="display:none;">
                 <label>ألوان التدرج اللوني (حتى 4 ألوان):</label>
@@ -3022,7 +3022,7 @@ ${parts.body}
                         fontMode: "google", fontGoogleName: "cairo", fontCustomUrl: "", fontUploadedDataUrl: "", fontUploadedFileName: "",
                         logoBorderEnabled: false, logoBorderColor: "#ffffff", logoBorderRadius: null,
                         textAnimation: "default", textAnimDirection: "",
-                        gitixThemes: [], gitixColors: []
+                        RosTrickThemes: [], RosTrickColors: []
                     };
                     smSplashLogoUploadedPath = "";
                     return;
@@ -3032,28 +3032,28 @@ ${parts.body}
                 const decoded = decodeURIComponent(escape(atob(cleanBase64)));
                 const parsed = JSON.parse(decoded);
 
-                // ترحيل تلقائي لإعدادات قديمة (ثيم gitix واحد بحقول مفردة) إلى نموذج المصفوفة الجديد المتعدد الثيمات
-                let migratedGitixThemes = Array.isArray(parsed.gitixThemes) ? parsed.gitixThemes : [];
+                // ترحيل تلقائي لإعدادات قديمة (ثيم RosTrick واحد بحقول مفردة) إلى نموذج المصفوفة الجديد المتعدد الثيمات
+                let migratedRosTrickThemes = Array.isArray(parsed.RosTrickThemes) ? parsed.RosTrickThemes : [];
                 let migratedTemplate = parsed.template || "classic";
-                if (!migratedGitixThemes.length && parsed.gitixBodyHtml) {
-                    const legacyId = "gitix_legacy_1";
-                    migratedGitixThemes = [{
+                if (!migratedRosTrickThemes.length && parsed.RosTrickBodyHtml) {
+                    const legacyId = "RosTrick_legacy_1";
+                    migratedRosTrickThemes = [{
                         id: legacyId,
-                        themeName: parsed.gitixThemeName || "ثيم مستورد",
-                        fileName: parsed.gitixFileName || "",
-                        iconClass: parsed.gitixIconClass || "",
-                        allowUploadPhoto: !!parsed.gitixAllowUploadPhoto,
-                        allowChangeColors: !!parsed.gitixAllowChangeColors,
-                        maxColors: parseInt(parsed.gitixMaxColors, 10) || 0,
-                        fontsChange: !!parsed.gitixFontsChange,
-                        fontsDraw: (typeof parsed.gitixFontsDraw !== "undefined") ? !!parsed.gitixFontsDraw : (parsed.gitixActiveTextCus !== false),
-                        borderChange: !!parsed.gitixBorderChange,
-                        bodyHtml: parsed.gitixBodyHtml
+                        themeName: parsed.RosTrickThemeName || "ثيم مستورد",
+                        fileName: parsed.RosTrickFileName || "",
+                        iconClass: parsed.RosTrickIconClass || "",
+                        allowUploadPhoto: !!parsed.RosTrickAllowUploadPhoto,
+                        allowChangeColors: !!parsed.RosTrickAllowChangeColors,
+                        maxColors: parseInt(parsed.RosTrickMaxColors, 10) || 0,
+                        fontsChange: !!parsed.RosTrickFontsChange,
+                        fontsDraw: (typeof parsed.RosTrickFontsDraw !== "undefined") ? !!parsed.RosTrickFontsDraw : (parsed.RosTrickActiveTextCus !== false),
+                        borderChange: !!parsed.RosTrickBorderChange,
+                        bodyHtml: parsed.RosTrickBodyHtml
                     }];
-                    if (migratedTemplate === "gitix") migratedTemplate = legacyId;
+                    if (migratedTemplate === "RosTrick") migratedTemplate = legacyId;
                 }
                 // ثيمات مستوردة محفوظة قبل ميزة تخصيص الوقت لا تحمل هذه الحقول — نمنحها القيم الافتراضية (تخصيص مفعّل، بلا حد أدنى)
-                migratedGitixThemes = migratedGitixThemes.map(g => Object.assign({
+                migratedRosTrickThemes = migratedRosTrickThemes.map(g => Object.assign({
                     allowDurationChange: true,
                     durationMs: SM_SPLASH_RECOMMENDED_MS,
                     minDurationMs: 300
@@ -3077,8 +3077,8 @@ ${parts.body}
                     logoBorderRadius: (parsed.logoBorderRadius === null || typeof parsed.logoBorderRadius === "undefined") ? null : parseInt(parsed.logoBorderRadius, 10),
                     textAnimation: parsed.textAnimation || "default",
                     textAnimDirection: parsed.textAnimDirection || "",
-                    gitixThemes: migratedGitixThemes,
-                    gitixColors: Array.isArray(parsed.gitixColors) ? parsed.gitixColors : []
+                    RosTrickThemes: migratedRosTrickThemes,
+                    RosTrickColors: Array.isArray(parsed.RosTrickColors) ? parsed.RosTrickColors : []
                 };
                 smSplashLogoUploadedPath = smSplashState.logoUploadedPath;
             })
@@ -3105,11 +3105,11 @@ ${parts.body}
         if (isNaN(durationMs)) durationMs = SM_SPLASH_RECOMMENDED_MS;
         durationMs = Math.min(15000, Math.max(300, durationMs));
         // فرض قفل/حد أدنى مدة العرض الخاصين بالثيم الحالي مرة أخيرة عند الحفظ (حماية إضافية إلى جانب القفل الظاهر في الواجهة)
-        if (tpl.isGitix && tpl.gitixDef) {
-            if (tpl.gitixDef.allowDurationChange === false) {
-                durationMs = tpl.gitixDef.durationMs;
-            } else if (tpl.gitixDef.minDurationMs) {
-                durationMs = Math.max(durationMs, tpl.gitixDef.minDurationMs);
+        if (tpl.isRosTrick && tpl.RosTrickDef) {
+            if (tpl.RosTrickDef.allowDurationChange === false) {
+                durationMs = tpl.RosTrickDef.durationMs;
+            } else if (tpl.RosTrickDef.minDurationMs) {
+                durationMs = Math.max(durationMs, tpl.RosTrickDef.minDurationMs);
             }
         }
 
