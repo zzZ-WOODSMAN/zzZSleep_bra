@@ -1495,7 +1495,7 @@
 
     <input type="file" id="storage-upload-input" style="display:none;" multiple onchange="smHandleFileUpload(event)">
     <input type="file" id="sp-upload-input" accept=".html,.htm" style="display:none;" multiple onchange="spHandleFileUpload(event)">
-    <input type="file" id="smSplashRosTrickUploadInput" accept=".RosTrick" style="display:none" onchange="handleRosTrickFileUpload(event)">
+    <input type="file" id="smSplashRosTrickUploadInput" accept=".rt" style="display:none" onchange="handleRosTrickFileUpload(event)">
 
     <div id="editor-container" class="card">
         <div class="header-bar">
@@ -2488,7 +2488,7 @@ ${parts.body}
         const body = `
             <div class="form-group">
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    <button type="button" class="btn" onclick="closeCustomDialog(); triggerRosTrickUpload();"><i class="fa-solid fa-upload"></i> رفع ملف ثيم (RosTrick.)</button>
+                    <button type="button" class="btn" onclick="closeCustomDialog(); triggerRosTrickUpload();"><i class="fa-solid fa-upload"></i> رفع ملف ثيم (.rt)</button>
                     <button type="button" class="btn btn-dark" onclick="smOpenSplashThemeLibrary()"><i class="fa-solid fa-arrow-up-right-from-square"></i> الانتقال لمكتبة الثيمات</button>
                 </div>
                 <p style="font-size:0.75rem; color:var(--text-muted); margin-top:10px;">مكتبة الثيمات موقع مستقل ينفتح في تبويب جديد. بعد اختيار ثيم هناك، عُد وافتح "إضافة ثيم" مجددًا لاستيراده.</p>
@@ -2508,8 +2508,8 @@ ${parts.body}
     function handleRosTrickFileUpload(event) {
         const file = (event.target.files || [])[0];
         if (!file) return;
-        if (!/\.RosTrick$/i.test(file.name)) {
-            alert("⚠️ الرجاء اختيار ملف بصيغة .RosTrick فقط (مثال: Rainbow.RosTrick).");
+        if (!/\.rt$/i.test(file.name)) {
+            alert("⚠️ الرجاء اختيار ملف بصيغة .rt فقط (مثال: Rainbow.rt).");
             event.target.value = "";
             return;
         }
@@ -2560,7 +2560,7 @@ ${parts.body}
     /* ============ يضيف الثيم المستورَد كبطاقة جديدة في المعرض دون استبدال أي ثيم مستورد سابقًا ============ */
     function smApplyRosTrickPackage(parsed, sourceName) {
         // اسم الثيم يُجلب من محتوى الملف نفسه (المفتاح themena) وليس من اسم الملف؛ اسم الملف يُستخدم فقط كاحتياط إن لم يوجد المفتاح
-        const themeName = (typeof parsed.themena === "string" && parsed.themena.trim()) ? parsed.themena.trim() : (sourceName ? sourceName.replace(/\.RosTrick$/i, "") : "ثيم مستورد");
+        const themeName = (typeof parsed.themena === "string" && parsed.themena.trim()) ? parsed.themena.trim() : (sourceName ? sourceName.replace(/\.rt$/i, "") : "ثيم مستورد");
 
         if (!Array.isArray(smSplashState.RosTrickThemes)) smSplashState.RosTrickThemes = [];
         // كشف التكرار: إن وُجد ثيم مستورد سابقًا بنفس الاسم (بغض النظر عن حالة الأحرف)، يُحدَّث محتواه بدل إضافة بطاقة مكررة جديدة
@@ -2920,7 +2920,7 @@ ${parts.body}
             <div class="form-group">
                 <label>اختر تصميمًا جاهزًا (أو ثيمًا مستوردًا):</label>
                 <div style="display:flex; flex-wrap:wrap;">${chipsHtml}</div>
-                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">كل ثيم RosTrick يُرفع (سواء من ملف .RosTrick أو من مكتبة الثيمات) يُضاف كبطاقة جديدة هنا بجانب البقية، دون أن يستبدل أي ثيم مستورد سابقًا. استخدم زر "+ إضافة ثيم" في نهاية صف الكروت أعلاه.${(smSplashState.RosTrickThemes || []).length ? " (عدد الثيمات المستوردة حاليًا: " + smSplashState.RosTrickThemes.length + ")" : ""}</p>
+                <p style="font-size:0.72rem; color:var(--text-muted); margin-top:6px;">كل ثيم RosTrick يُرفع (سواء من ملف .rt أو من مكتبة الثيمات) يُضاف كبطاقة جديدة هنا بجانب البقية، دون أن يستبدل أي ثيم مستورد سابقًا. استخدم زر "+ إضافة ثيم" في نهاية صف الكروت أعلاه.${(smSplashState.RosTrickThemes || []).length ? " (عدد الثيمات المستوردة حاليًا: " + smSplashState.RosTrickThemes.length + ")" : ""}</p>
             </div>
             <div class="form-group" id="smSplashRosTrickColorsGroup" style="display:none;">
                 <label>ألوان الثيم المستورد (حتى ${(smGetSplashTemplate(smSplashState.template).RosTrickDef && smGetSplashTemplate(smSplashState.template).RosTrickDef.maxColors) || 0} ألوان):</label>
