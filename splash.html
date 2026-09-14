@@ -19,17 +19,57 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+<script>
+(function(){
+  var themes = {
+    purple: {p:'#800ffc', p2:'#a855f7', pdark:'#0d0518', glow:'rgba(128,15,252,0.55)', bg1:'#1a0a2e', bg2:'#0d0518', bg3:'#060210', orb3:'#c084fc', particle:'#d8b4fe', core2:'#5b0fc7', text2:'#e9d5ff', text3:'#c9b8e8', cardBorder:'rgba(168,85,247,0.35)', cardShadow:'rgba(128,15,252,0.25)', grid:'rgba(128,15,252,0.12)'},
+    yellow: {p:'#e0a415', p2:'#f2c14e', pdark:'#1a1206', glow:'rgba(224,164,21,0.55)', bg1:'#2e2308', bg2:'#1a1206', bg3:'#0a0705', orb3:'#f4d06f', particle:'#f7dfa5', core2:'#b8790a', text2:'#fdf1d3', text3:'#e8dcc0', cardBorder:'rgba(242,193,78,0.35)', cardShadow:'rgba(224,164,21,0.25)', grid:'rgba(224,164,21,0.12)'},
+    green: {p:'#16a34a', p2:'#4ade80', pdark:'#052e13', glow:'rgba(22,163,74,0.55)', bg1:'#0b3320', bg2:'#052e13', bg3:'#031a0b', orb3:'#86efac', particle:'#bbf7d0', core2:'#0d6b34', text2:'#dcfce7', text3:'#bbe8cc', cardBorder:'rgba(74,222,128,0.35)', cardShadow:'rgba(22,163,74,0.25)', grid:'rgba(22,163,74,0.12)'},
+    navy: {p:'#1d4ed8', p2:'#3b82f6', pdark:'#05102b', glow:'rgba(29,78,216,0.55)', bg1:'#0b1f4d', bg2:'#05102b', bg3:'#020a1a', orb3:'#60a5fa', particle:'#bfdbfe', core2:'#173f9e', text2:'#dbeafe', text3:'#c3d4f0', cardBorder:'rgba(59,130,246,0.35)', cardShadow:'rgba(29,78,216,0.25)', grid:'rgba(29,78,216,0.12)'},
+    sky: {p:'#0ea5e9', p2:'#38bdf8', pdark:'#04283a', glow:'rgba(14,165,233,0.55)', bg1:'#083754', bg2:'#04283a', bg3:'#021621', orb3:'#7dd3fc', particle:'#bae6fd', core2:'#0b6ea8', text2:'#e0f2fe', text3:'#c3e6f7', cardBorder:'rgba(56,189,248,0.35)', cardShadow:'rgba(14,165,233,0.25)', grid:'rgba(14,165,233,0.12)'}
+  };
+  var keys = Object.keys(themes);
+  var chosen = themes[keys[Math.floor(Math.random()*keys.length)]];
+  var root = document.documentElement.style;
+  root.setProperty('--p', chosen.p);
+  root.setProperty('--p2', chosen.p2);
+  root.setProperty('--p-dark', chosen.pdark);
+  root.setProperty('--glow', chosen.glow);
+  root.setProperty('--bg1', chosen.bg1);
+  root.setProperty('--bg2', chosen.bg2);
+  root.setProperty('--bg3', chosen.bg3);
+  root.setProperty('--orb3', chosen.orb3);
+  root.setProperty('--particle', chosen.particle);
+  root.setProperty('--core2', chosen.core2);
+  root.setProperty('--text2', chosen.text2);
+  root.setProperty('--text3', chosen.text3);
+  root.setProperty('--card-border', chosen.cardBorder);
+  root.setProperty('--card-shadow', chosen.cardShadow);
+  root.setProperty('--grid-line', chosen.grid);
+})();
+</script>
 <style>
   :root{
-    --p:#800ffc;
-    --p2:#a855f7;
-    --p-dark:#0d0518;
-    --glow: rgba(128,15,252,0.55);
+    --p:#e0a415;
+    --p2:#f2c14e;
+    --p-dark:#1a1206;
+    --glow: rgba(224,164,21,0.55);
+    --bg1:#2e2308;
+    --bg2:#1a1206;
+    --bg3:#0a0705;
+    --orb3:#f4d06f;
+    --particle:#f7dfa5;
+    --core2:#b8790a;
+    --text2:#fdf1d3;
+    --text3:#e8dcc0;
+    --card-border: rgba(242,193,78,0.35);
+    --card-shadow: rgba(224,164,21,0.25);
+    --grid-line: rgba(224,164,21,0.12);
   }
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo','Manrope',sans-serif;}
   html,body{
     height:100%;
-    background:radial-gradient(circle at 50% 30%, #1a0a2e 0%, #0d0518 55%, #060210 100%);
+    background:radial-gradient(circle at 50% 30%, var(--bg1) 0%, var(--bg2) 55%, var(--bg3) 100%);
     overflow:hidden;
   }
   .screen{
@@ -61,8 +101,8 @@
   .grid{
     position:absolute;inset:0;
     background-image:
-      linear-gradient(rgba(128,15,252,0.12) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(128,15,252,0.12) 1px, transparent 1px);
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size:48px 48px;
     mask-image: radial-gradient(circle at 50% 40%, black 10%, transparent 75%);
     animation: gridMove 12s linear infinite;
@@ -82,7 +122,7 @@
   }
   .orb1{width:340px;height:340px;background:var(--p);top:-100px;left:-80px;animation-delay:0s;}
   .orb2{width:280px;height:280px;background:var(--p2);bottom:-100px;right:-60px;animation-delay:2s;}
-  .orb3{width:200px;height:200px;background:#c084fc;top:60%;left:70%;animation-delay:4s;}
+  .orb3{width:200px;height:200px;background:var(--orb3);top:60%;left:70%;animation-delay:4s;}
   @keyframes float{
     0%,100%{transform:translateY(0) scale(1);}
     50%{transform:translateY(-30px) scale(1.08);}
@@ -92,7 +132,7 @@
   .particle{
     position:absolute;
     width:4px;height:4px;
-    background:#d8b4fe;
+    background:var(--particle);
     border-radius:50%;
     box-shadow:0 0 8px 2px var(--glow);
     animation: rise linear infinite;
@@ -129,7 +169,7 @@
   .logo-core{
     width:88px;height:88px;
     border-radius:24px;
-    background:linear-gradient(145deg,var(--p),#5b0fc7);
+    background:linear-gradient(145deg,var(--p),var(--core2));
     display:flex;align-items:center;justify-content:center;
     box-shadow:
       0 0 25px var(--glow),
@@ -148,7 +188,7 @@
     font-weight:800;
     letter-spacing:0;
     line-height:1.3;
-    background:linear-gradient(90deg,#fff,#e9d5ff,var(--p2));
+    background:linear-gradient(90deg,#fff,var(--text2),var(--p2));
     background-size:200% auto;
     -webkit-background-clip:text;
     background-clip:text;
@@ -163,7 +203,7 @@
   .tagline{
     font-size:16px;
     font-weight:400;
-    color:#c9b8e8;
+    color:var(--text3);
     opacity:0;
     animation: fadeUp 1s ease forwards 0.5s;
     letter-spacing:0;
@@ -185,10 +225,10 @@
     width:64px;height:64px;
     border-radius:16px;
     background:rgba(255,255,255,0.05);
-    border:1px solid rgba(168,85,247,0.35);
+    border:1px solid var(--card-border);
     backdrop-filter: blur(6px);
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 0 18px rgba(128,15,252,0.25);
+    box-shadow:0 0 18px var(--card-shadow);
     animation: bob 3s ease-in-out infinite;
   }
   .card:nth-child(2){animation-delay:0.3s;}
@@ -198,7 +238,7 @@
     0%,100%{transform:translateY(0);}
     50%{transform:translateY(-8px);}
   }
-  .card svg{width:26px;height:26px;stroke:#d8b4fe;fill:none;stroke-width:1.6;}
+  .card svg{width:26px;height:26px;stroke:var(--particle);fill:none;stroke-width:1.6;}
 
   /* loader bar */
   .loader{
@@ -217,7 +257,7 @@
     height:100%;
     width:0%;
     border-radius:4px;
-    background:linear-gradient(90deg,var(--p),#e9d5ff);
+    background:linear-gradient(90deg,var(--p),var(--text2));
     box-shadow:0 0 10px var(--glow);
     animation: loadOnce 1.4s ease-out forwards 1.2s;
   }
@@ -279,6 +319,7 @@
 </script>
 </body>
 </html>
+
 <script>
     
     setTimeout(function () { window.location.href = "home.html"; }, 4800);
