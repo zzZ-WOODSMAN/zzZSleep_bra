@@ -1068,6 +1068,10 @@
                 <span id="update-status-text" style="font-weight: bold; font-size: 1rem; color: var(--accent-color);">جاري التحقق...</span>
             </div>
             <button class="btn btn-sm btn-dark" style="margin-top: 12px; width: 100%;" onclick="checkUpdateDeliveryStatus()"><i class="fa-solid fa-rotate-right"></i> تحديث فحص الحالة</button>
+            <button class="btn btn-sm btn-dark" style="margin-top: 8px; width: 100%;" onclick="manualBumpVersionTxt()"><i class="fa-solid fa-rotate-right"></i> التحديث لم يصل، إعادة محاولة نشر التحديث</button>
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; line-height: 1.7;">
+                إذا لاحظت إن التحديثات اللي سويتها (إضافة/تعديل/حذف صفحة) وصلت فعلياً للمستودع لكن المستخدمين ما يستلمون إشعار التحديث بالتطبيق، فهذا يعني إن آلية النشر التلقائي ما اشتغلت هالمرة (تعارض مزامنة، خطأ شبكة أثناء الحفظ، أو تعديل يدوي بالمستودع). اضغط هذا الزر لإعادة محاولة نشر التحديث للمستخدمين فوراً، بدون انتظار حفظ صفحة أو تعديل جديد.
+            </p>
         </div>
     </div>
 </div>
@@ -6486,6 +6490,13 @@ function showEditorWarningBanner() {
         .catch(err => console.log(`خطأ أثناء تحديث ملف ${filePath}: ` + err.message));
     }
 
+    function manualBumpVersionTxt() {
+        if (!confirm("سيُعاد الآن محاولة نشر التحديث للمستخدمين. متابعة؟")) return;
+        updateVersionTxtOnGithub(false)
+            .then(() => showAndroidToast("✅ تمت إعادة نشر التحديث بنجاح."))
+            .catch(err => alert("❌ فشلت إعادة نشر التحديث: " + (err && err.message)));
+    }
+
     /* ============ تخزين بيانات (الاسم/الأيقونة) الخاصة بالصفحات غير الظاهرة حالياً ============ */
     /* ============ بيانات (الاسم/الأيقونة) للصفحات غير الظاهرة تُقرأ وتُحفظ ضمن order.json نفسه ============ */
     /* (hiddenPagesMeta يُعبَّأ من داخل order.json عند التحميل، ويُحفظ ضمنه عند الضغط على "حفظ") */
@@ -10687,18 +10698,25 @@ function checkUpdateDeliveryStatusGeneric(isSite, elId, filePath) {
     statusEl.style.color = "var(--text-color)";
     statusEl.innerText = "جاري الفحص...";
 
-    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${filePath}?t=${Date.now()}`;
+    const workerUrl = (typeof getWorkerUrl === "function") ? getWorkerUrl(GITHUB_USER, GITHUB_REPO) : "";
+    if (!workerUrl) {
+        statusEl.style.color = "#e74c3c";
+        statusEl.innerText = "لا يوجد رابط Worker مُهيّأ لهذا المشروع بعد.";
+        return;
+    }
+    const cleanHost = workerUrl.trim().replace(/^https?:\/\//i, "").replace(/\/$/, "");
+    const workerFileUrl = `https://${cleanHost}/${filePath}?t=${Date.now()}`;
     const normalApiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${filePath}?t=${Date.now()}`;
 
-    let rawVal = null;
+    let workerVal = null;
     let normalVal = null;
 
     const storageKey = `last_version_${isSite ? "site_" : ""}${GITHUB_USER}_${GITHUB_REPO}`;
     const savedStorageVal = localStorage.getItem(storageKey);
 
-    const fetchRaw = fetch(rawUrl, { cache: "no-store" })
+    const fetchWorker = fetch(workerFileUrl, { cache: "no-store" })
         .then(res => res.ok ? res.text() : null)
-        .then(text => { if (text !== null) rawVal = text.trim(); })
+        .then(text => { if (text !== null) workerVal = text.trim(); })
         .catch(() => {});
 
     const fetchNormal = fetch(normalApiUrl, {
@@ -10718,19 +10736,19 @@ function checkUpdateDeliveryStatusGeneric(isSite, elId, filePath) {
     })
     .catch(() => {});
 
-    Promise.all([fetchRaw, fetchNormal]).then(() => {
-        if (rawVal === null && normalVal === null) {
+    Promise.all([fetchWorker, fetchNormal]).then(() => {
+        if (workerVal === null && normalVal === null) {
             statusEl.style.color = "#e74c3c"; statusEl.innerText = `تعذر الوصول إلى ملف ${filePath}`;
             return;
         }
 
-        if (rawVal !== normalVal) {
+        if (workerVal !== normalVal) {
             statusEl.style.color = "#e74c3c"; statusEl.innerText = "لم يصل التحديث للمستخدمين بعد!";
         } else {
-            if (savedStorageVal !== null && savedStorageVal === rawVal) {
+            if (savedStorageVal !== null && savedStorageVal === workerVal) {
                 statusEl.style.color = "#f39c12"; statusEl.innerText = "لم تقم بتعديل جديد بعد!";
             } else {
-                localStorage.setItem(storageKey, rawVal);
+                localStorage.setItem(storageKey, workerVal);
                 statusEl.style.color = "#2ecc71"; statusEl.innerText = "لقد تم وصول التحديث لدى المستخدمين!";
             }
         }
