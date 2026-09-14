@@ -17,6 +17,17 @@ body{
   background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans Arabic',sans-serif;
   min-height:100vh; position:relative; overflow-x:hidden;
 }
+/* ============ شاشة سوداء تبقى 1.5s ثم تتلاشى خلال 1s ============ */
+.black-overlay{
+  position:fixed; inset:0; z-index:9999; background:#000;
+  pointer-events:none;
+  animation:blackOverlayFade 2.5s ease forwards;
+}
+@keyframes blackOverlayFade{
+  0%{opacity:1;}
+  60%{opacity:1;}   /* يبقى أسود حتى 1.5s */
+  100%{opacity:0; visibility:hidden;} /* يتلاشى خلال 1s (من 1.5s إلى 2.5s) */
+}
 
 .bg-decor{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
   background:linear-gradient(175deg,#020814 0%,#03142a 45%,#041a35 75%,#030f22 100%);
@@ -284,6 +295,7 @@ body.modal-lock{overflow:hidden;}
 </head>
 <body>
 
+<div class="black-overlay"></div>
 <div class="bg-decor">
   <div class="glow g1"></div>
   <div class="glow g2"></div>
