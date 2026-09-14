@@ -605,27 +605,6 @@
         [data-theme="dark"] .build-app-warning { background: rgba(231, 76, 60, 0.13); color: #ff9d8f; }
         [data-theme="dark"] .build-app-warning h4 { color: #ff6b5b; }
 
-        /* نافذة عرض فيديو "طريقة الإنشاء" بشكل احترافي */
-        .build-video-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            z-index: 2000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;
-        }
-        .build-video-overlay.active { display: flex; }
-        .build-video-box {
-            position: relative; width: 100%; max-width: 720px; background: #000;
-            border-radius: 16px; overflow: hidden; box-shadow: 0 25px 70px rgba(0,0,0,0.55);
-            animation: buildVideoPop 0.2s ease-out;
-        }
-        @keyframes buildVideoPop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .build-video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
-        .build-video-frame video { width: 100%; height: 100%; display: block; }
-        .build-video-close {
-            position: absolute; top: 10px; left: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
-            background: rgba(0,0,0,0.6); color: #fff; border: none; cursor: pointer; font-size: 1rem;
-            display: flex; align-items: center; justify-content: center; transition: background 0.15s;
-        }
-        .build-video-close:hover { background: rgba(255,255,255,0.25); }
-
         .projects-selector-box {
             background: var(--find-bar-bg);
             padding: 12px;
@@ -805,15 +784,6 @@
     </div>
 </div>
 
-<div class="build-video-overlay" id="buildVideoOverlay" onclick="if(event.target === this) closeAssetVideo();">
-    <div class="build-video-box">
-        <button type="button" class="build-video-close" onclick="closeAssetVideo()"><i class="fa-solid fa-xmark"></i></button>
-        <div class="build-video-frame">
-            <video id="buildVideoPlayer" controls playsinline></video>
-        </div>
-    </div>
-</div>
-
 <div class="container">
 
 
@@ -919,12 +889,8 @@
             <input type="text" id="worker-onboarding-url-input" placeholder="مثال: my-app.username.workers.dev">
         </div>
 
-        <button type="button" class="btn btn-sm" style="width:auto; padding:6px 14px; font-size:0.78rem; margin-bottom:8px;" onclick="openAssetVideo(LOGIN_TUTORIAL_VIDEOS.workerSetup)">
+        <button type="button" class="btn btn-sm" style="width:auto; padding:6px 14px; font-size:0.78rem;" onclick="openAssetVideo(LOGIN_TUTORIAL_VIDEOS.workerSetup)">
             <i class="fa-solid fa-circle-play"></i> شاهد شرح: كيف تبدأ إنشاء Worker من الصفر
-        </button>
-        <br>
-        <button type="button" class="btn btn-sm" style="width:auto; padding:6px 14px; font-size:0.78rem;" onclick="openAssetVideo(LOGIN_TUTORIAL_VIDEOS.workerFetchUrl)">
-            <i class="fa-solid fa-circle-play"></i> شاهد شرح: كيف تجيب رابط الـ Worker الخاص فيك
         </button>
 
         <div style="margin-top:16px;">
@@ -4648,7 +4614,7 @@ ${parts.body}
        قسم "بناء التطبيق" — عدّل القيم التالية يدوياً بنفسك فقط:
        - userVersionAssetPath: اسم/مسار ملف الـ APK (نسخة المستخدم) داخل مجلد assets الخاص بالتطبيق، مثال: "app-user.apk"
        - sketchwareProLink: رابط تحميل Sketchware Pro من مصدرهم الرسمي
-       - tutorialVideoAssetPath: اسم/مسار ملف فيديو "طريقة الإنشاء" داخل مجلد assets، مثال: "how-to-build.mp4"
+       - tutorialVideoAssetPath: رابط فيديو "طريقة الإنشاء" الكامل، مثال: "https://youtu.be/xxxxxxxx"
        - stepsNote: نص خطوات الإنشاء الذي سيظهر أسفل الأزرار (يدعم أسطر متعددة)
        ============================================================ */
     const BUILD_APP_CONFIG = {
@@ -4746,35 +4712,18 @@ ${parts.body}
        عدّل قيمة المسار هنا لاسم ملف الفيديو داخل مجلد assets الخاص بالتطبيق
        ============================================================ */
     const LOGIN_TUTORIAL_VIDEOS = {
-        githubSetup: "",   // مثال: "how-to-github.mp4"
-        workerSetup: "",   // مثال: "how-to-worker.mp4"
-        workerFetchUrl: "" // مثال: "how-to-fetch-worker-url.mp4"
+        githubSetup: "",   // ضع هنا رابط الفيديو كاملاً، مثال: "https://youtu.be/xxxxxxxx"
+        workerSetup: ""    // ضع هنا رابط الفيديو كاملاً، مثال: "https://youtu.be/xxxxxxxx"
     };
 
-    function openAssetVideo(path) {
-        path = (path || "").trim();
-        if (!path) { alert("لم تتم إضافة فيديو الشرح بعد."); return; }
-        const overlay = document.getElementById("buildVideoOverlay");
-        const videoEl = document.getElementById("buildVideoPlayer");
-        if (!overlay || !videoEl) return;
-        videoEl.src = "file:///android_asset/" + path;
-        overlay.classList.add("active");
-        videoEl.play().catch(() => {});
-    }
-
-    function closeAssetVideo() {
-        const overlay = document.getElementById("buildVideoOverlay");
-        const videoEl = document.getElementById("buildVideoPlayer");
-        if (videoEl) { videoEl.pause(); videoEl.src = ""; }
-        if (overlay) overlay.classList.remove("active");
+    function openAssetVideo(url) {
+        url = (url || "").trim();
+        if (!url) { alert("لم تتم إضافة فيديو الشرح بعد."); return; }
+        window.open(url, "_blank");
     }
 
     function openBuildTutorialVideo() {
         openAssetVideo(BUILD_APP_CONFIG.tutorialVideoAssetPath);
-    }
-
-    function closeBuildTutorialVideo() {
-        closeAssetVideo();
     }
 
     window.onload = function() {
