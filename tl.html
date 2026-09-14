@@ -181,7 +181,7 @@ const DEMO_PALETTE = ["#e3b166","#59c9be","#7c8bdb","#e0678c","#86c98a","#f0a868
 function buildPreviewDoc(pkg) {
   const n = Math.min(10, Math.max(2, parseInt(pkg.howmuchcolorwillbechangemax, 10) || 4));
   let varsCss = "";
-  for (let i = 1; i <= n; i++) varsCss += `--sm-gitix-color-${i}:${DEMO_PALETTE[i - 1]};`;
+  for (let i = 1; i <= n; i++) varsCss += `--sm-RosTrick-color-${i}:${DEMO_PALETTE[i - 1]};`;
 
   const body = (pkg.bodyhtmlsplash || "")
     .replace(/\{\{\s*APP_NAME\s*\}\}/g, "اسم التطبيق")
@@ -202,8 +202,8 @@ function sanitizeFileName(name) {
   return n || "Theme";
 }
 
-function downloadGitix(pkg) {
-  const fileName = sanitizeFileName(pkg.themena) + ".gitix";
+function downloadRosTrick(pkg) {
+  const fileName = sanitizeFileName(pkg.themena) + ".rt";
   const jsonText = JSON.stringify(pkg, null, 2);
   // data: بدل blob: لتوافق أفضل مع WebView
   const dataUrl = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(jsonText);
@@ -259,7 +259,7 @@ function buildRow(id, pkg) {
   const downloadBtn = document.createElement("button");
   downloadBtn.className = "btn";
   downloadBtn.innerHTML = `<i class="fa-solid fa-download"></i> تنزيل`;
-  downloadBtn.addEventListener("click", () => downloadGitix(pkg));
+  downloadBtn.addEventListener("click", () => downloadRosTrick(pkg));
 
   actions.appendChild(previewBtn);
   actions.appendChild(downloadBtn);
