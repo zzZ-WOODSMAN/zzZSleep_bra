@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الثيمات المحفوظة</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --bg:#030c18; --panel:#0a1930; --panel-2:#0d2038; --line:#173049;
+  --ink:#eef1f6; --ink-dim:#8fa3bd;
+  --accent:#e3b166; --accent-soft:rgba(227,177,102,.14);
+}
+*{box-sizing:border-box; margin:0; padding:0;-webkit-tap-highlight-color: rgba(0,0,0,0) !important;user-select:none;}
+body{
+  background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans Arabic',sans-serif;
+  min-height:100vh; position:relative; overflow-x:hidden;
+}
+/* ============ شاشة سوداء تبقى 1.5s ثم تتلاشى خلال 1s ============ */
+.black-overlay{
+  position:fixed; inset:0; z-index:9999; background:#000;
+  pointer-events:none;
+  animation:blackOverlayFade 2.5s ease forwards;
+}
+@keyframes blackOverlayFade{
+  0%{opacity:1;}
+  60%{opacity:1;}   /* يبقى أسود حتى 1.5s */
+  100%{opacity:0; visibility:hidden;} /* يتلاشى خلال 1s (من 1.5s إلى 2.5s) */
+}
+
+.bg-decor{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+  background:linear-gradient(175deg,#020814 0%,#03142a 45%,#041a35 75%,#030f22 100%);
+}
+.bg-decor .reef{position:absolute; bottom:-4%; width:100%; height:100%; display:flex; align-items:flex-end; justify-content:space-between;}
+.bg-decor .frond{
+  transform-origin:50% 100%; flex-shrink:0;
+  animation-name:sway; animation-timing-function:ease-in-out; animation-iteration-count:infinite;
+  width:var(--w,3px); height:var(--h,120px);
+  background:linear-gradient(180deg, rgba(227,177,102,0) 0%, rgba(227,177,102,.5) 38%, rgba(89,201,190,.6) 100%);
+  border-radius:50% 50% 6px 6px / 65% 65% 6px 6px;
+  opacity:var(--op,.5);
+}
+.bg-decor .frond.alt{animation-name:swayBreathe;}
+@keyframes sway{
+  0%,100%{transform:rotate(calc(var(--tilt,9) * -1deg));}
+  50%{transform:rotate(calc(var(--tilt,9) * 1deg));}
+}
+@keyframes swayBreathe{
+  0%,100%{transform:rotate(calc(var(--tilt,9) * -1deg)) scaleY(1);}
+  50%{transform:rotate(calc(var(--tilt,9) * 1deg)) scaleY(1.06);}
+}
+
+.bg-decor .bubbles{position:absolute; inset:0; pointer-events:none;}
+.bg-decor .bubble{
+  position:absolute; bottom:-8%; border-radius:50%;
+  background:transparent;
+  border:1.5px solid rgba(120,190,255,.65);
+  box-shadow:inset 0 0 10px rgba(120,190,255,.22), 0 0 5px rgba(120,190,255,.12);
+  animation-name:riseBubble; animation-timing-function:linear; animation-iteration-count:infinite;
+  pointer-events:auto; cursor:pointer;
+}
+.bg-decor .bubble::before{
+  content:""; position:absolute; top:16%; inset-inline-start:20%;
+  width:30%; height:30%; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.85) 0%, rgba(255,255,255,.2) 65%, rgba(255,255,255,0) 100%);
+}
+@keyframes riseBubble{
+  0%{transform:translateY(0) translateX(0); opacity:0;}
+  8%{opacity:.85;}
+  50%{transform:translateY(-55vh) translateX(var(--drift,12px));}
+  92%{opacity:.7;}
+  100%{transform:translateY(-115vh) translateX(calc(var(--drift,12px) * -1)); opacity:0;}
+}
+
+/* ============ فقاعة تنفقع عند اللمس/الضغط ============ */
+.bg-decor .bubble.popping{
+  animation:none !important;
+  border-color:transparent;
+  box-shadow:none;
+  animation:bubbleVanish .18s ease-out forwards !important;
+}
+.bg-decor .bubble.popping::before{display:none;}
+@keyframes bubbleVanish{
+  0%{transform:scale(1); opacity:1;}
+  100%{transform:scale(.4); opacity:0;}
+}
+
+.pop-fx{
+  position:absolute; inset:0; pointer-events:none; z-index:1;
+  transform-origin:50% 50%;
+}
+.pop-ring{
+  position:absolute; top:50%; inset-inline-start:50%; border-radius:50%;
+  border:2.5px solid rgba(220,245,255,.95);
+  box-shadow:0 0 16px rgba(150,220,255,.85), inset 0 0 8px rgba(150,220,255,.5);
+  transform:translate(-50%,-50%) scale(.3);
+  animation:ringExpand .6s cubic-bezier(.2,.7,.3,1) forwards;
+}
+.pop-flash{
+  position:absolute; top:50%; inset-inline-start:50%; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(190,230,255,.7) 40%, transparent 72%);
+  transform:translate(-50%,-50%) scale(.2);
+  animation:flashPop .4s ease-out forwards;
+}
+.pop-fx .drop{
+  position:absolute; top:50%; inset-inline-start:50%; width:5px; height:5px; border-radius:50% 50% 50% 0;
+  background:linear-gradient(160deg, rgba(230,245,255,1), rgba(130,195,255,.75));
+  box-shadow:0 0 4px rgba(150,210,255,.6);
+  animation:dropFall .7s cubic-bezier(.3,.4,.7,1) forwards;
+}
+@keyframes ringExpand{
+  0%{width:8px; height:8px; opacity:1; transform:translate(-50%,-50%) scale(.3);}
+  60%{opacity:.85;}
+  100%{width:320%; height:320%; opacity:0; transform:translate(-50%,-50%) scale(1);}
+}
+@keyframes flashPop{
+  0%{width:40%; height:40%; opacity:1;}
+  100%{width:220%; height:220%; opacity:0;}
+}
+@keyframes dropFall{
+  0%{transform:translate(-50%,-50%) translate(0,0) rotate(0deg); opacity:1;}
+  100%{transform:translate(-50%,-50%) translate(var(--dx,10px), calc(var(--dy,20px) + 30px)) rotate(var(--dr,90deg)); opacity:0;}
+}
+
+.bg-decor .caustics{
+  position:absolute; inset:-10% -10%; opacity:.16; mix-blend-mode:screen;
+  background:
+    repeating-linear-gradient(115deg, rgba(120,190,255,.5) 0px, rgba(120,190,255,0) 2px, rgba(120,190,255,0) 26px, rgba(120,190,255,.35) 34px),
+    repeating-linear-gradient(65deg, rgba(89,201,190,.4) 0px, rgba(89,201,190,0) 3px, rgba(89,201,190,0) 30px, rgba(89,201,190,.3) 40px);
+  animation:causticsDrift 16s ease-in-out infinite;
+  filter:blur(2px);
+}
+@keyframes causticsDrift{
+  0%{transform:translate(0,0) skewX(0deg);}
+  25%{transform:translate(-2%,1.5%) skewX(1.5deg);}
+  50%{transform:translate(1.5%,-1%) skewX(-1deg);}
+  75%{transform:translate(-1%,-1.5%) skewX(1deg);}
+  100%{transform:translate(0,0) skewX(0deg);}
+}
+.bg-decor .glow{position:absolute; border-radius:50%; filter:blur(100px); opacity:.10; animation:glowFloat 24s ease-in-out infinite;}
+.bg-decor .glow.g1{width:480px; height:480px; top:-10%; inset-inline-start:-10%; background:#2f7fd6;}
+.bg-decor .glow.g2{width:420px; height:420px; bottom:-12%; inset-inline-end:-10%; background:#1fb3b3; animation-delay:8s;}
+@keyframes glowFloat{
+  0%,100%{transform:translate(0,0);}
+  50%{transform:translate(24px,-24px);}
+}
+
+.wrap{position:relative; z-index:1;}
+.mono{font-family:'JetBrains Mono',monospace; direction:ltr; unicode-bidi:plaintext;}
+
+.wrap{max-width:960px; margin:0 auto; padding:34px 24px 60px;}
+.top{display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:26px; flex-wrap:wrap;}
+.top h1{font-size:20px; font-weight:700;}
+.top .sub{font-size:12.5px; color:var(--ink-dim); margin-top:4px;}
+.top-tools{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.search-box{position:relative; width:220px;}
+.search-box input{
+  width:100%; background:rgba(29,33,48,.5); border:1px solid rgba(120,190,255,.14); border-radius:9px;
+  padding:9px 14px 9px 14px; padding-inline-start:36px; color:var(--ink); font-size:12.5px;
+  font-family:'IBM Plex Sans Arabic',sans-serif; outline:none; transition:.15s;
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.search-box input::placeholder{color:var(--ink-dim);}
+.search-box input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+.search-box i{position:absolute; inset-inline-start:14px; top:50%; transform:translateY(-50%); color:var(--ink-dim); font-size:12px; pointer-events:none;}
+.back-btn{
+  all:unset; cursor:pointer; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:9px;
+  display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(120,190,255,.14); background:rgba(29,33,48,.5); color:var(--ink);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  transition:.15s;
+}
+.back-btn:hover{border-color:var(--accent); color:var(--accent);}
+.pill{font-size:11.5px; font-family:'JetBrains Mono',monospace; direction:ltr; background:rgba(29,33,48,.5); border:1px solid rgba(120,190,255,.14); padding:6px 11px; border-radius:20px; color:var(--ink-dim); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);}
+.btn{
+  all:unset; cursor:pointer; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:9px;
+  display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(120,190,255,.14); background:rgba(29,33,48,.5); color:var(--ink);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent); color:#221604; border-color:var(--accent);}
+.btn.spinning i{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.list{display:flex; flex-direction:column; gap:12px;}
+.row{
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:14px 16px; border-radius:16px; position:relative;
+  background:linear-gradient(160deg, rgba(13,32,56,.6) 0%, rgba(6,16,30,.5) 100%);
+  border:1px solid rgba(120,190,255,.16);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 26px -14px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.03);
+  transition:border-color .2s, box-shadow .2s;
+  animation-name:driftRow; animation-timing-function:ease-in-out; animation-iteration-count:infinite;
+  animation-duration:var(--drift-dur, 6s); animation-delay:var(--drift-delay, 0s);
+  will-change:transform;
+}
+.row:hover{
+  border-color:rgba(227,177,102,.4);
+  box-shadow:0 14px 30px -14px rgba(0,0,0,.6), 0 0 0 1px rgba(227,177,102,.08), inset 0 1px 0 rgba(255,255,255,.04);
+  animation-play-state:paused;
+}
+@keyframes driftRow{
+  0%{transform:translateY(0) rotate(0deg);}
+  25%{transform:translateY(-5px) rotate(var(--drift-rot,.35deg));}
+  50%{transform:translateY(1px) rotate(0deg);}
+  75%{transform:translateY(-3px) rotate(calc(var(--drift-rot,.35deg) * -1));}
+  100%{transform:translateY(0) rotate(0deg);}
+}
+@media (prefers-reduced-motion: reduce){
+  .row{animation:none;}
+}
+
+/* ============ أيقونة بأسلوب الختم الدائري ============ */
+.row .icon{
+  width:46px; height:46px; border-radius:50%; flex-shrink:0;
+  border:2px solid var(--accent); color:var(--accent);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  transform:rotate(-6deg);
+  background:radial-gradient(circle at 32% 28%, rgba(227,177,102,.28) 0%, rgba(227,177,102,.08) 55%, transparent 75%);
+  box-shadow:0 0 0 1px rgba(120,190,255,.08), inset 0 0 8px rgba(227,177,102,.12);
+  position:relative;
+}
+.row .icon::before{
+  content:""; position:absolute; inset:4px; border:1px solid var(--accent); border-radius:50%; opacity:.5;
+}
+
+.row .info{flex:1; min-width:0;}
+.row .name{font-size:14.5px; font-weight:600;}
+.row .tags{display:flex; gap:6px; margin-top:6px; flex-wrap:wrap;}
+.tag{
+  font-size:10.5px; color:var(--ink-dim); padding:3px 8px; border-radius:20px;
+  background:rgba(120,190,255,.06); border:1px solid rgba(120,190,255,.16);
+}
+.row .actions{display:flex; gap:8px; flex-shrink:0;}
+
+.state{
+  max-width:420px; margin:70px auto; text-align:center; padding:40px 26px; border-radius:18px;
+  background:linear-gradient(160deg, rgba(29,33,48,.55) 0%, rgba(23,26,35,.45) 100%);
+  border:1px solid rgba(120,190,255,.14);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  box-shadow:0 10px 26px -14px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.03);
+}
+.state i{font-size:26px; color:var(--ink-dim); margin-bottom:14px; display:inline-block;}
+.state h3{font-size:16px; margin-bottom:8px;}
+.state p{font-size:13px; color:var(--ink-dim); line-height:1.8;}
+.state code{font-family:'JetBrains Mono',monospace; direction:ltr; display:inline-block; color:var(--accent); background:rgba(120,190,255,.08); padding:1px 6px; border-radius:6px;}
+
+/* ============ Modal ============ */
+.modal-overlay{
+  position:fixed; inset:0; z-index:999;
+  background:rgba(6,7,10,.72); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center;
+  padding:16px;
+}
+.modal-overlay.open{display:flex;}
+body.modal-lock{overflow:hidden;}
+
+.modal-box{
+  width:100%; max-width:520px;
+  max-height:calc(100vh - 32px); max-height:calc(100dvh - 32px);
+  background:linear-gradient(160deg, rgba(29,33,48,.85) 0%, rgba(23,26,35,.85) 100%);
+  border:1px solid rgba(120,190,255,.16); border-radius:20px;
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 20px 50px -18px rgba(0,0,0,.7);
+  display:flex; flex-direction:column; overflow:hidden;
+  animation:modalPop .18s ease;
+}
+@keyframes modalPop{from{opacity:0; transform:scale(.97);} to{opacity:1; transform:scale(1);}}
+
+.dlg-head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(120,190,255,.14); flex-shrink:0;}
+.dlg-head h3{font-size:14.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.dlg-close{all:unset; cursor:pointer; width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--ink-dim); flex-shrink:0;}
+.dlg-close:hover{color:var(--ink); background:rgba(120,190,255,.08);}
+
+.dlg-body{padding:22px 16px; overflow-y:auto; flex:1; min-height:0; display:flex; flex-direction:column; align-items:center;}
+.dlg-frame-wrap{
+  position:relative; width:min(320px, 80vw); aspect-ratio:9/17.5;
+  max-height:min(74vh, 74dvh);
+  border-radius:26px; overflow:hidden; background:#fff; border:1px solid rgba(120,190,255,.16);
+  box-shadow:0 12px 30px -14px rgba(0,0,0,.6);
+  flex-shrink:0;
+}
+.dlg-frame-wrap iframe{position:absolute; top:0; left:0; width:100%; height:100%; border:0;}
+.dlg-hint{font-size:11.5px; color:var(--ink-dim); text-align:center; margin-top:16px; line-height:1.7; max-width:380px;}
+
+/* ============ عناصر نافذة الاشتراك ============ */
+.sub-field{width:100%; margin-bottom:12px;}
+.sub-field label{display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;}
+.sub-field input[type="text"]{
+  width:100%; background:rgba(29,33,48,.6); border:1px solid rgba(120,190,255,.18); border-radius:9px;
+  padding:9px 12px; color:var(--ink); font-size:13px; font-family:'JetBrains Mono',monospace; direction:ltr;
+  outline:none;
+}
+.sub-field input[type="text"]:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+.sub-note{font-size:11.5px; line-height:1.8; color:var(--ink-dim); background:rgba(120,190,255,.06); border:1px solid rgba(120,190,255,.14); border-radius:9px; padding:9px 11px; margin-top:6px;}
+.sub-note.warn{color:#e0a860; background:rgba(227,177,102,.08); border-color:rgba(227,177,102,.25);}
+.sub-note.ok{color:#7bd7a0; background:rgba(89,201,190,.08); border-color:rgba(89,201,190,.25);}
+.sub-btn-full{width:100%; justify-content:center; margin-top:6px;}
+
+@media (max-width:400px){
+  .modal-box{border-radius:16px;}
+  .dlg-frame-wrap{width:min(260px, 74vw);}
+}
+@media (max-height:560px){
+  .dlg-frame-wrap{max-height:54vh; max-height:54dvh;}
+}
+</style>
+</head>
+<body>
+
+<div class="black-overlay"></div>
+<div class="bg-decor">
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="reef" id="reefLayer"></div>
+  <div class="caustics"></div>
+  <div class="bubbles" id="bubbleLayer"></div>
+</div>
+
+<div class="wrap">
+  <div class="top">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="back-btn" id="backBtn"><i class="fa-solid fa-arrow-right"></i> رجوع</button>
+      <div>
+        <h1>مكتبة الثيمات</h1>
+        <div class="sub">اضغط "معاينة" لعرض الثيم فعليًا كما سيظهر في التطبيق</div>
+      </div>
+    </div>
+    <div class="top-tools">
+      <div class="pill" id="projectPill" title="آخر مشروع تم فتحه من لوحة التحكم (ind.html) — لتغييره افتح لوحة التحكم">
+        <i class="fa-solid fa-folder"></i> <span id="projectPillName">لا يوجد مشروع محدد</span>
+      </div>
+      <button class="btn" id="subStatusBtn" title="حالة الاشتراك بالخطة الإحترافية لهذا المشروع">
+        <i class="fa-solid fa-crown" style="color:#d4af37;"></i> <span id="subStatusLabel">...</span>
+      </button>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="ابحث باسم الثيم...">
+      </div>
+      <span class="pill" id="countPill">0</span>
+      <button class="btn" id="refreshBtn"><i class="fa-solid fa-arrows-rotate"></i> تحديث</button>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <div class="state" id="noResultsState" hidden>
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <h3>لا توجد نتائج</h3>
+    <p>لم يتم العثور على أي ثيم يطابق بحثك.</p>
+  </div>
+
+  <div class="state" id="emptyState" hidden>
+    <i class="fa-solid fa-box-open"></i>
+    <h3>لا توجد ثيمات محفوظة</h3>
+    <p>أنشئ ثيمًا من لوحة التحكم ليظهر هنا.</p>
+  </div>
+
+  <div class="state" id="errorState" hidden>
+    <i class="fa-solid fa-plug-circle-xmark"></i>
+    <h3>تعذّر الاتصال بقاعدة البيانات</h3>
+    <p>تأكّد عندما تشغل <code>RosTrick</code> أنه يوجد لديك إنترنت</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="previewOverlay">
+  <div class="modal-box">
+    <div class="dlg-head">
+      <h3 id="dlgTitle">معاينة الثيم</h3>
+      <button class="dlg-close" id="dlgCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="dlg-body">
+      <div class="dlg-frame-wrap">
+        <iframe id="previewIframe" sandbox="allow-scripts allow-same-origin" title="معاينة الثيم"></iframe>
+      </div>
+      <p class="dlg-hint">معاينة تقريبية بالاسم والصورة والألوان الحقيقية التي سيحددها المستخدم عند الاستخدام الفعلي داخل التطبيق.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="subOverlay">
+  <div class="modal-box">
+    <div class="dlg-head">
+      <h3 id="subDlgTitle">👑 الخطة الإحترافية</h3>
+      <button class="dlg-close" id="subDlgCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="dlg-body" style="align-items:stretch;">
+      <div id="subDlgBody" style="width:100%;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ توليد الخيوط (الطحالب) والفقاعات ============ */
+function buildReef() {
+  const layer = document.getElementById("reefLayer");
+  const count = 46; // كثيرة مررررة
+  let html = "";
+  for (let i = 0; i < count; i++) {
+    const h = 60 + Math.random() * 180;      // ارتفاع الخيط
+    const w = 2 + Math.random() * 3;         // سماكة الخيط
+    const tilt = 5 + Math.random() * 12;     // زاوية الميلان
+    const dur = 3.5 + Math.random() * 4;     // مدة الحركة
+    const delay = -(Math.random() * dur);    // تبدأ الحركة من نقطة عشوائية
+    const op = 0.28 + Math.random() * 0.4;
+    const alt = Math.random() > 0.5 ? " alt" : ""; // الحركة الثانية (تنفّس + تمايل)
+    html += `<div class="frond${alt}" style="--h:${h}px;--w:${w}px;--tilt:${tilt};--op:${op}; animation-duration:${dur}s; animation-delay:${delay}s;"></div>`;
+  }
+  layer.innerHTML = html;
+}
+
+function buildBubbles() {
+  const layer = document.getElementById("bubbleLayer");
+  const count = 42; // كثيرة مررررة
+  let html = "";
+  for (let i = 0; i < count; i++) {
+    const size = 6 + Math.random() * 22;
+    const left = Math.random() * 100;
+    const dur = 7 + Math.random() * 9;
+    const delay = -(Math.random() * dur);
+    const drift = 8 + Math.random() * 26;
+    html += `<div class="bubble" style="width:${size}px; height:${size}px; inset-inline-start:${left}%; --drift:${drift}px; animation-duration:${dur}s; animation-delay:${delay}s;"></div>`;
+  }
+  layer.innerHTML = html;
+}
+
+function popBubble(bubble) {
+  if (!bubble || bubble.classList.contains("popping")) return;
+  bubble.classList.add("popping");
+
+  // تأثير الانفقاع: ومضة + حلقة صدمة تتوسع + رذاذ ماء يتساقط
+  const fx = document.createElement("div");
+  fx.className = "pop-fx";
+
+  const flash = document.createElement("div");
+  flash.className = "pop-flash";
+  fx.appendChild(flash);
+
+  const ring = document.createElement("div");
+  ring.className = "pop-ring";
+  fx.appendChild(ring);
+
+  const dropCount = 6;
+  for (let i = 0; i < dropCount; i++) {
+    const drop = document.createElement("div");
+    drop.className = "drop";
+    const angle = (Math.PI * 2 * i) / dropCount + Math.random() * 0.5;
+    const dist = 8 + Math.random() * 12;
+    drop.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+    drop.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+    drop.style.setProperty("--dr", `${(Math.random() * 180 - 90).toFixed(0)}deg`);
+    fx.appendChild(drop);
+  }
+
+  bubble.appendChild(fx);
+  setTimeout(() => bubble.remove(), 650);
+}
+
+document.getElementById("bubbleLayer").addEventListener("click", e => {
+  const bubble = e.target.closest(".bubble");
+  if (bubble) popBubble(bubble);
+});
+
+buildReef();
+buildBubbles();
+// إعادة تغذية الفقاعات المنفقعة باستمرار حتى لا يفرغ البحر منها
+setInterval(() => {
+  const layer = document.getElementById("bubbleLayer");
+  if (layer.children.length < 42) {
+    const size = 6 + Math.random() * 22;
+    const left = Math.random() * 100;
+    const dur = 7 + Math.random() * 9;
+    const drift = 8 + Math.random() * 26;
+    const b = document.createElement("div");
+    b.className = "bubble";
+    b.style.cssText = `width:${size}px; height:${size}px; inset-inline-start:${left}%; --drift:${drift}px; animation-duration:${dur}s;`;
+    layer.appendChild(b);
+  }
+}, 900);
+
+/* يجب أن يطابق THEME_FIREBASE_DB_URL نفس قاعدة الثيمات المستخدمة في لوحة التحكم */
+const THEME_FIREBASE_DB_URL = "https://wtoons-44aba-default-rtdb.firebaseio.com";
+const THEME_FIREBASE_AUTH   = "";
+const THEMES_NODE = "themes";
+
+function themeFbUrl(path) {
+  const auth = THEME_FIREBASE_AUTH ? `?auth=${THEME_FIREBASE_AUTH}` : "";
+  return `${THEME_FIREBASE_DB_URL}/${path}.json${auth}`;
+}
+
+/* =====================================================================
+   حالة اشتراك المشروع الحالي — تعتمد بالكامل على نفس منظومة الاشتراكات
+   المستخدمة في ind.html (نفس قاعدة Firebase، نفس مفاتيح التخزين المحلي،
+   نفس مستودع رمز التفعيل subkey.json)، حتى تبقى الحالة متطابقة بين
+   الصفحتين لنفس المشروع. القيم التالية يجب أن تطابق ind.html تمامًا.
+   ===================================================================== */
+const SM_LIC_OWNER = "BLOXMAM";
+const SM_LIC_REPO = "webv";
+const SM_LIC_BRANCH = "main";
+const SM_FIREBASE_DB_URL = "https://umlog-box-default-rtdb.firebaseio.com";
+const SM_FIREBASE_AUTH = "";
+
+let smLicenseSettings = { premium: true, buyLink: "n/a", price: "" };
+let smIsPro = false;
+let smCurrentProject = null; // { user, repo, name } — يُقرأ من sm_last_project، آخر مشروع فُتح من ind.html فقط
+
+/* ============ قراءة "آخر مشروع تم فتحه" — للعرض فقط، لا يمكن تغييره من هذه الصفحة ============ */
+function smLoadCurrentProject() {
+  try {
+    const raw = localStorage.getItem("sm_last_project");
+    smCurrentProject = raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    smCurrentProject = null;
+  }
+  const nameEl = document.getElementById("projectPillName");
+  if (nameEl) {
+    nameEl.textContent = (smCurrentProject && smCurrentProject.user && smCurrentProject.repo)
+      ? (smCurrentProject.name || smCurrentProject.repo)
+      : "لا يوجد مشروع محدد";
+  }
+}
+
+function smProStorageKey() {
+  if (!smCurrentProject || !smCurrentProject.user || !smCurrentProject.repo) return null;
+  return `sm_pro_status_${smCurrentProject.user}_${smCurrentProject.repo}`;
+}
+
+/* نفس نافذة الأوقات المسموح بها للتحقق من RTDB في ind.html، للحفاظ على تطابق الحالة بين الصفحتين */
+function smIsAllowedVerificationWindow() {
+  const h = new Date().getHours();
+  return (h >= 12 && h < 15) || (h >= 20 && h < 23) || (h >= 6 && h < 9);
+}
+
+function smLoadLicenseSettings() {
+  const url = `https://raw.githubusercontent.com/${SM_LIC_OWNER}/${SM_LIC_REPO}/${SM_LIC_BRANCH}/settings.json?t=${Date.now()}`;
+  return fetch(url)
+    .then(res => { if (!res.ok) throw new Error("settings fetch failed"); return res.json(); })
+    .then(data => {
+      const premiumRaw = data && (data.premium !== undefined ? data.premium : data["premium"]);
+      smLicenseSettings.premium = (premiumRaw === true || premiumRaw === "true");
+      smLicenseSettings.buyLink = (data && (data["buy-link"] || data.buyLink)) || "n/a";
+      smLicenseSettings.price = (data && data.price) ? String(data.price) : "";
+    })
+    .catch(() => { /* في حال التعذر نفترض تفعيل الاشتراك (الوضع الأكثر أماناً) */ });
+}
+
+function smFirebaseGetSubscription() {
+  if (!smCurrentProject) return Promise.reject(new Error("no project"));
+  const path = `subscriptions/${smCurrentProject.user}/${smCurrentProject.repo}.json`;
+  const authQ = SM_FIREBASE_AUTH ? `?auth=${SM_FIREBASE_AUTH}` : "";
+  return fetch(`${SM_FIREBASE_DB_URL}/${path}${authQ}`).then(res => {
+    if (!res.ok) throw new Error("تعذر الاتصال بقاعدة البيانات.");
+    return res.json();
+  });
+}
+
+function smFirebaseSetSubscription(active) {
+  if (!smCurrentProject) return Promise.reject(new Error("no project"));
+  const path = `subscriptions/${smCurrentProject.user}/${smCurrentProject.repo}.json`;
+  const authQ = SM_FIREBASE_AUTH ? `?auth=${SM_FIREBASE_AUTH}` : "";
+  const body = {
+    active: active,
+    projectName: smCurrentProject.name || smCurrentProject.repo,
+    githubUser: smCurrentProject.user,
+    githubRepo: smCurrentProject.repo,
+    activatedAt: new Date().toISOString()
+  };
+  return fetch(`${SM_FIREBASE_DB_URL}/${path}${authQ}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(res => { if (!res.ok) throw new Error("تعذر تحديث حالة الاشتراك."); return res.json(); });
+}
+
+/* ============ فحص حالة الخطة الإحترافية للمشروع الحالي (بنفس منطق ind.html بالضبط) ============ */
+function smCheckProStatus(forceCheck) {
+  const cacheKey = smProStorageKey();
+  if (!cacheKey) { smIsPro = false; smUpdateProUI(); return Promise.resolve(); }
+  const cached = localStorage.getItem(cacheKey);
+
+  if (cached === "active" && !forceCheck) {
+    smIsPro = true;
+    smUpdateProUI();
+    return Promise.resolve();
+  }
+  if (!forceCheck && !smIsAllowedVerificationWindow()) {
+    smIsPro = (cached === "active");
+    smUpdateProUI();
+    return Promise.resolve();
+  }
+  return smFirebaseGetSubscription()
+    .then(data => {
+      if (data && data.active === true) {
+        smIsPro = true;
+        localStorage.setItem(cacheKey, "active");
+      } else {
+        smIsPro = false;
+        localStorage.setItem(cacheKey, "deactive");
+      }
+    })
+    .catch(() => { smIsPro = (cached === "active"); })
+    .finally(() => smUpdateProUI());
+}
+
+/* هل يُسمح بالتنزيل الآن؟ (الاشتراك مُعطّل عالميًا = مسموح دائمًا؛ غير ذلك يتطلب اشتراك المشروع الحالي) */
+function smDownloadAllowed() {
+  if (!smLicenseSettings.premium) return true;
+  return smIsPro;
+}
+
+function smUpdateProUI() {
+  const label = document.getElementById("subStatusLabel");
+  const btn = document.getElementById("subStatusBtn");
+  if (!label || !btn) return;
+  if (!smLicenseSettings.premium) {
+    label.textContent = "كل الثيمات مجانية حاليًا";
+    btn.style.borderColor = "";
+  } else if (!smCurrentProject) {
+    label.textContent = "لا يوجد مشروع محدد";
+    btn.style.borderColor = "rgba(227,177,102,.4)";
+  } else if (smIsPro) {
+    label.textContent = "مشترك ✓";
+    btn.style.borderColor = "rgba(89,201,190,.5)";
+  } else {
+    label.textContent = "غير مشترك";
+    btn.style.borderColor = "rgba(227,177,102,.4)";
+  }
+  smDownloadButtons.forEach(smRenderDownloadBtnLabel);
+}
+
+/* ============ التحقق من رمز التفعيل عبر subkey.json (نفس آلية ind.html بالضبط) ============ */
+function smVerifyLicenseCode(inputCode) {
+  const url = `https://raw.githubusercontent.com/${SM_LIC_OWNER}/${SM_LIC_REPO}/${SM_LIC_BRANCH}/subkey.json?t=${Date.now()}`;
+  return fetch(url)
+    .then(res => { if (!res.ok) throw new Error("تعذر الوصول لملف رمز التفعيل."); return res.json(); })
+    .then(data => {
+      const raw = (data && data.A) ? String(data.A) : "";
+      const realKey = raw.substring(5);
+      return realKey.length > 0 && realKey === String(inputCode).trim();
+    });
+}
+
+function smActivateLicenseCode() {
+  const input = document.getElementById("sm-tl-license-code-input");
+  if (!input) return;
+  const code = input.value.trim();
+  if (!code) { alert("⚠️ الرجاء إدخال رمز التفعيل أولاً."); return; }
+  if (!smCurrentProject) { alert("⚠️ لا يوجد مشروع محدد — افتح مشروعًا من لوحة التحكم (ind.html) أولاً."); return; }
+
+  const btn = document.getElementById("sm-tl-activate-btn");
+  if (btn) btn.disabled = true;
+
+  smVerifyLicenseCode(code)
+    .then(isValid => {
+      if (!isValid) { alert("❌ رمز التفعيل غير صحيح."); return; }
+      return smFirebaseSetSubscription(true).then(() => {
+        smIsPro = true;
+        localStorage.setItem(smProStorageKey(), "active");
+        smUpdateProUI();
+        smOpenSubDialog();
+      });
+    })
+    .catch(err => alert("❌ " + err.message))
+    .finally(() => { if (btn) btn.disabled = false; });
+}
+
+function smManualRefreshProStatus() {
+  if (!smCurrentProject) { alert("⚠️ لا يوجد مشروع محدد — افتح مشروعًا من لوحة التحكم (ind.html) أولاً."); return; }
+  if (!smIsAllowedVerificationWindow()) {
+    alert("⏰ التحقق من الاشتراك متاح فقط خلال هذه الأوقات: 6-9ص، 12-3م، 8-11م. رمز تفعيل جديد يمكن إدخاله في أي وقت.");
+    return;
+  }
+  smCheckProStatus(true).then(smOpenSubDialog);
+}
+
+/* ============ نافذة حالة/تفعيل الاشتراك ============ */
+function smOpenSubDialog() {
+  const titleEl = document.getElementById("subDlgTitle");
+  const bodyEl = document.getElementById("subDlgBody");
+  if (!titleEl || !bodyEl) return;
+
+  if (!smCurrentProject) {
+    titleEl.textContent = "👑 الخطة الإحترافية";
+    bodyEl.innerHTML = `<p class="sub-note warn"><i class="fa-solid fa-triangle-exclamation"></i> لا يوجد مشروع محدد بعد. افتح مشروعك من لوحة التحكم (ind.html) أولًا حتى تُسجَّل هذه الصفحة به وتتمكن من التحقق من اشتراكه أو تفعيله.</p>`;
+  } else if (!smLicenseSettings.premium) {
+    titleEl.textContent = "👑 الخطة الإحترافية";
+    bodyEl.innerHTML = `<p class="sub-note ok"><i class="fa-solid fa-circle-check"></i> الاشتراك مُعطّل عالميًا حاليًا — جميع الثيمات متاحة للتنزيل مجانًا للجميع.</p>`;
+  } else if (smIsPro) {
+    titleEl.textContent = "👑 مشترك بالخطة الإحترافية";
+    bodyEl.innerHTML = `
+      <p class="sub-note ok"><i class="fa-solid fa-crown" style="color:#d4af37;"></i> مشروع "<b>${smCurrentProject.name || smCurrentProject.repo}</b>" مشترك — تنزيل جميع الثيمات متاح.</p>
+      <p class="sub-note">التفعيل خاص بهذا المشروع فقط وليس لبقية مشاريعك.</p>`;
+  } else {
+    titleEl.textContent = "👑 التطوير اللامحدود";
+    const buyBtnHtml = (smLicenseSettings.buyLink && smLicenseSettings.buyLink !== "n/a")
+      ? `<button class="btn primary sub-btn-full" onclick="window.open('${smLicenseSettings.buyLink}', '_blank')"><i class="fa-solid fa-cart-shopping"></i> شراء رمز التفعيل${smLicenseSettings.price ? ` بـ (${smLicenseSettings.price})` : ""}</button>`
+      : "";
+    bodyEl.innerHTML = `
+      <p class="sub-note warn"><i class="fa-solid fa-lock"></i> تنزيل ملفات الثيمات (.rt) من هذه المكتبة متاح فقط للمشتركين بالخطة الإحترافية. المعاينة تبقى متاحة للجميع دون أي قيد.</p>
+      <div class="sub-field">
+        <label>رمز التفعيل (اشتراك مدى الحياة) — لمشروع "${smCurrentProject.name || smCurrentProject.repo}"</label>
+        <input type="text" id="sm-tl-license-code-input" placeholder="أدخل رمز التفعيل هنا">
+      </div>
+      <button class="btn primary sub-btn-full" id="sm-tl-activate-btn" onclick="smActivateLicenseCode()"><i class="fa-solid fa-unlock"></i> تفعيل</button>
+      ${buyBtnHtml}
+      <button class="btn sub-btn-full" onclick="smManualRefreshProStatus()"><i class="fa-solid fa-rotate"></i> انا مشترك بالفعل! (تحقق)</button>
+      <p class="sub-note">التحقق متاح فقط خلال أوقات محددة (6-9ص، 12-3م، 8-11م). تفعيل رمز جديد متاح في أي وقت.</p>`;
+  }
+
+  subOverlay.classList.add("open");
+  document.body.classList.add("modal-lock");
+}
+function closeSubDialog() {
+  subOverlay.classList.remove("open");
+  document.body.classList.remove("modal-lock");
+}
+
+const DEMO_PALETTE = ["#e3b166","#59c9be","#7c8bdb","#e0678c","#86c98a","#f0a868","#6fb1e0","#c98ad0","#d7c46a","#4fd1b0"];
+
+function buildPreviewDoc(pkg) {
+  const n = Math.min(10, Math.max(2, parseInt(pkg.howmuchcolorwillbechangemax, 10) || 4));
+  let varsCss = "";
+  for (let i = 1; i <= n; i++) varsCss += `--sm-RosTrick-color-${i}:${DEMO_PALETTE[i - 1]};`;
+
+  const body = (pkg.bodyhtmlsplash || "")
+    .replace(/\{\{\s*APP_NAME\s*\}\}/g, "اسم التطبيق")
+    .replace(/\{\{\s*LOGO_URL\s*\}\}/g, "https://placehold.co/200x200/e3b166/1a1206?text=Logo");
+
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{${varsCss}}
+  html,body{margin:0; height:100%;}
+  body{min-height:100vh; display:flex; align-items:center; justify-content:center; background:#fff; font-family:'IBM Plex Sans Arabic',sans-serif;}
+</style>
+</head><body>${body}</body></html>`;
+}
+
+function sanitizeFileName(name) {
+  let n = (name || "Theme").trim().replace(/[^a-zA-Z0-9_\-\u0600-\u06FF ]/g, "").trim();
+  return n || "Theme";
+}
+
+function downloadRosTrick(pkg) {
+  const fileName = sanitizeFileName(pkg.themena) + ".rt";
+  const jsonText = JSON.stringify(pkg, null, 2);
+  // data: بدل blob: لتوافق أفضل مع WebView
+  const dataUrl = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(jsonText);
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function activeTags(pkg) {
+  const tags = [];
+  if (pkg.allowuploadphoto === "active") tags.push("رفع صورة");
+  if (pkg.allowchangescolor === "active") tags.push(`ألوان (${pkg.howmuchcolorwillbechangemax || 0})`);
+  if (pkg.fontschange === "active") tags.push("تخصيص الخط");
+  if (pkg.fontsdraw) tags.push("أنيميشن النص");
+  if (pkg.borderchange === "active") tags.push("حدود مخصصة");
+  return tags;
+}
+
+function buildRow(id, pkg) {
+  const row = document.createElement("div");
+  row.className = "row";
+  const driftDur = (5 + Math.random() * 3).toFixed(2);
+  const driftDelay = (-(Math.random() * driftDur)).toFixed(2);
+  const driftRot = (0.25 + Math.random() * 0.5).toFixed(2);
+  row.style.setProperty("--drift-dur", driftDur + "s");
+  row.style.setProperty("--drift-delay", driftDelay + "s");
+  row.style.setProperty("--drift-rot", driftRot + "deg");
+
+  const icon = document.createElement("div");
+  icon.className = "icon";
+  icon.innerHTML = `<i class="${(pkg.ticonf || "").trim() || "fa-solid fa-box-open"}"></i>`;
+
+  const info = document.createElement("div");
+  info.className = "info";
+  const name = document.createElement("div");
+  name.className = "name";
+  name.textContent = pkg.themena || "بدون اسم";
+  const tagsWrap = document.createElement("div");
+  tagsWrap.className = "tags";
+  activeTags(pkg).forEach(t => {
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = t;
+    tagsWrap.appendChild(tag);
+  });
+  info.appendChild(name);
+  info.appendChild(tagsWrap);
+
+  const actions = document.createElement("div");
+  actions.className = "actions";
+  const previewBtn = document.createElement("button");
+  previewBtn.className = "btn primary";
+  previewBtn.innerHTML = `<i class="fa-solid fa-eye"></i> معاينة`;
+  previewBtn.addEventListener("click", () => openPreview(pkg));
+
+  const downloadBtn = document.createElement("button");
+  downloadBtn.className = "btn";
+  smRenderDownloadBtnLabel(downloadBtn);
+  downloadBtn.addEventListener("click", () => {
+    if (!smDownloadAllowed()) {
+      smOpenSubDialog();
+      return;
+    }
+    downloadRosTrick(pkg);
+  });
+  smDownloadButtons.push(downloadBtn);
+
+  actions.appendChild(previewBtn);
+  actions.appendChild(downloadBtn);
+
+  row.appendChild(icon);
+  row.appendChild(info);
+  row.appendChild(actions);
+  return row;
+}
+
+let smDownloadButtons = []; // كل أزرار "تنزيل" المعروضة حاليًا — تُحدَّث تسميتها فور تغيّر حالة الاشتراك
+
+function smRenderDownloadBtnLabel(btn) {
+  btn.innerHTML = smDownloadAllowed()
+    ? `<i class="fa-solid fa-download"></i> تنزيل`
+    : `<i class="fa-solid fa-lock" style="color:#e0a860;"></i> تنزيل`;
+}
+
+function renderList(themes) {
+  const list = document.getElementById("list");
+  const empty = document.getElementById("emptyState");
+  const error = document.getElementById("errorState");
+  list.innerHTML = "";
+  error.hidden = true;
+  smDownloadButtons = [];
+
+  const entries = Object.entries(themes || {});
+  document.getElementById("countPill").textContent = entries.length;
+
+  if (!entries.length) { empty.hidden = false; return; }
+  empty.hidden = true;
+
+  entries
+    .sort((a, b) => (a[1].themena || "").localeCompare(b[1].themena || "", "ar"))
+    .forEach(([id, pkg]) => list.appendChild(buildRow(id, pkg)));
+}
+
+function showErrorState() {
+  document.getElementById("list").innerHTML = "";
+  document.getElementById("emptyState").hidden = true;
+  document.getElementById("errorState").hidden = false;
+  document.getElementById("countPill").textContent = "0";
+}
+
+async function loadThemes() {
+  try {
+    const res = await fetch(themeFbUrl(THEMES_NODE));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderList(data || {});
+  } catch (e) {
+    showErrorState();
+  }
+}
+
+const overlay = document.getElementById("previewOverlay");
+const subOverlay = document.getElementById("subOverlay");
+function openPreview(pkg) {
+  document.getElementById("dlgTitle").textContent = pkg.themena || "معاينة الثيم";
+  document.getElementById("previewIframe").srcdoc = buildPreviewDoc(pkg);
+  overlay.classList.add("open");
+  document.body.classList.add("modal-lock");
+}
+function closePreview() {
+  overlay.classList.remove("open");
+  document.body.classList.remove("modal-lock");
+  document.getElementById("previewIframe").srcdoc = "";
+}
+document.getElementById("dlgCloseBtn").addEventListener("click", closePreview);
+overlay.addEventListener("click", e => { if (e.target === overlay) closePreview(); });
+document.getElementById("subDlgCloseBtn").addEventListener("click", closeSubDialog);
+subOverlay.addEventListener("click", e => { if (e.target === subOverlay) closeSubDialog(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (overlay.classList.contains("open")) closePreview();
+  if (subOverlay.classList.contains("open")) closeSubDialog();
+});
+document.getElementById("subStatusBtn").addEventListener("click", smOpenSubDialog);
+
+document.getElementById("refreshBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("refreshBtn");
+  btn.classList.add("spinning");
+  document.getElementById("searchInput").value = "";
+  document.getElementById("noResultsState").hidden = true;
+  await loadThemes();
+  btn.classList.remove("spinning");
+});
+
+document.getElementById("searchInput").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  const rows = document.querySelectorAll(".row");
+  let visibleCount = 0;
+  rows.forEach(row => {
+    const name = row.querySelector(".name").textContent.toLowerCase();
+    const match = name.includes(q);
+    row.style.display = match ? "" : "none";
+    if (match) visibleCount++;
+  });
+  document.getElementById("noResultsState").hidden = !(q && visibleCount === 0 && rows.length > 0);
+});
+
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.location.href = "home.html";
+});
+
+/* ============ التهيئة عند تحميل الصفحة ============ */
+smLoadCurrentProject();
+smUpdateProUI();
+smLoadLicenseSettings().then(() => smCheckProStatus(false));
+loadThemes();
+</script>
+</body>
+</html>
