@@ -34,9 +34,5 @@
   "tl.html": {
     "op": "add",
     "timestamp": 1789497588421
-  },
-  "sm-custom-styles.json": {
-    "op": "add",
-    "timestamp": 1789498156857
   }
 }
