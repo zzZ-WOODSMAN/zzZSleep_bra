@@ -761,6 +761,16 @@
 </head>
 <body>
 
+<!-- ============================================================
+     ⚙️ إعدادات تحديث نسخة اللوحة (عدّل هنا يدويًا عند كل تحديث)
+     - BOARD_VERSION_CODE: رقم النسخة الحالي (رقم صحيح، دائمًا أكبر من السابق)
+     - BOARD_VERSION_CHANGELOG: مميزات/تغييرات هذا التحديث (نص، يدعم أسطر متعددة)
+     ============================================================ -->
+<script>
+const BOARD_VERSION_CODE = 1;
+const BOARD_VERSION_CHANGELOG = `- أول إصدار من اللوحة.`;
+</script>
+
 <div id="sm-boot-fade-overlay" style="position:fixed; inset:0; background:#000; z-index:999999; opacity:1; transition:opacity 2s ease; pointer-events:none;"></div>
 <script>
 (function () {
@@ -11952,6 +11962,70 @@ function smLoadLicenseSettings() {
         });
 }
 
+/* ============ تحديث نسخة اللوحة (board_version.json) ============
+   يُقارن رقم نسخة اللوحة المنشور من المطوّر مع الرقم المخزّن محلياً لدى
+   المستخدم عبر localStorage (المفتاح: version-RosTrick):
+   - إن لم يوجد رقم مخزّن أصلاً (أول زيارة) → يتم تسجيل رقم النسخة الحالي
+     مباشرة دون إظهار أي نافذة.
+   - إن وُجد رقم مخزّن وكان أقدم من الرقم المنشور → تظهر نافذة تعرض
+     مميزات/تغييرات آخر تحديث ورقمه، وعند الضغط على "حسنًا" يتحدّث
+     الرقم المخزّن محلياً إلى آخر رقم. ============ */
+const SM_BOARD_VERSION_STORAGE_KEY = "version-RosTrick";
+
+function smEscapeHtmlBoardUpdate(str) {
+    return String(str == null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function smCheckBoardVersionUpdate() {
+    const latestVersion = parseInt(BOARD_VERSION_CODE, 10) || 0;
+    if (!latestVersion) return;
+    const changeLog = BOARD_VERSION_CHANGELOG ? String(BOARD_VERSION_CHANGELOG) : "";
+
+    let storedRaw = null;
+    try { storedRaw = localStorage.getItem(SM_BOARD_VERSION_STORAGE_KEY); } catch (e) { return; }
+
+    if (storedRaw === null) {
+        // أول زيارة على هذا المتصفح: نسجّل رقم النسخة الحالي فقط دون إظهار أي نافذة
+        try { localStorage.setItem(SM_BOARD_VERSION_STORAGE_KEY, String(latestVersion)); } catch (e) {}
+        return;
+    }
+
+    const storedVersion = parseInt(storedRaw, 10) || 0;
+    if (latestVersion > storedVersion) {
+        smShowBoardUpdateDialog(latestVersion, changeLog);
+    }
+}
+
+function smShowBoardUpdateDialog(latestVersion, changeLog) {
+    const changeLogHtml = changeLog
+        ? `<div style="white-space:pre-line; line-height:1.9; background: var(--item-hover); padding:12px 14px; border-radius:8px; font-size:0.9rem; margin-top:12px; text-align:right;">${smEscapeHtmlBoardUpdate(changeLog)}</div>`
+        : "";
+
+    const bodyHtml = `
+        <div style="text-align:center; padding: 6px 0 4px;">
+            <i class="fa-solid fa-rocket" style="font-size: 2.2rem; color: var(--accent-color);"></i>
+            <h3 style="margin: 10px 0 5px;">🎉 تحديث جديد للوحة — الإصدار ${latestVersion}</h3>
+            <p style="color: var(--text-muted); font-size:0.9rem;">تعرّف على أبرز ما تم إضافته وتحسينه في هذا التحديث:</p>
+        </div>
+        ${changeLogHtml}
+    `;
+
+    openCustomDialog(
+        "🚀 تحديث جديد متاح",
+        bodyHtml,
+        () => {
+            try { localStorage.setItem(SM_BOARD_VERSION_STORAGE_KEY, String(latestVersion)); } catch (e) {}
+            closeCustomDialog();
+        },
+        "حسنًا، فهمت 👍",
+        true
+    );
+}
+
 /* ============ التحقق من نافذة الأوقات المسموح بها للتحقق من RTDB ============
    12م - 3م (12:00-14:59) | 8م - 11م (20:00-22:59) | 6ص - 9ص (06:00-08:59) */
 function smIsAllowedVerificationWindow() {
@@ -12720,6 +12794,7 @@ function smOpenLicenseDialog(triggeredByFeature) {
 
 /* ============ التهيئة عند تحميل الصفحة ============ */
 (function smInitLicenseModule() {
+    smCheckBoardVersionUpdate(); // فحص تحديث نسخة اللوحة (محلي بالكامل، لا يعتمد على الشبكة)
     smLoadLicenseSettings().then(() => {
         if (GITHUB_USER && GITHUB_REPO) smCheckProStatus(false).then(smInitCustomStyles).then(smEnforceFreeTierPolicy);
     });
