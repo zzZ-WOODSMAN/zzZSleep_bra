@@ -35,10 +35,6 @@
     "op": "sync",
     "timestamp": 1789575901651
   },
-  "home.html": {
-    "op": "add",
-    "timestamp": 1789577869223
-  },
   "app_linked_pages.json": {
     "op": "update",
     "timestamp": 1789581918989
