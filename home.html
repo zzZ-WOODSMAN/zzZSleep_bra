@@ -12258,7 +12258,7 @@ function smCleanupRestrictedFreeFiles(tree) {
 /* عرض الشاشة الإجبارية لتجاوز حد الصفحات المجانية (6 صفحات لكل قسم).
    استدعاؤها بدون appPages/sitePages (أو null) يعرض حالة "جاري التحقق" مؤقتاً (تُستخدم فور تحميل
    الصفحة إن كانت الحالة المحفوظة محلياً تشير لوجود حجب سابق، ريثما يكتمل التحقق الفعلي). */
-function smShowForceLimitScreen(appPages, sitePages) {
+function smShowForceLimitScreen(appPages, sitePages, linkedMap) {
     smForceLimitActive = true;
     try { localStorage.setItem(smForceLimitStorageKey(), "1"); } catch (e) {}
     closeCustomDialog();
@@ -12280,19 +12280,31 @@ function smShowForceLimitScreen(appPages, sitePages) {
         return;
     }
 
+    // الصفحات المرتبطة برابط خارجي (app_linked_pages.json) تُحسب ضمن الحد أيضاً،
+    // لذا يجب عرضها في القائمة (بزر "إلغاء الربط" بدل "حذف") وإلا يظهر الحجب بدون أي عنصر قابل للحذف
+    const linkedPaths = Object.keys(linkedMap || {});
+    const sitePrefix = SITE_FOLDER + "/";
+    const linkedAppPaths = linkedPaths.filter(p => !p.startsWith(sitePrefix));
+    const linkedSitePaths = linkedPaths.filter(p => p.startsWith(sitePrefix));
+    const totalAppCount = appPages.length + linkedAppPaths.length;
+    const totalSiteCount = sitePages.length + linkedSitePaths.length;
+
     const parts = [];
-    if (appPages.length > SM_LIMITS.maxPages) parts.push(`صفحات التطبيق (${appPages.length}/${SM_LIMITS.maxPages})`);
-    if (sitePages.length > SM_LIMITS.maxPages) parts.push(`صفحات الموقع (${sitePages.length}/${SM_LIMITS.maxPages})`);
+    if (totalAppCount > SM_LIMITS.maxPages) parts.push(`صفحات التطبيق (${totalAppCount}/${SM_LIMITS.maxPages})`);
+    if (totalSiteCount > SM_LIMITS.maxPages) parts.push(`صفحات الموقع (${totalSiteCount}/${SM_LIMITS.maxPages})`);
 
     if (msgEl) {
-        msgEl.innerHTML = `لن تتمكن من استخدام اللوحة إلا بعد تخفيض عدد الصفحات في: <b>${parts.join(" و ")}</b> إلى ${SM_LIMITS.maxPages} صفحات كحد أقصى لكل قسم، أو الاشتراك بالخطة الإحترافية للاستخدام بلا حدود. احذف الصفحات الزائدة من القائمة أدناه:`;
+        msgEl.innerHTML = `لن تتمكن من استخدام اللوحة إلا بعد تخفيض عدد الصفحات في: <b>${parts.join(" و ")}</b> إلى ${SM_LIMITS.maxPages} صفحات كحد أقصى لكل قسم، أو الاشتراك بالخطة الإحترافية للاستخدام بلا حدود. احذف الصفحات الزائدة (أو ألغِ ربط الصفحات المرتبطة) من القائمة أدناه:`;
     }
 
-    function buildSection(title, pages) {
-        if (pages.length <= SM_LIMITS.maxPages) return "";
-        let html = `<h4 style="margin:15px 0 8px;">${title} (${pages.length})</h4><ul class="file-list">`;
+    function buildSection(title, pages, linked, totalCount) {
+        if (totalCount <= SM_LIMITS.maxPages) return "";
+        let html = `<h4 style="margin:15px 0 8px;">${title} (${totalCount})</h4><ul class="file-list">`;
         pages.forEach(p => {
             html += `<li class="file-item"><span class="file-name">${p.path}</span><div class="actions"><button class="btn btn-danger btn-sm" onclick="smForceDeleteOverLimitPage('${smEscJs(p.path)}','${smEscJs(p.sha)}',this)"><i class="fa-solid fa-trash"></i> حذف</button></div></li>`;
+        });
+        linked.forEach(p => {
+            html += `<li class="file-item"><span class="file-name">${p} <small style="color:var(--text-muted);">(مرتبطة برابط خارجي)</small></span><div class="actions"><button class="btn btn-danger btn-sm" onclick="smForceUnlinkOverLimitPage('${smEscJs(p)}',this)"><i class="fa-solid fa-link-slash"></i> إلغاء الربط</button></div></li>`;
         });
         html += "</ul>";
         return html;
@@ -12300,8 +12312,8 @@ function smShowForceLimitScreen(appPages, sitePages) {
 
     if (listEl) {
         listEl.innerHTML =
-            buildSection('<i class="fa-solid fa-mobile-screen-button"></i> صفحات التطبيق', appPages) +
-            buildSection('<i class="fa-solid fa-globe"></i> صفحات الموقع', sitePages);
+            buildSection('<i class="fa-solid fa-mobile-screen-button"></i> صفحات التطبيق', appPages, linkedAppPaths, totalAppCount) +
+            buildSection('<i class="fa-solid fa-globe"></i> صفحات الموقع', sitePages, linkedSitePaths, totalSiteCount);
     }
 }
 
@@ -12334,16 +12346,62 @@ function smForceDeleteOverLimitPage(path, sha, btnEl) {
     });
 }
 
+/* حذف تسجيل صفحة مرتبطة برابط خارجي (من app_linked_pages.json) من داخل الشاشة الإجبارية،
+   ثم إعادة الفحص تلقائياً. لا يحذف أي ملف فعلي من المستودع، فقط يزيل تسجيلها من السجل. */
+function smForceUnlinkOverLimitPage(path, btnEl) {
+    if (!confirm(`هل أنت متأكد من إلغاء ربط الصفحة: ${path}؟`)) return;
+    if (btnEl) btnEl.disabled = true;
+    fetch(smBuildPathUrl("app_linked_pages.json"), { headers: smApiHeaders() })
+        .then(res => { if (!res.ok) throw new Error("تعذر جلب سجل الصفحات المرتبطة."); return res.json(); })
+        .then(data => {
+            const decoded = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+            const map = JSON.parse(decoded) || {};
+            delete map[path];
+            const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(map, null, 2))));
+            return smPutFile("app_linked_pages.json", base64, data.sha, "إلغاء ربط صفحة زائدة عن الحد المجاني: " + path);
+        })
+        .then(() => {
+            showAndroidToast("تم إلغاء ربط الصفحة بنجاح");
+            return smEnforcePageLimitBlock();
+        })
+        .catch(err => {
+            alert("تعذر إلغاء ربط الصفحة: " + err.message);
+            if (btnEl) btnEl.disabled = false;
+        });
+}
+
 /* فحص عدد الصفحات الفعلي الحالي (بدون أي تحقق اشتراك) وتحديث/إخفاء الشاشة الإجبارية بناءً عليه فقط
    إن كانت اللوحة معروضة عليها أصلاً (لا تُظهرها من جديد من هنا دون تحقق اشتراك قاطع أولاً) */
 function smEnforcePageLimitBlock() {
     return smFetchRepoTree(true).then(tree => {
         const { appPages, sitePages } = smGetPagesFromTree(tree);
-        if (appPages.length > SM_LIMITS.maxPages || sitePages.length > SM_LIMITS.maxPages) {
-            if (smForceLimitActive) smShowForceLimitScreen(appPages, sitePages);
-        } else {
-            smHideForceLimitScreen();
-        }
+        return fetch(smBuildPathUrl("app_linked_pages.json"), { headers: smApiHeaders() })
+            .then(res => res.status === 404 ? null : (res.ok ? res.json() : null))
+            .then(data => {
+                let linkedMap = {};
+                if (data) {
+                    try {
+                        const decoded = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+                        linkedMap = JSON.parse(decoded) || {};
+                    } catch (e) { linkedMap = {}; }
+                }
+                const linkedPaths = Object.keys(linkedMap);
+                const sitePrefix = SITE_FOLDER + "/";
+                const linkedAppCount = linkedPaths.filter(p => !p.startsWith(sitePrefix)).length;
+                const linkedSiteCount = linkedPaths.filter(p => p.startsWith(sitePrefix)).length;
+                if ((appPages.length + linkedAppCount) > SM_LIMITS.maxPages || (sitePages.length + linkedSiteCount) > SM_LIMITS.maxPages) {
+                    if (smForceLimitActive) smShowForceLimitScreen(appPages, sitePages, linkedMap);
+                } else {
+                    smHideForceLimitScreen();
+                }
+            })
+            .catch(() => {
+                if (appPages.length > SM_LIMITS.maxPages || sitePages.length > SM_LIMITS.maxPages) {
+                    if (smForceLimitActive) smShowForceLimitScreen(appPages, sitePages, {});
+                } else {
+                    smHideForceLimitScreen();
+                }
+            });
     });
 }
 
@@ -12388,17 +12446,17 @@ function smEnforceFreeTierPolicy() {
                 const linkedSiteCount = linkedPaths.filter(p => p.startsWith(sitePrefix)).length;
 
                 const overLimit = ((appPages.length + linkedAppCount) > SM_LIMITS.maxPages || (sitePages.length + linkedSiteCount) > SM_LIMITS.maxPages);
-                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit);
+                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, linkedMap);
             })
             .catch(() => {
                 // تعذر جلب سجل الصفحات المرتبطة: نكمل بالاعتماد على الملفات الفعلية فقط دون حجب إضافي بسببه
                 const overLimit = (appPages.length > SM_LIMITS.maxPages || sitePages.length > SM_LIMITS.maxPages);
-                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit);
+                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, {});
             });
     }).catch(err => console.log("smEnforceFreeTierPolicy error: " + (err && err.message)));
 }
 
-function smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit) {
+function smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, linkedMap) {
     if (!hasRestrictedFiles && !overLimit) {
         smHideForceLimitScreen();
         return Promise.resolve();
@@ -12429,7 +12487,7 @@ function smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sit
         const cleanupPromise = hasRestrictedFiles ? smCleanupRestrictedFreeFiles(tree) : Promise.resolve(false);
         return cleanupPromise.then(() => {
             if (overLimit) {
-                smShowForceLimitScreen(appPages, sitePages);
+                smShowForceLimitScreen(appPages, sitePages, linkedMap);
             } else {
                 smHideForceLimitScreen();
             }
