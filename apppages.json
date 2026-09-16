@@ -32,8 +32,8 @@
     "timestamp": 1789575901651
   },
   "version.txt": {
-    "op": "sync",
-    "timestamp": 1789575901651
+    "op": "update",
+    "timestamp": 1789583964207
   },
   "app_linked_pages.json": {
     "op": "update",
