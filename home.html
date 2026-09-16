@@ -26,6 +26,65 @@
         }
     })();
     </script>
+    <!-- ============ إعدادات نظام إشعار التحديثات (Version Update Dialog) ============
+         عدّل من هنا فقط عند كل تحديث للوحة:
+         1) غيّر قيمة version لرقم النسخة الجديد (أي نص/رقم، المهم يختلف عن السابق).
+         2) عدّل قائمة features بمميزات هذا التحديث (كل عنصر بالمصفوفة = سطر في القائمة).
+         آلية العمل:
+         - أول زيارة للمستخدم (ماعنده أي رقم محفوظ بـ localStorage): يُسجَّل الرقم الحالي بصمت بدون إظهار أي نافذة.
+         - إذا كان عنده رقم أقدم محفوظ: تظهر له نافذة بمميزات آخر تحديث، وعند ضغط "حسنًا" يتحدّث الرقم المحفوظ لديه للرقم الجديد.
+         - إذا كان الرقم المحفوظ مطابقاً للحالي: لا يظهر شيء. ============ -->
+    <script>
+    var ROSTRICK_VERSION_CONFIG = {
+        version: "1.0.0",
+        title: "🎉 تحديث جديد للوحة",
+        features: [
+            "أضف هنا وصف الميزة الأولى في هذا التحديث",
+            "أضف هنا وصف الميزة الثانية في هذا التحديث"
+        ]
+    };
+
+    function smCheckRosTrickVersionUpdate() {
+        try {
+            var STORAGE_KEY = "version-RosTrick";
+            var current = String(ROSTRICK_VERSION_CONFIG.version);
+            var saved = localStorage.getItem(STORAGE_KEY);
+
+            // أول زيارة: سجّل الرقم فقط بدون إظهار نافذة
+            if (!saved) {
+                localStorage.setItem(STORAGE_KEY, current);
+                return;
+            }
+
+            // الرقم المحفوظ مطابق للحالي: لا شيء
+            if (saved === current) return;
+
+            var featuresHtml = (ROSTRICK_VERSION_CONFIG.features || []).map(function (f) {
+                return '<li style="margin-bottom:8px; line-height:1.7;">' + f + '</li>';
+            }).join("");
+
+            var bodyHtml =
+                '<div style="text-align:center; padding: 5px 0 15px;">' +
+                    '<i class="fa-solid fa-rocket" style="font-size: 2.2rem; color: var(--accent-color);"></i>' +
+                    '<h3 style="margin: 10px 0 5px;">تم تحديث اللوحة إلى الإصدار ' + current + '</h3>' +
+                    '<p style="color: var(--text-muted); font-size:0.9rem; margin:0;">أبرز ما جاء في هذا التحديث:</p>' +
+                '</div>' +
+                '<ul style="padding-right: 20px; margin: 0; color: var(--text-color); text-align:right;">' + featuresHtml + '</ul>';
+
+            if (typeof openCustomDialog !== "function") { localStorage.setItem(STORAGE_KEY, current); return; }
+            openCustomDialog(
+                ROSTRICK_VERSION_CONFIG.title,
+                bodyHtml,
+                function () {
+                    localStorage.setItem(STORAGE_KEY, current);
+                    closeCustomDialog();
+                },
+                "حسنًا",
+                true
+            );
+        } catch (e) { /* تجاهل أي خطأ حتى لا يعطّل تحميل اللوحة */ }
+    }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>لوحة تحكم الأدمن - إدارة وترتيب الصفحات والمشاريع</title>
@@ -4759,6 +4818,7 @@ ${parts.body}
         initBuildAppSection();
         historyAttach("code-editor");
         historyAttach("sm-text-editor-textarea");
+        smCheckRosTrickVersionUpdate();
     };
 
     /* ============ التبديل بين تبويبي "التطبيق" و"الموقع" ============ */
