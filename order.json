@@ -10,5 +10,11 @@
     "title": "tl",
     "icon": "fa-solid fa-file",
     "hidden": false
+  },
+  {
+    "file": "WS.html",
+    "title": "WS",
+    "icon": "fa-solid fa-file",
+    "hidden": false
   }
 ]
