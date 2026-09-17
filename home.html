@@ -8736,8 +8736,9 @@ function showEditorWarningBanner() {
                     '.bottom-navbar::-webkit-scrollbar { display: none; }\n' +
                     '.bottom-navbar-list {\n' +
                     '    list-style: none; margin: 0; padding: 0 4px; display: flex; height: 100%;\n' +
-                    '    ' + (scroll ? 'flex-wrap: nowrap; width: max-content; min-width: 100%;' : 'flex: 1; justify-content: space-around; width: 100%;') + '\n' +
+                    '    ' + (scroll ? 'flex-wrap: nowrap; width: max-content; min-width: 100%; gap: 8px;' : 'flex: 1; justify-content: space-around; width: 100%;') + '\n' +
                     '}\n' +
+                    (scroll ? '.bottom-navbar-list.sm-nav-fit { justify-content: space-evenly; }\n.bottom-navbar-list.sm-nav-fit .bottom-navbar-item { flex: 1 1 0; min-width: 0; }\n' : '') +
                     '.bottom-navbar-item {\n' +
                     '    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;\n' +
                     '    ' + (scroll ? 'min-width: 66px;' : 'flex: 1;') + ' padding: 6px 10px; cursor: pointer;\n' +
@@ -8773,9 +8774,10 @@ function showEditorWarningBanner() {
                     '}\n' +
                     '.bottom-navbar::-webkit-scrollbar { display: none; }\n' +
                     '.bottom-navbar-list {\n' +
-                    '    list-style: none; margin: 0; padding: 0 8px; display: flex; height: 100%;\n' +
-                    '    ' + (scroll ? 'flex-wrap: nowrap; width: max-content; min-width: 100%;' : 'flex: 1; justify-content: space-around; width: 100%;') + '\n' +
+                    '    list-style: none; margin: 0; padding: ' + (scroll ? '0 24px' : '0 8px') + '; display: flex; height: 100%;\n' +
+                    '    ' + (scroll ? 'flex-wrap: nowrap; width: max-content; min-width: 100%; gap: 10px;' : 'flex: 1; justify-content: space-around; width: 100%;') + '\n' +
                     '}\n' +
+                    (scroll ? '.bottom-navbar-list.sm-nav-fit { justify-content: space-evenly; }\n.bottom-navbar-list.sm-nav-fit .bottom-navbar-item { flex: 1 1 0; min-width: 0; }\n' : '') +
                     '.bottom-navbar-item {\n' +
                     '    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;\n' +
                     '    ' + (scroll ? 'min-width: 62px;' : 'flex: 1;') + ' padding: 4px 10px; cursor: pointer;\n' +
@@ -8810,8 +8812,9 @@ function showEditorWarningBanner() {
                     '.bottom-navbar::-webkit-scrollbar { display: none; }\n' +
                     '.bottom-navbar-list {\n' +
                     '    list-style: none; margin: 0; padding: 0 6px; display: flex; height: 100%;\n' +
-                    '    ' + (scroll ? 'flex-wrap: nowrap; width: max-content; min-width: 100%;' : 'flex: 1; justify-content: space-around; width: 100%;') + '\n' +
+                    '    ' + (scroll ? 'flex-wrap: nowrap; width: max-content; min-width: 100%; gap: 8px;' : 'flex: 1; justify-content: space-around; width: 100%;') + '\n' +
                     '}\n' +
+                    (scroll ? '.bottom-navbar-list.sm-nav-fit { justify-content: space-evenly; }\n.bottom-navbar-list.sm-nav-fit .bottom-navbar-item { flex: 1 1 0; min-width: 0; }\n' : '') +
                     '.bottom-navbar-item {\n' +
                     '    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;\n' +
                     '    ' + (scroll ? 'min-width: 64px;' : 'flex: 1;') + ' padding: 6px 10px; cursor: pointer;\n' +
@@ -10052,7 +10055,18 @@ function showEditorWarningBanner() {
     '                }, 0);\n' +
     '            }\n' +
     '        }\n' +
+    '        smUpdateBottomNavFit();\n' +
     '    }\n' +
+    '\n' +
+    '    function smUpdateBottomNavFit() {\n' +
+    '        const bottomNavbar = document.getElementById("bottomNavbar");\n' +
+    '        const bottomNavList = document.getElementById("bottomNavbarList");\n' +
+    '        if (!bottomNavbar || !bottomNavList) return;\n' +
+    '        bottomNavList.classList.remove("sm-nav-fit");\n' +
+    '        const fits = bottomNavList.scrollWidth <= bottomNavbar.clientWidth + 1;\n' +
+    '        bottomNavList.classList.toggle("sm-nav-fit", fits);\n' +
+    '    }\n' +
+    '    window.addEventListener("resize", smUpdateBottomNavFit);\n' +
     '\n' +
     '    async function loadGlobalVars() {\n' +
     '        try {\n' +
