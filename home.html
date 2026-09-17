@@ -2,6 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <!-- ============ إعداد زر "ربط برابط خارجي" (قريبًا) — عدّل القيمة هنا فقط ============ -->
+    <script>
+    const linkedpagesoon = true; // true = الزر مغلق ويظهر توست "قريبًا ستُضَافْ" | false = الزر يعمل بشكل طبيعي
+    </script>
     <!-- ============ فحص فوري ومتزامن قبل أي رسم للصفحة: يحدد أي شاشة تظهر مباشرة من localStorage
          بدل الاعتماد على قيمة افتراضية بالـ CSS ثم تعديلها لاحقاً عبر checkAuth() عند window.onload.
          هذا هو ما كان يسبب ظهور شاشة تسجيل مشروع GitHub لبضع ثوانٍ قبل اختفائها وظهور اللوحة. ============ -->
@@ -10451,7 +10455,7 @@ function showEditorWarningBanner() {
                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px;">
                     <button type="button" class="btn btn-sm btn-dark sm-splash-chip sm-splash-chip-active" id="smPageModeBlankBtn" onclick="smSwitchPageCreateMode('blank')">صفحة فارغة</button>
                     <button type="button" class="btn btn-sm btn-dark sm-splash-chip" id="smPageModeUploadBtn" onclick="smSwitchPageCreateMode('upload')">رفع ملف HTML</button>
-                    <button type="button" class="btn btn-sm btn-dark sm-splash-chip" id="smPageModeLinkBtn" onclick="smSwitchPageCreateMode('link')">ربط برابط خارجي</button>
+                    <button type="button" class="btn btn-sm btn-dark sm-splash-chip" id="smPageModeLinkBtn" ${linkedpagesoon ? 'style="opacity:0.5; cursor:not-allowed;" onclick="showAndroidToast(\'قريبًا ستُضَافْ\')"' : 'onclick="smSwitchPageCreateMode(\'link\')"'}>ربط برابط خارجي</button>
                 </div>
 
                 <div id="smPageModeBlank">
