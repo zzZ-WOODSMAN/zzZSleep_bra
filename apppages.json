@@ -38,9 +38,5 @@
   "app_linked_pages.json": {
     "op": "update",
     "timestamp": 1789581918989
-  },
-  "home.html": {
-    "op": "update",
-    "timestamp": 1789661503966
   }
 }
