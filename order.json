@@ -1,14 +1,18 @@
 [
   {
-    "file": "tl.html",
-    "title": "tl",
-    "icon": "fa-solid fa-file",
-    "hidden": false
-  },
-  {
     "file": "home.html",
     "title": "home",
     "icon": "fa-solid fa-file",
-    "hidden": true
+    "hidden": true,
+    "searchEnabled": false,
+    "searchNames": []
+  },
+  {
+    "file": "tl.html",
+    "title": "tl",
+    "icon": "fa-solid fa-file",
+    "hidden": true,
+    "searchEnabled": false,
+    "searchNames": []
   }
 ]
