@@ -38,5 +38,9 @@
   "version.txt": {
     "op": "update",
     "timestamp": 1789748023740
+  },
+  "home.html": {
+    "op": "add",
+    "timestamp": 1789748078962
   }
 }
