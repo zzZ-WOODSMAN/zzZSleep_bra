@@ -42,9 +42,5 @@
   "version.txt": {
     "op": "update",
     "timestamp": 1789669689594
-  },
-  "WS.html": {
-    "op": "update",
-    "timestamp": 1789669671023
   }
 }
