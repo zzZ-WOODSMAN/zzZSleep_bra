@@ -38,9 +38,5 @@
   "tl.html": {
     "op": "add",
     "timestamp": 1789792858198
-  },
-  "home.html": {
-    "op": "update",
-    "timestamp": 1789794493111
   }
 }
