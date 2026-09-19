@@ -12854,10 +12854,8 @@ function smDeleteFolder(path) {
    ============ وحدة الترخيص / الخطة الإحترافية (Premium License) =========
    ====================================================================== */
 
-/* --- إعدادات المصدر (مستودع GitHub الخاص بك الذي يحوي settings.json و subkey.json) --- */
-const SM_LIC_OWNER = "BLOXMAM";
-const SM_LIC_REPO = "webv";
-const SM_LIC_BRANCH = "main"; // عدّلها إن كان الفرع الرئيسي باسم مختلف
+/* --- مصدر ملفات الترخيص: settings.json و subkey.json يُقدَّمان من الـ Worker (مستودع zzZ-WOODSMAN/zzZSleep_bra) بلا استهلاك GitHub --- */
+const SM_LICENSE_WORKER_BASE = "https://zzzsleep-bra.rostrick.workers.dev";
 
 /* --- رابط قاعدة بيانات Firebase Realtime Database الخاصة بك ---
    ضع هنا رابط قاعدتك (مثال: https://your-project-id-default-rtdb.firebaseio.com)
@@ -12978,8 +12976,8 @@ function smProStorageKey() {
 
 /* ============ تحميل إعدادات التفعيل العامة (settings.json) من GitHub ============ */
 function smLoadLicenseSettings() {
-    const url = `https://raw.githubusercontent.com/${SM_LIC_OWNER}/${SM_LIC_REPO}/${SM_LIC_BRANCH}/settings.json?t=${Date.now()}`;
-    return fetch(url)
+    const url = `${SM_LICENSE_WORKER_BASE}/settings.json?t=${Date.now()}`; // من الـ Worker (بلا استهلاك GitHub) — يُنشر بعد كل حفظ من لوحة الإنتاج
+    return fetch(url, { cache: "no-cache" })
         .then(res => { if (!res.ok) throw new Error("settings fetch failed"); return res.json(); })
         .then(data => {
             const premiumRaw = data && (data.premium !== undefined ? data.premium : data["premium"]);
@@ -13774,8 +13772,8 @@ function smCheckLimit(currentCount, maxAllowed, featureLabel) {
    في كل الحالات يُهمَل أول 5 أحرف من كل رمز فقط، والباقي هو الرمز الحقيقي.
    الدالة تُعيد الرمز الحقيقي المطابق (بعد إزالة أول 5 أحرف) إن كان صحيحاً، أو null إن لم يكن صحيحاً. */
 function smVerifyLicenseCode(inputCode) {
-    const url = `https://raw.githubusercontent.com/${SM_LIC_OWNER}/${SM_LIC_REPO}/${SM_LIC_BRANCH}/subkey.json?t=${Date.now()}`;
-    return fetch(url)
+    const url = `${SM_LICENSE_WORKER_BASE}/subkey.json?t=${Date.now()}`; // من الـ Worker (بلا حدود GitHub) — يُنشر بعد كل حفظ من لوحة الإنتاج
+    return fetch(url, { cache: "no-cache" })
         .then(res => { if (!res.ok) throw new Error("تعذر الوصول لملف رمز التفعيل."); return res.json(); })
         .then(data => {
             const rawList = (data && data.A !== undefined && data.A !== null)
