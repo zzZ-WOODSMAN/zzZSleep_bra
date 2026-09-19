@@ -940,7 +940,14 @@ function smManualRefreshProStatus() {
 }
 
 /* ============ نافذة حالة/تفعيل الاشتراك ============ */
-function smOpenSubDialog() {
+let smSubDialogTheme = ""; // اسم الثيم الذي فُتحت النافذة بسببه (فارغ إذا فُتحت من زر الاشتراك العام)
+function smEscapeHtml(str) {
+  const d = document.createElement("div");
+  d.textContent = String(str == null ? "" : str);
+  return d.innerHTML;
+}
+function smOpenSubDialog(themeName) {
+  if (typeof themeName === "string") smSubDialogTheme = themeName.trim(); // أي استدعاء بلا اسم نصّي يُبقي الاسم السابق (مثل التحقق اليدوي)
   const titleEl = document.getElementById("subDlgTitle");
   const bodyEl = document.getElementById("subDlgBody");
   if (!titleEl || !bodyEl) return;
@@ -962,7 +969,7 @@ function smOpenSubDialog() {
       ? `<button class="btn primary sub-btn-full" onclick="window.open('${smLicenseSettings.buyLink}', '_blank')"><i class="fa-solid fa-cart-shopping"></i> شراء رمز التفعيل${smLicenseSettings.price ? ` بـ (${smLicenseSettings.price})` : ""}</button>`
       : "";
     bodyEl.innerHTML = `
-      <p class="sub-note warn"><i class="fa-solid fa-lock"></i> تنزيل الثيمات من هذه المكتبة متاح فقط للمشتركين بالخطة الإحترافية. المعاينة تبقى متاحة للجميع دون أي قيد.</p>
+      <p class="sub-note warn"><i class="fa-solid fa-lock"></i> ${smSubDialogTheme ? `تنزيل ثيم "<b>${smEscapeHtml(smSubDialogTheme)}</b>" متاح فقط للمشتركين بالخطة الإحترافية.` : `تنزيل الثيمات من هذه المكتبة متاح فقط للمشتركين بالخطة الإحترافية.`} المعاينة تبقى متاحة للجميع دون أي قيد.</p>
       <div class="sub-field">
         <label>رمز التفعيل (اشتراك مدى الحياة) — لمشروع "${smCurrentProject.name || smCurrentProject.repo}"</label>
         <input type="text" id="sm-tl-license-code-input" placeholder="أدخل رمز التفعيل هنا">
@@ -1107,7 +1114,7 @@ function buildRow(id, pkg) {
   smRenderDownloadBtnLabel(downloadBtn, themeNeedsSub, pkg.themena);
   downloadBtn.addEventListener("click", () => {
     if (!smDownloadAllowed(themeNeedsSub)) {
-      smOpenSubDialog();
+      smOpenSubDialog(pkg.themena || "");
       return;
     }
     if (smInstallTheme(pkg)) {
@@ -1131,6 +1138,13 @@ let smDownloadButtons = []; // كل أزرار "تنزيل" المعروضة ح�
 
 function smRenderDownloadBtnLabel(btn, needsSub, name) {
   if (smIsInstalled(name)) {
+    if (!smDownloadAllowed(needsSub)) {
+      // محمّل سابقًا (ربما بحساب مشترك) لكن الحساب الحالي غير مشترك والثيم Pro: يبقى مكتوب "محمّل" مع قفل، والضغط يفتح نافذة الاشتراك
+      btn.innerHTML = `<i class="fa-solid fa-lock" style="color:#e0a860;"></i> محمّل`;
+      btn.disabled = false;
+      btn.style.cursor = "";
+      return;
+    }
     btn.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#59c9be;"></i> محمّل`;
     btn.disabled = true;
     btn.style.cursor = "default";
@@ -1202,7 +1216,7 @@ document.addEventListener("keydown", e => {
   if (overlay.classList.contains("open")) closePreview();
   if (subOverlay.classList.contains("open")) closeSubDialog();
 });
-document.getElementById("subStatusBtn").addEventListener("click", smOpenSubDialog);
+document.getElementById("subStatusBtn").addEventListener("click", () => smOpenSubDialog(""));
 
 document.getElementById("refreshBtn").addEventListener("click", async () => {
   const btn = document.getElementById("refreshBtn");
