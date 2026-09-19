@@ -740,14 +740,21 @@ setInterval(() => {
   }
 }, 900);
 
-/* يجب أن يطابق THEME_FIREBASE_DB_URL نفس قاعدة الثيمات المستخدمة في لوحة التحكم */
-const THEME_FIREBASE_DB_URL = "https://wtoons-44aba-default-rtdb.firebaseio.com";
-const THEME_FIREBASE_AUTH   = "";
-const THEMES_NODE = "themes";
-
-function themeFbUrl(path) {
-  const auth = THEME_FIREBASE_AUTH ? `?auth=${THEME_FIREBASE_AUTH}` : "";
-  return `${THEME_FIREBASE_DB_URL}/${path}.json${auth}`;
+/* الثيمات تُجلب من الـ Worker (يقدّم المجلد themes/ المحفوظ في GitHub من لوحة الإنتاج) — بلا حدود تنزيل كما في Firebase.
+   themes/index.json  : فهرس خفيف { معرّف: الحزمة بدون bodyhtmlsplash } — يُجلب مرة واحدة لعرض القائمة
+   themes/<معرّف>.json: الحزمة الكاملة — تُجلب فقط عند المعاينة أو التنزيل */
+const THEMES_BASE_URL = "https://zzzsleep-bra.rostrick.workers.dev/themes/";
+const THEMES_INDEX_URL = THEMES_BASE_URL + "index.json";
+const smFullThemeCache = {};
+async function smFetchFullTheme(id, meta) {
+  if (meta && typeof meta.bodyhtmlsplash === "string") return meta; // الفهرس يحمل الحزمة كاملة أصلًا
+  if (smFullThemeCache[id]) return smFullThemeCache[id];
+  const res = await fetch(THEMES_BASE_URL + encodeURIComponent(id) + ".json", { cache: "no-cache" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const pkg = await res.json();
+  if (!pkg || typeof pkg !== "object") throw new Error("invalid theme file");
+  smFullThemeCache[id] = pkg;
+  return pkg;
 }
 
 /* =====================================================================
@@ -1107,21 +1114,44 @@ function buildRow(id, pkg) {
   const previewBtn = document.createElement("button");
   previewBtn.className = "btn primary";
   previewBtn.innerHTML = `<i class="fa-solid fa-eye"></i> معاينة`;
-  previewBtn.addEventListener("click", () => openPreview(pkg));
+  previewBtn.addEventListener("click", async () => {
+    if (previewBtn.disabled) return;
+    const oldHtml = previewBtn.innerHTML;
+    previewBtn.disabled = true;
+    previewBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري الجلب`;
+    try {
+      openPreview(await smFetchFullTheme(id, pkg));
+    } catch (e) {
+      previewBtn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> تعذّر الجلب`;
+      await new Promise(r => setTimeout(r, 1600));
+    }
+    previewBtn.innerHTML = oldHtml;
+    previewBtn.disabled = false;
+  });
 
   const downloadBtn = document.createElement("button");
   downloadBtn.className = "btn";
   smRenderDownloadBtnLabel(downloadBtn, themeNeedsSub, pkg.themena);
-  downloadBtn.addEventListener("click", () => {
+  downloadBtn.addEventListener("click", async () => {
     if (!smDownloadAllowed(themeNeedsSub)) {
       smOpenSubDialog(pkg.themena || "");
       return;
     }
-    if (smInstallTheme(pkg)) {
-      smRenderDownloadBtnLabel(downloadBtn, themeNeedsSub, pkg.themena);
-    } else {
-      downloadRosTrick(pkg); // احتياطي: تعذّر التخزين المحلي (أو الثيم بلا اسم) فننزّل ملف .rt كالسابق
+    if (downloadBtn.dataset.busy) return;
+    downloadBtn.dataset.busy = "1";
+    downloadBtn.disabled = true;
+    downloadBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري الجلب`;
+    try {
+      const full = await smFetchFullTheme(id, pkg); // الحزمة الكاملة تُجلب هنا فقط (الفهرس لا يحمل كود التصميم)
+      if (!smInstallTheme(full)) {
+        downloadRosTrick(full); // احتياطي: تعذّر التخزين المحلي (أو الثيم بلا اسم) فننزّل ملف .rt كالسابق
+      }
+    } catch (e) {
+      downloadBtn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> تعذّر الجلب`;
+      await new Promise(r => setTimeout(r, 1600));
     }
+    delete downloadBtn.dataset.busy;
+    smRenderDownloadBtnLabel(downloadBtn, themeNeedsSub, pkg.themena);
   });
   smDownloadButtons.push({ btn: downloadBtn, needsSub: themeNeedsSub, name: pkg.themena });
 
@@ -1185,10 +1215,10 @@ function showErrorState() {
 
 async function loadThemes() {
   try {
-    const res = await fetch(themeFbUrl(THEMES_NODE));
+    const res = await fetch(THEMES_INDEX_URL, { cache: "no-cache" }); // no-cache: يتحقق من ETag فيصل الثيم الجديد فور نشر الـ Worker
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    renderList(data || {});
+    renderList(data && typeof data === "object" && !Array.isArray(data) ? data : {});
   } catch (e) {
     showErrorState();
   }
