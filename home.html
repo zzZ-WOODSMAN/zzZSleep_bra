@@ -1117,7 +1117,12 @@
         </div>
 
         <p style="font-size: 0.85rem; color: var(--text-muted);">يتم حفظ هذه البيانات محلياً في جهازك تلقائياً لسهولة التنقل بين المستودعات والمشاريع.</p>
-        
+
+        <div class="form-group">
+            <label>اسم التطبيق: <span style="color:#e02424;">*</span></label>
+            <input type="text" id="project-name" placeholder="مثال: تطبيق منشئ صور" required>
+        </div>
+
         <!-- ============ قسم بيانات GitHub ============ -->
         <details class="card" id="github-details" style="background: var(--item-hover); margin-bottom: 10px; padding: 10px 14px;" ontoggle="onGithubDetailsToggle(this)">
             <summary style="cursor:pointer; color: var(--accent-color); font-weight:bold; list-style:none; display:flex; align-items:center; justify-content:space-between;">
@@ -1128,10 +1133,6 @@
             </summary>
 
             <div class="form-group" style="margin-top:12px;">
-                <label>اسم تعريف المشروع (Project Nickname):</label>
-                <input type="text" id="project-name" placeholder="مثال: تطبيق منشئ صور">
-            </div>
-            <div class="form-group">
                 <label>اسم المستخدم في GitHub (Username):</label>
                 <input type="text" id="git-user" placeholder="مثال: MyGithubUser">
             </div>
@@ -5913,7 +5914,7 @@ ${parts.body}
         const repo = document.getElementById("git-repo").value.trim();
         const token = document.getElementById("git-token").value.trim();
 
-        if(!user || !repo || !token) {
+        if(!projName || !user || !repo || !token) {
             alert("الرجاء ملء جميع حقول الاتصال الرئيسية!");
             return;
         }
@@ -6015,7 +6016,7 @@ ${parts.body}
         const repo = document.getElementById("git-repo").value.trim();
         const token = document.getElementById("git-token").value.trim();
 
-        if (!user || !repo || !token) {
+        if (!projName || !user || !repo || !token) {
             alert("يرجى ملء الحقول لتتمكن من نسخ المعلومات!");
             return;
         }
