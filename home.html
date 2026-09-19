@@ -11701,7 +11701,26 @@ function showEditorWarningBanner() {
         fetch(smBuildPathUrl(path), { headers: smApiHeaders() })
             .then(res => res.json())
             .then(data => {
-                const decoded = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+                let decoded = decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
+
+                /* ============ إزالة كل ما تم حقنه تلقائيًا (الهيدر، القائمة، المتغيرات، حماية كلمة المرور،
+                   حماية الأوفلاين، ثيمات Pro...) قبل تسليم الملف للمستخدم — نفس آلية buildFullContent تمامًا،
+                   حتى لا يحصل المستخدم على كود الهيدر/الثيمات المدفوعة داخل الملف المُنزَّل بأي حال ============ */
+                decoded = decoded.replace(/<!-- SM-AUTO-INJECTED:START:[\s\S]*?<!-- SM-AUTO-INJECTED:END:[\w-]+ -->/g, "");
+                decoded = decoded.replace(/<!-- START PASSWORD PROTECTION -->[\s\S]*?<!-- END PASSWORD PROTECTION -->/g, "");
+                decoded = decoded.replace(/<!-- START OFFLINE PROTECTION -->[\s\S]*?<!-- END OFFLINE PROTECTION -->/g, "");
+                decoded = decoded.replace(/<!-- START HEADER SCROLL COLOR -->[\s\S]*?<!-- END HEADER SCROLL COLOR -->/g, "");
+                decoded = decoded.replace(/<!-- START ADMIN DRAWER -->[\s\S]*?<!-- END ADMIN DRAWER -->/g, "");
+                /* توافقية مع صفحات محفوظة قبل اعتماد علامات الإحاطة الفريدة أعلاه */
+                decoded = decoded.replace(/<style id="admin-styles">[\s\S]*?<\/style>/g, "");
+                decoded = decoded.replace(/<style id="header-preset-styles">[\s\S]*?<\/style>/g, "");
+                decoded = decoded.replace(/<style id="nav-tool-preset-styles">[\s\S]*?<\/style>/g, "");
+                decoded = decoded.replace(/<style id="nav-tool-follow-header-styles">[\s\S]*?<\/style>/g, "");
+                decoded = decoded.replace(/<style id="custom-font-styles">[\s\S]*?<\/style>/g, "");
+                decoded = decoded.replace(/<script id="admin-scripts">[\s\S]*?<\/script>/g, "");
+                decoded = decoded.replace(/<script id="sm-search-placeholders">[\s\S]*?<\/script>/g, "");
+                decoded = decoded.replace(/<style id="sm-search-placeholders-style">[\s\S]*?<\/style>/g, "");
+
                 const fileName = path.split("/").pop();
                 // رابط data: بدل blob: للتوافق مع DownloadListener في تطبيقات WebView على أندرويد
                 const dataUrl = "data:text/html;charset=utf-8," + encodeURIComponent(decoded);
