@@ -760,12 +760,10 @@ async function smFetchFullTheme(id, meta) {
 /* =====================================================================
    حالة اشتراك المشروع الحالي — تعتمد بالكامل على نفس منظومة الاشتراكات
    المستخدمة في ind.html (نفس قاعدة Firebase، نفس مفاتيح التخزين المحلي،
-   نفس مستودع رمز التفعيل subkey.json)، حتى تبقى الحالة متطابقة بين
+   نفس ملف رمز التفعيل subkey.json من الـ Worker)، حتى تبقى الحالة متطابقة بين
    الصفحتين لنفس المشروع. القيم التالية يجب أن تطابق ind.html تمامًا.
    ===================================================================== */
-const SM_LIC_OWNER = "BLOXMAM";
-const SM_LIC_REPO = "webv";
-const SM_LIC_BRANCH = "main";
+const SM_LICENSE_WORKER_BASE = "https://zzzsleep-bra.rostrick.workers.dev"; // يقدّم settings.json و subkey.json من مستودع zzZ-WOODSMAN/zzZSleep_bra
 const SM_FIREBASE_DB_URL = "https://umlog-box-default-rtdb.firebaseio.com";
 const SM_FIREBASE_AUTH = "";
 
@@ -801,8 +799,8 @@ function smIsAllowedVerificationWindow() {
 }
 
 function smLoadLicenseSettings() {
-  const url = `https://raw.githubusercontent.com/${SM_LIC_OWNER}/${SM_LIC_REPO}/${SM_LIC_BRANCH}/settings.json?t=${Date.now()}`;
-  return fetch(url)
+  const url = `${SM_LICENSE_WORKER_BASE}/settings.json?t=${Date.now()}`; // من الـ Worker (بلا استهلاك GitHub) — يُنشر بعد كل حفظ من لوحة الإنتاج
+  return fetch(url, { cache: "no-cache" })
     .then(res => { if (!res.ok) throw new Error("settings fetch failed"); return res.json(); })
     .then(data => {
       const premiumRaw = data && (data.premium !== undefined ? data.premium : data["premium"]);
@@ -903,14 +901,54 @@ function smUpdateProUI() {
 
 /* ============ التحقق من رمز التفعيل عبر subkey.json (نفس آلية ind.html بالضبط) ============ */
 function smVerifyLicenseCode(inputCode) {
-  const url = `https://raw.githubusercontent.com/${SM_LIC_OWNER}/${SM_LIC_REPO}/${SM_LIC_BRANCH}/subkey.json?t=${Date.now()}`;
-  return fetch(url)
+  /* يدعم صيغتين لـ subkey.json (مطابق للوحة التحكم):
+     1) رمز واحد:      { "A": "XXXXXرمز" }
+     2) عدة رموز:      { "A": ["XXXXXرمز1", "XXXXXرمز2", ...] }
+     يُهمَل أول 5 أحرف من كل عنصر، والباقي هو الرمز الحقيقي. تعيد الرمز الحقيقي المطابق أو null. */
+  const url = `${SM_LICENSE_WORKER_BASE}/subkey.json?t=${Date.now()}`; // من الـ Worker (بلا حدود GitHub) — يُنشر بعد كل حفظ من لوحة الإنتاج
+  return fetch(url, { cache: "no-cache" })
     .then(res => { if (!res.ok) throw new Error("تعذر الوصول لملف رمز التفعيل."); return res.json(); })
     .then(data => {
-      const raw = (data && data.A) ? String(data.A) : "";
-      const realKey = raw.substring(5);
-      return realKey.length > 0 && realKey === String(inputCode).trim();
+      const rawList = (data && data.A !== undefined && data.A !== null)
+        ? (Array.isArray(data.A) ? data.A : [data.A])
+        : [];
+      const trimmedInput = String(inputCode).trim();
+      for (const raw of rawList) {
+        const realKey = String(raw).substring(5); // تجاهل أول 5 أحرف
+        if (realKey.length > 0 && realKey === trimmedInput) return realKey;
+      }
+      return null;
     });
+}
+
+/* ============ تتبّع رموز التفعيل المُستخدمة عبر Firebase RTDB (نفس عقدة usedLicenseCodes في لوحة التحكم) ============
+   كل رمز يُستخدم يُسجَّل هنا، فلا يمكن استخدامه مرة أخرى حتى في مشروع آخر. */
+function smLicenseCodeFirebaseKey(code) {
+  return String(code).replace(/[.#$\[\]\/]/g, "_"); // مفاتيح Firebase لا تقبل . # $ [ ] /
+}
+
+function smIsLicenseCodeUsed(code) {
+  const authQ = SM_FIREBASE_AUTH ? `?auth=${SM_FIREBASE_AUTH}` : "";
+  return fetch(`${SM_FIREBASE_DB_URL}/usedLicenseCodes/${smLicenseCodeFirebaseKey(code)}.json${authQ}`).then(res => {
+    if (!res.ok) throw new Error("تعذر التحقق من حالة استخدام الرمز.");
+    return res.json();
+  }).then(data => !!(data && data.used === true));
+}
+
+function smMarkLicenseCodeUsed(code) {
+  const authQ = SM_FIREBASE_AUTH ? `?auth=${SM_FIREBASE_AUTH}` : "";
+  const body = {
+    used: true,
+    usedAt: new Date().toISOString(),
+    githubUser: smCurrentProject.user,
+    githubRepo: smCurrentProject.repo,
+    projectName: smCurrentProject.name || smCurrentProject.repo
+  };
+  return fetch(`${SM_FIREBASE_DB_URL}/usedLicenseCodes/${smLicenseCodeFirebaseKey(code)}.json${authQ}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(res => { if (!res.ok) throw new Error("تعذر تسجيل استخدام الرمز."); return res.json(); });
 }
 
 function smActivateLicenseCode() {
@@ -923,17 +961,31 @@ function smActivateLicenseCode() {
   const btn = document.getElementById("sm-tl-activate-btn");
   if (btn) btn.disabled = true;
 
+  let matchedKey = null;
   smVerifyLicenseCode(code)
-    .then(isValid => {
-      if (!isValid) { alert("❌ رمز التفعيل غير صحيح."); return; }
-      return smFirebaseSetSubscription(true).then(() => {
-        smIsPro = true;
-        localStorage.setItem(smProStorageKey(), "active");
-        smUpdateProUI();
-        smOpenSubDialog();
-      });
+    .then(realKey => {
+      if (!realKey) {
+        alert("❌ رمز التفعيل غير صحيح.");
+        return Promise.reject(new Error("__handled__"));
+      }
+      matchedKey = realKey;
+      return smIsLicenseCodeUsed(realKey);
     })
-    .catch(err => alert("❌ " + err.message))
+    .then(isUsed => {
+      if (isUsed) {
+        alert("❌ تم استخدام هذا الرمز من قبل، ولا يمكن استخدامه مرة أخرى.");
+        return Promise.reject(new Error("__handled__"));
+      }
+      return smFirebaseSetSubscription(true);
+    })
+    .then(() => smMarkLicenseCodeUsed(matchedKey))
+    .then(() => {
+      smIsPro = true;
+      localStorage.setItem(smProStorageKey(), "active");
+      smUpdateProUI();
+      smOpenSubDialog();
+    })
+    .catch(err => { if (err.message !== "__handled__") alert("❌ " + err.message); })
     .finally(() => { if (btn) btn.disabled = false; });
 }
 
