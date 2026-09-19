@@ -31,10 +31,6 @@
     "op": "sync",
     "timestamp": 1789668294329
   },
-  "tl.html": {
-    "op": "update",
-    "timestamp": 1789749181317
-  },
   "version.txt": {
     "op": "update",
     "timestamp": 1789791635076
