@@ -1273,18 +1273,33 @@
         </div>
         <div class="card-body">
             <div class="build-app-buttons">
-                <button type="button" class="build-app-btn build-app-btn-green" onclick="downloadUserAppVersion()">
-                    <i class="fa-solid fa-download"></i> تحميل نسخة المستخدم
+                <button type="button" class="build-app-btn build-app-btn-red" onclick="openBuildTutorialVideo()">
+                    <i class="fa-solid fa-circle-play"></i> طريقة الإنشاء
                 </button>
                 <button type="button" class="build-app-btn build-app-btn-blue" onclick="openSketchwareProLink()">
                     <i class="fa-brands fa-android"></i> تحميل Sketchware Pro
                 </button>
-                <button type="button" class="build-app-btn build-app-btn-red" onclick="openBuildTutorialVideo()">
-                    <i class="fa-solid fa-circle-play"></i> طريقة الإنشاء
+                <button type="button" class="build-app-btn build-app-btn-green" onclick="downloadUserAppVersion()">
+                    <i class="fa-solid fa-download"></i> تحميل نسخة المستخدم
                 </button>
                 <button type="button" class="build-app-btn build-app-btn-blue" onclick="copyOnCreateCode()">
                     <i class="fa-solid fa-copy"></i> نسخ كود الـ onCreate
                 </button>
+            </div>
+            <div class="build-app-note">
+                <h4 style="margin: 0 0 8px 0; font-size: 0.95rem;"><i class="fa-solid fa-list-check"></i> خطوات الإنشاء</h4>
+                <p id="build-app-note-text" style="margin: 0;"></p>
+            </div>
+        </div>
+    </div>
+
+<!-- الميزة الجديدة: قسم مزامنة صفحات التطبيق -->
+<div class="card collapsed" id="sync-app-pages-card">
+        <div class="card-header-toggle" onclick="toggleCardSection(this)" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="margin: 0; border: none; padding: 0;"><i class="fa-solid fa-chevron-down toggle-icon"></i><i class="fa-solid fa-arrows-rotate me-1"></i> مزامنة صفحات التطبيق</h2>
+        </div>
+        <div class="card-body">
+            <div class="build-app-buttons">
                 <button type="button" class="build-app-btn build-app-btn-purple" id="sm-sync-pages-btn" onclick="smSyncAppPagesManually()">
                     <i class="fa-solid fa-arrows-rotate"></i> مزامنة صفحات التطبيق
                 </button>
@@ -1294,10 +1309,6 @@
                 <p>تطبيقك (نسخة الأندرويد) يحمل معه "ورقة" صغيرة باسم <code>apppages.json</code> يعرف منها ما هي صفحات تطبيقك الموجودة حالياً. هذه الورقة تتحدّث تلقائياً بنفسها كل مرة تضيف أو تعدّل أو تحذف صفحة من اللوحة — فلست مضطراً للضغط على هذا الزر بشكل يومي.</p>
                 <p><b>فمتى أحتاجه إذاً؟</b> في حالات نادرة فقط، مثل: انقطاع الإنترنت للحظة أثناء الحفظ، فتح اللوحة من أكثر من جهاز بنفس الوقت، أو تعديل ملفات مستودعك يدوياً من موقع GitHub مباشرة (بدون المرور من اللوحة). في هذه الحالات قد تصبح هذه "الورقة" غير مطابقة تماماً لصفحاتك الفعلية.</p>
                 <p>الضغط على الزر يعيد بناء <code>apppages.json</code> بالكامل بالاعتماد على الصفحات الموجودة فعلياً بمستودعك الآن — فيصلح أي اختلاف تلقائياً. هذا الزر آمن تماماً: لا يحذف ولا يعدّل أي صفحة حقيقية من تطبيقك، فقط يحدّث "القائمة المرجعية" الخاصة بها.</p>
-            </div>
-            <div class="build-app-note">
-                <h4 style="margin: 0 0 8px 0; font-size: 0.95rem;"><i class="fa-solid fa-list-check"></i> خطوات الإنشاء</h4>
-                <p id="build-app-note-text" style="margin: 0;"></p>
             </div>
         </div>
     </div>
@@ -1462,8 +1473,9 @@
 
         <div class="card collapsed" id="order-card">
             <div class="card-header-toggle" onclick="toggleCardSection(this)" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin: 0; border: none; padding: 0;"><i class="fa-solid fa-chevron-down toggle-icon"></i>ترتيب وظهور وتعديل أسماء الصفحات في القائمة الجانبية</h2>
+                <h2 style="margin: 0; border: none; padding: 0;"><i class="fa-solid fa-chevron-down toggle-icon"></i>ترتيب وظهور الصفحات</h2>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-purple btn-sm" id="sm-sync-order-btn" onclick="event.stopPropagation(); smSyncOrderJsonManually();">مزامنة ترتيب الصفحات <i class="fa-solid fa-arrows-rotate"></i></button>
                     <button class="btn btn-dark btn-sm" onclick="event.stopPropagation(); refreshPagesList();">إعادة تحميل للصفحات <i class="fa-solid fa-rotate"></i></button>
                     <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); hideAllPages();">إخفاء جميع الصفحات <i class="fa-solid fa-eye-slash"></i> <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> مدفوع</span></button>
                 </div>
@@ -5062,15 +5074,11 @@ ${parts.body}
         const githubUser = (typeof GITHUB_USER !== "undefined" && GITHUB_USER) ? GITHUB_USER : "";
         const githubRepo = (typeof GITHUB_REPO !== "undefined" && GITHUB_REPO) ? GITHUB_REPO : "";
         const workerHost = (typeof getWorkerUrl === "function") ? (getWorkerUrl(githubUser, githubRepo) || "") : "";
-        const code = "// === [إعدادات الحساب والمستودع] ===\n" +
-            "final String GITHUB_USER = \"" + githubUser + "\";\n" +
-            "final String GITHUB_REPO = \"" + githubRepo + "\";\n\n" +
-            "// === [جديد] مسح سجل التصفح الذكي (Smart Back Stack) بداية كل فتحة للتطبيق، فيبدأ كل جلسة استخدام سجلاً جديداً فاضياً\n" +
-            "MainActivity.this.getSharedPreferences(\"smart_back_stack\", android.content.Context.MODE_PRIVATE).edit().clear().apply();\n\n" +
+        const code = "// =======================================================\n" +
+            "// 🧱 البلوك الأول: تعريفات Workers.dev (مصدر المشروع الوحيد)\n" +
+            "// =======================================================\n" +
             "final String ASSET_BASE_HOST = \"" + workerHost + "\";\n" +
-            "final String ASSET_BASE_URL = ASSET_BASE_HOST.isEmpty()\n" +
-            "    ? (\"https://raw.githubusercontent.com/\" + GITHUB_USER + \"/\" + GITHUB_REPO + \"/main/\")\n" +
-            "    : (\"https://\" + ASSET_BASE_HOST + \"/\");\n\n" +
+            "final String ASSET_BASE_URL = \"https://\" + ASSET_BASE_HOST + \"/\";\n" +
             "final String APP_PAGES_URL = ASSET_BASE_URL + \"apppages.json\";";
 
         function fallbackCopy(text) {
@@ -5735,6 +5743,80 @@ ${parts.body}
             });
 
         return smAppPagesQueue;
+    }
+
+    /* ============================================================
+       مزامنة يدوية لملف order.json (زر "مزامنة ترتيب الصفحات"):
+       تجلب قائمة صفحات HTML الموجودة فعلياً بالمستودع الآن، تزيل من
+       order.json أي صفحة لم تعد موجودة، وتضيف أي صفحة جديدة لم تكن
+       مسجّلة بعد (تُضاف كظاهرة بنهاية الترتيب)، ثم تحفظ الملف مباشرة —
+       دون الحاجة للضغط يدوياً على زر "حفظ". ============================================================ */
+    let smOrderSyncing = false;
+
+    function smSyncOrderJsonManually() {
+        if (!GITHUB_USER || !GITHUB_REPO || !GITHUB_TOKEN) {
+            alert("⚠️ يجب إعداد بيانات GitHub أولاً قبل المزامنة.");
+            return;
+        }
+        if (smOrderSyncing) return; // تفادي الضغط المتكرر أثناء التنفيذ
+
+        smOrderSyncing = true;
+        const btn = document.getElementById("sm-sync-order-btn");
+        const btnOriginalHtml = btn ? btn.innerHTML : "";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-arrows-rotate fa-spin"></i> جاري المزامنة...';
+        }
+        showAndroidToast("⏳ جاري مزامنة ترتيب الصفحات...");
+
+        const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`;
+
+        fetch(url, {
+            headers: { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("فشل جلب الملفات من المستودع.");
+            return response.json();
+        })
+        .then(data => {
+            const rawHtmlFiles = (Array.isArray(data) ? data : []).filter(file => file.type === "file" && file.name.toLowerCase().endsWith(".html"));
+            const htmlFiles = rawHtmlFiles.filter(f => {
+                const n = f.name.toLowerCase();
+                return n !== "404.html" && n !== "loader.html" && n !== "splash.html" && n !== SM_SEARCH_PAGE_FILE;
+            });
+            allHtmlFilesList = htmlFiles;
+
+            const existingNames = new Set(htmlFiles.map(f => f.name));
+
+            // إزالة أي صفحة (ظاهرة أو مخفية) لم تعد موجودة فعلياً بالمستودع
+            pagesOrder = pagesOrder.filter(item => existingNames.has(item.file));
+            Object.keys(hiddenPagesMeta).forEach(name => {
+                if (!existingNames.has(name)) delete hiddenPagesMeta[name];
+            });
+
+            // إضافة أي صفحة جديدة غير مسجّلة بعد في order.json (تُضاف كظاهرة بنهاية الترتيب)
+            htmlFiles.forEach(f => {
+                const inShown = pagesOrder.some(p => p.file === f.name);
+                const inHidden = !!hiddenPagesMeta[f.name];
+                if (!inShown && !inHidden) {
+                    pagesOrder.push({ file: f.name, title: f.name.replace(".html", ""), icon: "fa-solid fa-file", searchEnabled: true, searchNames: [] });
+                }
+            });
+
+            renderOrderList();
+            return saveOrderJson(true);
+        })
+        .then(() => {
+            showAndroidToast("✅ تمت مزامنة ترتيب الصفحات بنجاح.");
+        })
+        .catch(err => {
+            console.log("تنبيه: فشلت مزامنة order.json: " + (err && err.message));
+            alert("❌ تعذّرت مزامنة ترتيب الصفحات. تأكد من اتصالك بالإنترنت وحاول مجدداً.\n" + ((err && err.message) || ""));
+        })
+        .then(() => {
+            smOrderSyncing = false;
+            if (btn) { btn.disabled = false; btn.innerHTML = btnOriginalHtml; }
+        });
     }
 
     /* ============================================================
@@ -7540,7 +7622,7 @@ function showEditorWarningBanner() {
         }
     }
 
-    function saveOrderJson() {
+    function saveOrderJson(silent) {
         const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/order.json`;
 
         const shownFiles = new Set(pagesOrder.map(p => p.file));
@@ -7577,7 +7659,7 @@ function showEditorWarningBanner() {
 
         if (orderFileSha) bodyData.sha = orderFileSha;
 
-        fetch(url, {
+        const savePromise = fetch(url, {
             method: "PUT",
             headers: {
                 "Authorization": `token ${GITHUB_TOKEN}`,
@@ -7592,11 +7674,18 @@ function showEditorWarningBanner() {
         })
         .then(data => {
             orderFileSha = data.content.sha;
-            showAndroidToast("تم تحديث وتخصيص الصفحات بنجاح سيظهر التعديل بعد دقيقة إلى خمس");
+            if (!silent) {
+                showAndroidToast("تم تحديث وتخصيص الصفحات بنجاح سيظهر التعديل بعد دقيقة إلى خمس");
+            }
             updateVersionTxtOnGithub();
             loadOrderJson();
-        })
-        .catch(err => alert("خطأ أثناء حفظ الترتيب: " + err.message));
+        });
+
+        if (!silent) {
+            savePromise.catch(err => alert("خطأ أثناء حفظ الترتيب: " + err.message));
+        }
+
+        return savePromise;
     }
 
     /* ============ الميزة الجديدة: إعادة تحميل قوائم الصفحات دون الحاجة للخروج من التطبيق والعودة إليه ============ */
