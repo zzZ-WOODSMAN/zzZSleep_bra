@@ -1,50 +1,54 @@
 {
   "apk_version.json": {
-    "op": "update",
-    "timestamp": 1789927896861
+    "op": "sync",
+    "timestamp": 1790443880965
   },
   "app_linked_pages.json": {
     "op": "sync",
-    "timestamp": 1789668294329
+    "timestamp": 1790443880965
   },
   "apppages.json": {
     "op": "sync",
-    "timestamp": 1789668294329
+    "timestamp": 1790443880965
   },
   "board_version.json": {
     "op": "sync",
-    "timestamp": 1789668294329
+    "timestamp": 1790443880965
   },
   "checkser.json": {
     "op": "sync",
-    "timestamp": 1789668294329
-  },
-  "order.json": {
-    "op": "update",
-    "timestamp": 1789793879143
-  },
-  "splash.html": {
-    "op": "update",
-    "timestamp": 1790437692913
-  },
-  "splash_config.json": {
-    "op": "update",
-    "timestamp": 1790437694007
-  },
-  "version.txt": {
-    "op": "update",
-    "timestamp": 1790437698475
+    "timestamp": 1790443880965
   },
   "home.html": {
-    "op": "update",
-    "timestamp": 1789927231781
+    "op": "sync",
+    "timestamp": 1790443880965
+  },
+  "order.json": {
+    "op": "sync",
+    "timestamp": 1790443880965
+  },
+  "settings.json": {
+    "op": "sync",
+    "timestamp": 1790443880965
+  },
+  "splash.html": {
+    "op": "sync",
+    "timestamp": 1790443880965
+  },
+  "splash_config.json": {
+    "op": "sync",
+    "timestamp": 1790443880965
+  },
+  "subkey.json": {
+    "op": "sync",
+    "timestamp": 1790443880965
   },
   "tl.html": {
-    "op": "update",
-    "timestamp": 1789825096947
+    "op": "sync",
+    "timestamp": 1790443880965
   },
-  "app/uploads/rostrick_app.apk": {
-    "op": "add",
-    "timestamp": 1789927711002
+  "version.txt": {
+    "op": "sync",
+    "timestamp": 1790443880965
   }
 }
