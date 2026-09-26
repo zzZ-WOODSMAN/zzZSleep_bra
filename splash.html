@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RosTrick</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+
+
+    </style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RosTrick</title>
@@ -242,6 +255,29 @@
     from{opacity:1;}
     to{opacity:0;}
   }
+
+  .skip-btn{
+    position:absolute;
+    z-index:30;
+    top:50%;
+    right:22px;
+    transform:translateY(-50%);
+    padding:10px 22px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.5);
+    background:rgba(0,0,0,.28);
+    backdrop-filter:blur(6px);
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:.3px;
+    cursor:pointer;
+    opacity:0;
+    transition:background .2s,opacity .4s;
+  }
+  .skip-btn.show{ opacity:1; }
+  .skip-btn:active{ transform:translateY(-50%) scale(.96); }
+  .skip-btn:hover{ background:rgba(0,0,0,.42); }
 </style>
 </head>
 <body>
@@ -307,6 +343,8 @@
   </div>
 
   <div class="fade-black"></div>
+
+  <button type="button" class="skip-btn" id="skipBtn" style="display:none;">تخطي</button>
 </div>
 
 <script>
@@ -426,7 +464,43 @@
   }, 66);
 })();
 
-setTimeout(function () { window.location.href = "home.html"; }, 9700);
+(function () {
+  var VISIT_KEY = 'rostrick_splash_visits';
+  var visits = parseInt(localStorage.getItem(VISIT_KEY) || '0', 10) + 1;
+  try { localStorage.setItem(VISIT_KEY, visits); } catch (e) {}
+
+  var redirectTimer = setTimeout(goHome, 9700);
+
+  if (visits >= 2) {
+    var skipBtn = document.getElementById('skipBtn');
+    skipBtn.style.display = 'block';
+    setTimeout(function () { skipBtn.classList.add('show'); }, 3000);
+    skipBtn.addEventListener('click', function () {
+      clearTimeout(redirectTimer);
+      skipBtn.disabled = true;
+      skipBtn.classList.remove('show');
+      var fadeBlack = document.querySelector('.fade-black');
+      fadeBlack.style.animation = 'none';
+      fadeBlack.style.opacity = '0';
+      // إعادة تشغيل نفس أنيميشن الاسوداد الأصلي (toBlack) فورًا بدل انتظار وقتها الطبيعي
+      requestAnimationFrame(function () {
+        fadeBlack.style.animation = 'toBlack 1.2s ease forwards';
+      });
+      setTimeout(goHome, 1200);
+    });
+  }
+
+  function goHome() {
+    window.location.href = 'home.html';
+  }
+})();
+</script>
+</body>
+</html>
+
+<script>
+    
+    setTimeout(function () { window.location.href = "home.html"; }, 4800);
 </script>
 </body>
 </html>
