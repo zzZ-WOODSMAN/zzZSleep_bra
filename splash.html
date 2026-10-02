@@ -259,25 +259,52 @@
   .skip-btn{
     position:absolute;
     z-index:30;
-    top:50%;
-    right:22px;
-    transform:translateY(-50%);
-    padding:10px 22px;
+    left:50%;
+    bottom:calc(68px + env(safe-area-inset-bottom,0px));
+    transform:translate(-50%,14px);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:11px 14px 11px 20px;
     border-radius:999px;
-    border:1px solid rgba(255,255,255,.5);
-    background:rgba(0,0,0,.28);
-    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.28);
+    background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.06));
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    backdrop-filter:blur(14px) saturate(140%);
+    box-shadow:0 8px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.35);
     color:#fff;
     font-size:14px;
-    font-weight:600;
-    letter-spacing:.3px;
+    font-weight:700;
+    letter-spacing:.2px;
+    text-shadow:0 1px 3px rgba(0,0,0,.45);
     cursor:pointer;
     opacity:0;
-    transition:background .2s,opacity .4s;
+    pointer-events:none;
+    outline:none;
+    -webkit-tap-highlight-color:transparent;
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    user-select:none;
+    touch-action:manipulation;
+    transition:opacity .5s ease,transform .5s cubic-bezier(.2,.8,.2,1),background .25s,border-color .25s;
   }
-  .skip-btn.show{ opacity:1; }
-  .skip-btn:active{ transform:translateY(-50%) scale(.96); }
-  .skip-btn:hover{ background:rgba(0,0,0,.42); }
+  .skip-btn .skip-ico{
+    width:24px;height:24px;border-radius:50%;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--p),var(--p2));
+    box-shadow:0 0 12px var(--glow);
+    transition:transform .25s ease;
+  }
+  .skip-btn .skip-ico svg{width:12px;height:12px;display:block;}
+  .skip-btn.show{ opacity:1; transform:translate(-50%,0); }
+  .skip-btn.ready{ pointer-events:auto; }
+  .skip-btn:focus,.skip-btn:focus-visible,.skip-btn:active{ outline:none; }
+  .skip-btn::-moz-focus-inner{ border:0; }
+  .skip-btn:active{ transform:translate(-50%,0) scale(.96); background:linear-gradient(135deg,rgba(255,255,255,.24),rgba(255,255,255,.1)); }
+  @media (hover:hover){
+    .skip-btn:hover{ border-color:rgba(127,227,212,.7); }
+    .skip-btn:hover .skip-ico{ transform:translateX(-3px); }
+  }
 </style>
 </head>
 <body>
@@ -344,7 +371,7 @@
 
   <div class="fade-black"></div>
 
-  <button type="button" class="skip-btn" id="skipBtn" style="display:none;">تخطي</button>
+  <button type="button" class="skip-btn" id="skipBtn" aria-label="تخطي" disabled tabindex="-1" style="display:none;"><span>تخطي</span><span class="skip-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></span></button>
 </div>
 
 <script>
@@ -475,10 +502,13 @@
     var skipBtn = document.getElementById('skipBtn');
     skipBtn.style.display = 'block';
     setTimeout(function () { skipBtn.classList.add('show'); }, 3000);
+    // لا يصبح قابلًا للضغط إلا بعد اكتمال ظهوره (انتهاء transition الـ 0.5s)
+    setTimeout(function () { skipBtn.disabled = false; skipBtn.tabIndex = 0; skipBtn.classList.add('ready'); }, 3550);
     skipBtn.addEventListener('click', function () {
       clearTimeout(redirectTimer);
+      skipBtn.blur();
       skipBtn.disabled = true;
-      skipBtn.classList.remove('show');
+      skipBtn.classList.remove('show','ready');
       var fadeBlack = document.querySelector('.fade-black');
       fadeBlack.style.animation = 'none';
       fadeBlack.style.opacity = '0';
