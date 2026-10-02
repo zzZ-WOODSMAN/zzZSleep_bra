@@ -1076,15 +1076,58 @@
   <div class="puddle-shine"></div>
 </div>
 
-<div id="sm-boot-fade-overlay" style="position:fixed; inset:0; background:#000; z-index:999999; opacity:1; transition:opacity 2s ease; pointer-events:none;"></div>
+<div id="sm-boot-fade-overlay" style="position:fixed; inset:0; background:#000; z-index:999999; opacity:1; pointer-events:auto; touch-action:none; -webkit-tap-highlight-color:transparent;"></div>
 <script>
 (function () {
+    /* كشف دائري من مركز الشاشة: ثقب شفاف يكبر داخل الطبقة السوداء حتى تنكشف الصفحة بالكامل.
+       طوال مدة الكشف: الطبقة تستقبل اللمس (pointer-events:auto) والتمرير والأزرار معطّلة. */
+    var START_DELAY = 1000;   // نفس التأخير السابق قبل بدء الكشف
+    var DURATION    = 2000;   // نفس مدة الـ fade السابقة
+    var FEATHER     = 28;     // نعومة حافة الدائرة (px)
+
+    var el = document.getElementById("sm-boot-fade-overlay");
+    if (!el) return;
+
+    var root = document.documentElement, body = document.body;
+    var prevRootOv = root.style.overflow, prevBodyOv = body.style.overflow;
+    root.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+
+    function stop(e) { if (e.cancelable) e.preventDefault(); e.stopPropagation(); }
+    var evs = ["touchmove", "wheel", "keydown", "contextmenu"];
+    evs.forEach(function (n) { window.addEventListener(n, stop, { passive: false, capture: true }); });
+
+    var done = false;
+    function finish() {
+        if (done) return;
+        done = true;
+        evs.forEach(function (n) { window.removeEventListener(n, stop, { capture: true }); });
+        root.style.overflow = prevRootOv;
+        body.style.overflow = prevBodyOv;
+        el.style.display = "none";
+    }
+
+    function setR(r) {
+        var g = "radial-gradient(circle at 50% 50%, transparent " + r + "px, #000 " + (r + FEATHER) + "px)";
+        el.style.webkitMaskImage = g;
+        el.style.maskImage = g;
+    }
+
+    function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; } // easeInOutCubic
+
+    setR(-FEATHER);
     setTimeout(function () {
-        var el = document.getElementById("sm-boot-fade-overlay");
-        if (!el) return;
-        el.style.opacity = "0";
-        setTimeout(function () { el.style.display = "none"; }, 2000);
-    }, 1000);
+        var maxR = Math.hypot(window.innerWidth, window.innerHeight) / 2 + FEATHER;
+        var t0 = performance.now();
+        (function frame(now) {
+            var t = Math.min(1, (now - t0) / DURATION);
+            setR(-FEATHER + (maxR + FEATHER) * ease(t));
+            if (t < 1) requestAnimationFrame(frame); else finish();
+        })(t0);
+    }, START_DELAY);
+
+    // شبكة أمان: لا يبقى التفاعل مقفولًا مهما حدث
+    setTimeout(finish, START_DELAY + DURATION + 1500);
 })();
 </script>
 
