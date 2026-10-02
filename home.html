@@ -573,6 +573,12 @@
             cursor: pointer;
             color: #2980b9;
         }
+        .sm-page-name-text { white-space: nowrap; direction: ltr; unicode-bidi: isolate; display: inline-block; vertical-align: bottom; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .file-item.sm-collapsed-row { flex-wrap: nowrap; align-items: center; gap: 8px; }
+        .file-item.sm-collapsed-row .file-name { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; }
+        .sm-actions-more { padding: 6px 12px !important; font-size: 1rem !important; flex: 0 0 auto; }
+        .sm-page-actions-list { display: flex; flex-direction: column; gap: 10px; }
+        .sm-page-actions-list .btn { width: 100%; justify-content: center; padding: 12px !important; font-size: 1rem !important; }
         
         [data-theme="dark"] .file-name {
             color: #3498db;
@@ -1570,11 +1576,11 @@
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
-                        <span><i class="fa-solid fa-database"></i> المساحة المستهلكة تقريبًا</span>
+                        <span><i class="fa-solid fa-database"></i> المساحة المستهلكة (ملفات app/uploads فقط)</span>
                         <span id="storage-usage-text">— اضغط تحديث لعرض الحجم —</span>
                     </div>
                     <div class="storage-usage-bar"><div class="storage-usage-fill" id="storage-usage-fill"></div></div>
-                    <div class="storage-usage-note">تقدير تقريبي بناءً على حجم المستودع المضغوط لدى GitHub، مقارنة بالحد الموصى به (1 GB) ضمن الحساب المجاني.</div>
+                    <div class="storage-usage-note">يُحسب مجموع أحجام الملفات داخل هذا المجلد فقط (دون باقي المستودع)، مقارنةً بالحد الموصى به (1 GB).</div>
                 </div>
 
                 <div id="storage-loader" class="loader">جاري جلب الملفات من GitHub...</div>
@@ -1779,15 +1785,14 @@
                     حجم الملف الواحد: يظهر تحذير عند تجاوز <strong>50 MB</strong>، ويُمنع رفع أي ملف أكبر من <strong>100 MB</strong> نهائيًا عبر Git.<br>
                     الرفع من هذه اللوحة يتم عبر GitHub API مباشرة، لذا الحد الأقصى العملي للملف الواحد هنا هو <strong>~24 MB</strong>. للملفات الأكبر، استخدم Git LFS أو ارفعها عبر تطبيق Git مباشرة.
                 </div>
-                <p class="sm-pro-limit-hint" style="font-size:0.75rem; color:var(--text-muted); margin: 8px 0;"><i class="fa-solid fa-circle-info"></i> مجانًا حتى 10 ملفات و10 مجلدات — بلا حدود مع <span class="sm-pro-badge-inline"><i class="fa-solid fa-crown"></i> الخطة الإحترافية</span></p>
 
                 <div class="storage-usage-wrap">
                     <div class="storage-usage-top">
-                        <span><i class="fa-solid fa-database"></i> المساحة المستهلكة تقريبًا (كامل المستودع)</span>
+                        <span><i class="fa-solid fa-database"></i> المساحة المستهلكة (ملفات site/uploads فقط)</span>
                         <span id="site-storage-usage-text">— اضغط تحديث لعرض الحجم —</span>
                     </div>
                     <div class="storage-usage-bar"><div class="storage-usage-fill" id="site-storage-usage-fill"></div></div>
-                    <div class="storage-usage-note">تقدير تقريبي بناءً على حجم المستودع المضغوط لدى GitHub، مقارنة بالحد الموصى به (1 GB) ضمن الحساب المجاني.</div>
+                    <div class="storage-usage-note">يُحسب مجموع أحجام الملفات داخل هذا المجلد فقط (دون باقي المستودع)، مقارنةً بالحد الموصى به (1 GB).</div>
                 </div>
 
                 <div id="site-storage-loader" class="loader">جاري جلب الملفات من GitHub...</div>
@@ -2049,8 +2054,8 @@
                     <input type="checkbox" id="custom-font-enabled" onchange="toggleCustomFontField(); saveCustomFontState();"> تخصيص خط الهيدر/الشريط السفلي
                 </label>
                 <div id="custom-font-url-wrap" style="display:none; margin-top:8px;">
-                    <input type="text" id="custom-font-url" placeholder="رابط CSS من Google Fonts" style="width:100%; box-sizing:border-box;" onchange="saveCustomFontState();">
-                    <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:4px;">اذهب إلى fonts.google.com، اختر الخط، وانسخ رابط &lt;link&gt; من قسم "Use on the web"، والصق الرابط هنا (يمكنك لصق وسم &lt;link&gt; كاملاً أو الرابط فقط).</span>
+                    <textarea id="custom-font-url" rows="3" dir="ltr" spellcheck="false" placeholder="اسم الخط (مثل: Cairo) أو رابط الخط أو كود الخط" style="width:100%; box-sizing:border-box; resize:vertical; font-family:monospace; font-size:0.8rem;" onchange="saveCustomFontState();"></textarea>
+                    <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:4px; line-height:1.7;">يمكنك كتابة <b>اسم الخط فقط</b> (يُجلب من Google Fonts تلقائيًا)، أو لصق <b>الرابط</b> (رابط Google Fonts، أو رابط CSS، أو رابط ملف خط .woff2 / .woff / .ttf / .otf)، أو لصق <b>الكود</b> (وسم &lt;link&gt; أو @import أو @font-face).</span>
                 </div>
             </div>
         </div>
@@ -5037,6 +5042,89 @@ ${parts.body}
         stepsNote: "1. قم بتحميل سكتشوير.\n2. قم بتحميل نسخة المستخدم (swb file).\n3. قم بالدخول إلى سكتشوير، ثم اضغط Restore واختر الملف المحمّل (swb file).\n4. قم بالدخول للملف الذي تم تحميله عن طريق سكتشوير، واذهب إلى EVENT.\n5. اضغط على الحدث onCreate.\n6. أضف الكود الذي نسخته (بالضغط على زر \"نسخ كود الـ onCreate\") في أول لبنة داخل onCreate.\n7. اخرج من الحدث onCreate، ثم اضغط على الثلاث نقاط التي في أعلى المشروع، ثم اضغط على Java/Kotlin Manager، ثم اضغط على الملف \"MediaDownloadService.java\" وعدّل package com.app.name ليصبح بنفس اسم الحزمة الخاصة بك، ثم احفظ التعديلات واضغط زر Run.\n8. أصبح لديك التطبيق جاهزًا للعمل!"
     };
 
+    /* ============ اختصار أسماء الصفحات حسب عرض الشاشة (مثال: Ben10-ultimat….html) ============
+       عدد الحروف المسموح به قبل علامة الحذف يكبر ويصغر مع عرض الشاشة، ويُحدَّث تلقائياً عند تغيير الحجم أو تدوير الجهاز. */
+    function smPageNameMaxBase() {
+        const w = window.innerWidth || 360;
+        return Math.max(8, Math.min(60, Math.floor((w - 150) / 9)));
+    }
+    function smPageDisplayPlain(name) {
+        name = String(name == null ? "" : name);
+        const dot = name.lastIndexOf(".");
+        const hasExt = dot > 0 && dot < name.length - 1;
+        const base = hasExt ? name.substring(0, dot) : name;
+        const ext = hasExt ? name.substring(dot) : "";
+        const max = smPageNameMaxBase();
+        if (base.length <= max) return name;
+        return base.substring(0, max) + "…" + ext;
+    }
+    function smPageNameSpanHtml(name) {
+        const full = escapeHtmlForNote(name);
+        return '<span class="sm-page-name-text" data-full="' + full + '" title="' + full + '">' + escapeHtmlForNote(smPageDisplayPlain(name)) + '</span>';
+    }
+    (function () {
+        let t = null;
+        window.addEventListener("resize", function () {
+            clearTimeout(t);
+            t = setTimeout(function () {
+                document.querySelectorAll(".sm-page-name-text").forEach(function (el) {
+                    el.textContent = smPageDisplayPlain(el.getAttribute("data-full") || "");
+                });
+            }, 120);
+        });
+    })();
+
+    /* ============ تجميع أزرار كل صفحة في زر واحد (⋮) يفتح نافذة: نسخ / تحرير / حذف / تنزيل ============ */
+    function smCollapsePageActions(root) {
+        if (!root) return;
+        root.querySelectorAll("li.file-item:not(.folder-item)").forEach(function (li) {
+            const actions = li.querySelector(":scope > .actions");
+            if (!actions || actions.dataset.collapsed) return;
+            actions.dataset.collapsed = "1";
+            actions.style.display = "none";
+            const more = document.createElement("button");
+            more.type = "button";
+            more.className = "btn btn-dark sm-actions-more";
+            more.title = "خيارات الصفحة";
+            more.innerHTML = '<i class="fa-solid fa-ellipsis-vertical"></i>';
+            more.onclick = function (e) { e.stopPropagation(); smOpenPageActions(li); };
+            li.appendChild(more);
+            li.classList.add("sm-collapsed-row");
+        });
+    }
+    function smOpenPageActions(li) {
+        const actions = li.querySelector(":scope > .actions");
+        if (!actions) return;
+        const nameEl = li.querySelector(".sm-page-name-text");
+        const fullName = nameEl ? nameEl.getAttribute("data-full") : "";
+        const plainName = fullName ? fullName.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&") : "خيارات الصفحة";
+        const kinds = [
+            { key: "copy",   icon: "fa-copy",     label: "نسخ" },
+            { key: "edit",   icon: "fa-pen",      label: "تحرير" },
+            { key: "view",   icon: "fa-link",     label: "عرض (صفحة مرتبطة)" },
+            { key: "delete", icon: "fa-trash",    label: "حذف" },
+            { key: "dl",     icon: "fa-download", label: "تنزيل" }
+        ];
+        const found = [];
+        actions.querySelectorAll("button").forEach(function (b) {
+            const k = kinds.find(function (x) { return b.querySelector("i." + x.icon); });
+            if (k) found.push({ k: k, b: b });
+        });
+        found.sort(function (a, b) { return kinds.indexOf(a.k) - kinds.indexOf(b.k); });
+        let html = '<div class="sm-page-actions-list">';
+        found.forEach(function (f) {
+            const clone = f.b.cloneNode(true);
+            const orig = f.b.getAttribute("onclick") || "";
+            clone.setAttribute("onclick", "closeCustomDialog(); " + orig);
+            clone.removeAttribute("style");
+            clone.setAttribute("class", "btn " + (f.k.key === "delete" ? "btn-danger" : f.k.key === "dl" || f.k.key === "copy" ? "btn-dark" : ""));
+            clone.innerHTML = '<i class="fa-solid ' + (f.k.key === "copy" ? "fa-copy" : f.k.icon) + '"></i> ' + f.k.label;
+            html += clone.outerHTML;
+        });
+        html += "</div>";
+        openCustomDialog(plainName, html, null);
+    }
+
     function escapeHtmlForNote(str) {
         return String(str)
             .replace(/&/g, "&amp;")
@@ -7468,7 +7556,7 @@ function showEditorWarningBanner() {
                 <div style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; min-width: 0;">
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <button type="button" class="icon-select-btn" title="اختيار أيقونة الصفحة" onclick="openIconPicker('${item.file}', ${isShown})"><i class="${currentIcon}"></i></button>
-                        <span style="font-weight:bold; color: ${isShown ? 'var(--text-color)' : 'var(--text-muted)'};">${item.file}</span>
+                        <span style="font-weight:bold; color: ${isShown ? 'var(--text-color)' : 'var(--text-muted)'};">${smPageNameSpanHtml(item.file)}</span>
                         <input type="text" class="title-input" value="${currentTitle}" 
                             placeholder="الاسم الظاهر" 
                             onchange="updatePageTitle('${item.file}', this.value, ${isShown})">
@@ -7797,7 +7885,7 @@ function showEditorWarningBanner() {
                 <div style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 220px; min-width: 0;">
                     <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <button type="button" class="icon-select-btn" title="اختيار أيقونة الصفحة" onclick="openSiteIconPicker('${item.file}', ${isShown})"><i class="${currentIcon}"></i></button>
-                        <span style="font-weight:bold; color: ${isShown ? 'var(--text-color)' : 'var(--text-muted)'};">${item.file}</span>
+                        <span style="font-weight:bold; color: ${isShown ? 'var(--text-color)' : 'var(--text-muted)'};">${smPageNameSpanHtml(item.file)}</span>
                         <input type="text" class="title-input" value="${currentTitle}" 
                             placeholder="الاسم الظاهر" 
                             onchange="updateSitePageTitle('${item.file}', this.value, ${isShown})">
@@ -8100,7 +8188,7 @@ function showEditorWarningBanner() {
                     : `<button class="btn" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editFile('${file.path}', '${file.sha}')"><i class="fa-solid fa-pen"></i></button>`;
                 itemsHtml += `
                     <li class="file-item">
-                        <span class="file-name" onclick="${nameClickHandler}">${file.name}${isLinked ? ' <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="مرتبطة برابط خارجي"></i>' : ''}</span>
+                        <span class="file-name" onclick="${nameClickHandler}">${smPageNameSpanHtml(file.name)}${isLinked ? ' <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="مرتبطة برابط خارجي"></i>' : ''}</span>
                         <div class="actions">
                             <button class="btn btn-dark" style="padding: 4px 8px; font-size: 0.8rem;" onclick="copyFilePath('${file.name}')"><i class="fa-regular fa-copy"></i></button>
                             <button class="btn btn-dark" style="padding: 4px 8px; font-size: 0.8rem;" onclick="smDownloadPageHtml('${smEscJs(file.path)}')" title="تنزيل كملف HTML"><i class="fa-solid fa-download"></i></button>
@@ -8116,7 +8204,7 @@ function showEditorWarningBanner() {
                 const displayName = linkPath.split("/").pop();
                 itemsHtml += `
                     <li class="file-item">
-                        <span class="file-name" onclick="smViewLinkOnlyEntry('${smEscJs(linkPath)}', '${smEscJs(sourceUrl)}')">${displayName} <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="رابط خارجي مسجّل بدون تحميل محتواه"></i></span>
+                        <span class="file-name" onclick="smViewLinkOnlyEntry('${smEscJs(linkPath)}', '${smEscJs(sourceUrl)}')">${smPageNameSpanHtml(displayName)} <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="رابط خارجي مسجّل بدون تحميل محتواه"></i></span>
                         <div class="actions">
                             <button class="btn" style="padding: 4px 8px; font-size: 0.8rem;" onclick="smViewLinkOnlyEntry('${smEscJs(linkPath)}', '${smEscJs(sourceUrl)}')" title="صفحة مرتبطة — بدون محتوى مُحمَّل"><i class="fa-solid fa-link"></i></button>
                             <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="smDeleteLinkedPageOnly('${smEscJs(linkPath)}')"><i class="fa-solid fa-trash"></i></button>
@@ -8125,7 +8213,7 @@ function showEditorWarningBanner() {
                 `;
             });
 
-            if (listContainer) listContainer.innerHTML = itemsHtml;
+            if (listContainer) { listContainer.innerHTML = itemsHtml; smCollapsePageActions(listContainer); }
         })
         .catch(err => {
             if (loader) loader.style.display = "none";
@@ -8219,7 +8307,7 @@ function showEditorWarningBanner() {
                     : `<button class="btn" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editFile('${file.path}', '${file.sha}')"><i class="fa-solid fa-pen"></i></button>`;
                 itemsHtml += `
                     <li class="file-item">
-                        <span class="file-name" onclick="${nameClickHandler}">${file.name}${isLinked ? ' <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="مرتبطة برابط خارجي"></i>' : ''}</span>
+                        <span class="file-name" onclick="${nameClickHandler}">${smPageNameSpanHtml(file.name)}${isLinked ? ' <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="مرتبطة برابط خارجي"></i>' : ''}</span>
                         <div class="actions">
                             <button class="btn btn-dark" style="padding: 4px 8px; font-size: 0.8rem;" onclick="copySitePageLink('${smEscJs(file.path)}')" title="نسخ رابط الصفحة"><i class="fa-regular fa-copy"></i></button>
                             <button class="btn btn-dark" style="padding: 4px 8px; font-size: 0.8rem;" onclick="smDownloadPageHtml('${smEscJs(file.path)}')" title="تنزيل كملف HTML"><i class="fa-solid fa-download"></i></button>
@@ -8240,7 +8328,7 @@ function showEditorWarningBanner() {
                 const displayName = linkPath.split("/").pop();
                 itemsHtml += `
                     <li class="file-item">
-                        <span class="file-name" onclick="smViewLinkOnlyEntry('${smEscJs(linkPath)}', '${smEscJs(sourceUrl)}')">${displayName} <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="رابط خارجي مسجّل بدون تحميل محتواه"></i></span>
+                        <span class="file-name" onclick="smViewLinkOnlyEntry('${smEscJs(linkPath)}', '${smEscJs(sourceUrl)}')">${smPageNameSpanHtml(displayName)} <i class="fa-solid fa-link" style="font-size:0.7rem; color:var(--text-muted);" title="رابط خارجي مسجّل بدون تحميل محتواه"></i></span>
                         <div class="actions">
                             <button class="btn" style="padding: 4px 8px; font-size: 0.8rem;" onclick="smViewLinkOnlyEntry('${smEscJs(linkPath)}', '${smEscJs(sourceUrl)}')" title="صفحة مرتبطة — بدون محتوى مُحمَّل"><i class="fa-solid fa-link"></i></button>
                             <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="smDeleteLinkedPageOnly('${smEscJs(linkPath)}')"><i class="fa-solid fa-trash"></i></button>
@@ -8249,7 +8337,7 @@ function showEditorWarningBanner() {
                 `;
             });
 
-            if (listContainer) listContainer.innerHTML = itemsHtml;
+            if (listContainer) { listContainer.innerHTML = itemsHtml; smCollapsePageActions(listContainer); }
         })
         .catch(err => {
             if (loader) loader.style.display = "none";
@@ -8505,12 +8593,13 @@ function showEditorWarningBanner() {
                 </div>`;
         } else {
             li.innerHTML = `
-                <span class="file-name" onclick="editFile('${jsPath}', '${jsSha}')">${dispName}</span>
+                <span class="file-name" onclick="editFile('${jsPath}', '${jsSha}')">${smPageNameSpanHtml(item.name)}</span>
                 <div class="actions">
                     <button class="btn btn-dark" style="padding:4px 8px;font-size:0.8rem;" onclick="copySitePageLink('${jsPath}')" title="نسخ رابط الصفحة"><i class="fa-regular fa-copy"></i></button>
                     <button class="btn" style="padding:4px 8px;font-size:0.8rem;" onclick="editFile('${jsPath}', '${jsSha}')" title="تعديل"><i class="fa-solid fa-pen"></i></button>
                     <button class="btn btn-danger" style="padding:4px 8px;font-size:0.8rem;" onclick="deleteFile('${jsPath}', '${jsSha}')" title="حذف"><i class="fa-solid fa-trash"></i></button>
                 </div>`;
+            smCollapsePageActions({ querySelectorAll: function () { return [li]; } });
         }
         return li;
     }
@@ -8973,6 +9062,111 @@ function showEditorWarningBanner() {
             return familyParam.split(":")[0].replace(/\+/g, " ").trim();
         } catch(e) { return ""; }
     }
+    /* ذاكرة مؤقتة لاسم العائلة المستخرج من روابط CSS غير التابعة لـ Google (يُجلب مرة واحدة ويُحفظ محلياً) */
+    function smFontFamilyCacheGet(url) {
+        try { return (JSON.parse(localStorage.getItem("custom_font_family_cache") || "{}"))[url] || ""; } catch(e) { return ""; }
+    }
+    function smFontFamilyCacheSet(url, family) {
+        try {
+            const c = JSON.parse(localStorage.getItem("custom_font_family_cache") || "{}");
+            c[url] = family;
+            localStorage.setItem("custom_font_family_cache", JSON.stringify(c));
+        } catch(e) {}
+    }
+    function smSafeFontFamily(name) {
+        return String(name || "").replace(/["'\\{};<>]/g, "").trim();
+    }
+    function smFirstFamilyFromDecl(value) {
+        const first = String(value || "").split(",")[0] || "";
+        return smSafeFontFamily(first.replace(/!important/i, ""));
+    }
+    function smFontFormatFromExt(ext) {
+        ext = (ext || "").toLowerCase();
+        return ext === "ttf" ? "truetype" : ext === "otf" ? "opentype" : ext === "woff" ? "woff" : "woff2";
+    }
+    /* يحلّل ما كتبه المستخدم في خانة الخط: اسم فقط / رابط / كود (link أو @import أو @font-face أو font-family)
+       ويُرجع { family, links[], css } أو null إن كانت الخانة فارغة */
+    function smParseHeaderFontInput(rawInput) {
+        const raw = (rawInput || "").trim();
+        if (!raw) return null;
+        const links = [];
+        let css = "";
+        let family = "";
+        function addLink(u) {
+            u = (u || "").trim().replace(/&amp;/g, "&");
+            if (/^https?:\/\//i.test(u) && links.indexOf(u) === -1) links.push(u);
+        }
+        function googleLinkForName(name) {
+            return "https://fonts.googleapis.com/css2?family=" + encodeURIComponent(name).replace(/%20/g, "+") + "&display=swap";
+        }
+
+        const isBareUrl = /^https?:\/\/\S+$/i.test(raw); // رابط وحيد بلا مسافات (قد يحوي @ مثل wght@400)
+        const looksLikeCode = !isBareUrl && /[<{@]|font-family|url\s*\(/i.test(raw);
+        if (looksLikeCode) {
+            /* وسوم <link> (نتجاهل preconnect/preload) */
+            (raw.match(/<link\b[^>]*>/gi) || []).forEach(function (tag) {
+                if (/rel\s*=\s*["']?(preconnect|dns-prefetch|preload|prefetch)/i.test(tag)) return;
+                const m = tag.match(/href\s*=\s*["']([^"']+)["']/i);
+                if (m) addLink(m[1]);
+            });
+            /* @import */
+            raw.replace(/@import\s+(?:url\(\s*)?["']?([^"')\s;]+)["']?\s*\)?/gi, function (_, u) { addLink(u); return ""; });
+            /* كتل @font-face تُحقن كما هي */
+            let faceFamily = "";
+            const faceBlocks = raw.match(/@font-face\s*\{[^}]*\}/gi) || [];
+            faceBlocks.forEach(function (b) {
+                css += b.replace(/<\/style/gi, "") + "\n";
+                if (!faceFamily) {
+                    const fm = b.match(/font-family\s*:\s*([^;}]+)/i);
+                    if (fm) faceFamily = smFirstFamilyFromDecl(fm[1]);
+                }
+            });
+            /* font-family مُعلن خارج @font-face (مثل قواعد Google Fonts) */
+            const withoutFaces = raw.replace(/@font-face\s*\{[^}]*\}/gi, "");
+            const declM = withoutFaces.match(/font-family\s*:\s*([^;}]+)/i);
+            const declFamily = declM ? smFirstFamilyFromDecl(declM[1]) : "";
+            let linkFamily = "";
+            for (let i = 0; i < links.length && !linkFamily; i++) linkFamily = extractGoogleFontFamily(links[i]);
+            family = declFamily || faceFamily || linkFamily;
+            if (!family) {
+                /* كود بلا أي اسم مفهوم: نجرب أسماء العائلة المخزّنة لروابط CSS الأخرى */
+                for (let i = 0; i < links.length && !family; i++) family = smFontFamilyCacheGet(links[i]);
+            }
+        } else if (/^https?:\/\//i.test(raw)) {
+            const spec = raw.match(/fonts\.google\.com\/specimen\/([^/?#]+)/i);
+            const fileExt = raw.match(/\.(woff2?|ttf|otf)(?:[?#].*)?$/i);
+            if (spec) {
+                family = smSafeFontFamily(decodeURIComponent(spec[1]).replace(/\+/g, " "));
+                addLink(googleLinkForName(family));
+            } else if (fileExt) {
+                family = "HeaderCustomFont";
+                css = "@font-face{font-family:'HeaderCustomFont';src:url('" + raw.replace(/'/g, "%27") + "') format('" + smFontFormatFromExt(fileExt[1]) + "');font-weight:normal;font-style:normal;font-display:swap;}\n";
+            } else {
+                addLink(raw);
+                family = extractGoogleFontFamily(raw) || smFontFamilyCacheGet(raw);
+            }
+        } else {
+            /* اسم خط فقط (مع السماح بأقواس تنصيص أو فاصلة بدائل) */
+            family = smFirstFamilyFromDecl(raw.replace(/^font-family\s*:/i, ""));
+            if (family) addLink(googleLinkForName(family));
+        }
+        return { family: smSafeFontFamily(family), links: links, css: css };
+    }
+    /* لروابط CSS غير التابعة لـ Google: نحاول قراءة اسم العائلة من ملف CSS نفسه مرة واحدة (إن سمح الموقع بذلك) */
+    function smResolveHeaderFontFamilyAsync(rawInput) {
+        try {
+            const parsed = smParseHeaderFontInput(rawInput);
+            if (!parsed || parsed.family || parsed.links.length === 0) return;
+            parsed.links.forEach(function (url) {
+                if (smFontFamilyCacheGet(url)) return;
+                fetch(url).then(function (r) { return r.ok ? r.text() : ""; }).then(function (txt) {
+                    const m = (txt || "").match(/font-family\s*:\s*([^;}]+)/i);
+                    const fam = m ? smFirstFamilyFromDecl(m[1]) : "";
+                    if (fam) smFontFamilyCacheSet(url, fam);
+                }).catch(function () {});
+            });
+        } catch (e) {}
+    }
     function toggleCustomFontField() {
         const chk = document.getElementById("custom-font-enabled");
         const wrap = document.getElementById("custom-font-url-wrap");
@@ -8984,15 +9178,16 @@ function showEditorWarningBanner() {
     function saveCustomFontState() {
         try {
             const input = document.getElementById("custom-font-url");
-            const href = extractLinkHref(input.value);
-            input.value = href;
+            const rawFont = input.value.trim();
             const enabled = document.getElementById("custom-font-enabled").checked;
-            localStorage.setItem(customFontStorageKey(), JSON.stringify({ enabled, url: href }));
+            localStorage.setItem(customFontStorageKey(), JSON.stringify({ enabled, url: rawFont }));
+            if (enabled && rawFont) smResolveHeaderFontFamilyAsync(rawFont);
         } catch(e) {}
     }
     function applyCustomFontState(state) {
         const enabled = !!(state && state.enabled);
-        const url = (state && state.url) || "";
+        let url = (state && state.url) || "";
+        if (state && state.enc) { try { url = decodeURIComponent(state.enc); } catch(e) {} }
         const chk = document.getElementById("custom-font-enabled");
         const inp = document.getElementById("custom-font-url");
         if (chk) chk.checked = enabled;
@@ -10675,10 +10870,14 @@ function showEditorWarningBanner() {
 
             const customFontEnabledVal = document.getElementById("custom-font-enabled").checked;
             const customFontUrlVal = document.getElementById("custom-font-url").value.trim();
-            const customFontFamily = (customFontEnabledVal && customFontUrlVal) ? extractGoogleFontFamily(customFontUrlVal) : "";
-            const customFontLinkTag = (customFontEnabledVal && customFontUrlVal) ? ('\n    <link rel="stylesheet" href="' + customFontUrlVal + '">') : '';
-            const customFontStyleTag = (customFontEnabledVal && customFontUrlVal) ?
-                ('<!-- SM-AUTO-INJECTED:START:custom-font-styles -->\n<style id="custom-font-styles">\n/* CUSTOM_FONT: ' + JSON.stringify({ enabled: true, url: customFontUrlVal }) + ' */\n' +
+            const customFontParsed = (customFontEnabledVal && customFontUrlVal) ? smParseHeaderFontInput(customFontUrlVal) : null;
+            const customFontFamily = customFontParsed ? customFontParsed.family : "";
+            const customFontLinkTag = customFontParsed ? customFontParsed.links.map(function (u) {
+                return '\n    <link rel="stylesheet" href="' + u.replace(/"/g, "&quot;") + '">';
+            }).join("") : '';
+            const customFontStyleTag = customFontParsed ?
+                ('<!-- SM-AUTO-INJECTED:START:custom-font-styles -->\n<style id="custom-font-styles">\n/* CUSTOM_FONT: ' + JSON.stringify({ enabled: true, enc: encodeURIComponent(customFontUrlVal) }) + ' */\n' +
+                    (customFontParsed.css || '') +
                     (customFontFamily ?
                         ('header, .drawer, .bottom-navbar, #pageMainHeader, .drawer-item, .bottom-navbar-item, .drawer-item span, .bottom-navbar-item span {\n    font-family: "' + customFontFamily + '", sans-serif !important;\n}\n') :
                         '') +
@@ -12289,23 +12488,41 @@ function smRefreshAll() {
     smRefreshRootLists();
 }
 
+/* حجم المساحة المستهلكة: يُحسب من ملفات المجلد المخصص للرفع فقط (app/uploads للتطبيق، وsite/uploads للموقع)
+   وليس من حجم المستودع كاملاً. يُجمَع حجم كل الملفات داخل المجلد وفروعه من شجرة المستودع. */
+function smSumFolderBytes(tree, basePath) {
+    const prefix = basePath.replace(/\/$/, "") + "/";
+    let total = 0;
+    tree.forEach(item => {
+        if (item.type === "blob" && item.path && item.path.startsWith(prefix) && !item.path.endsWith("/.gitkeep")) {
+            total += Number(item.size) || 0;
+        }
+    });
+    return total;
+}
 function smLoadRepoUsage() {
-    const textEls = ["storage-usage-text", "site-storage-usage-text"].map(id => document.getElementById(id)).filter(Boolean);
-    const fillEls = ["storage-usage-fill", "site-storage-usage-fill"].map(id => document.getElementById(id)).filter(Boolean);
-    if (textEls.length === 0 || fillEls.length === 0) return;
-    textEls.forEach(t => { t.innerText = "جاري الحساب..."; });
-    fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, { headers: smApiHeaders() })
-        .then(res => { if (!res.ok) throw new Error("تعذر جلب حجم المستودع."); return res.json(); })
-        .then(data => {
-            const usedBytes = (data.size || 0) * 1024; // GitHub يرجع الحجم بالكيلوبايت
+    const targets = [
+        { text: "storage-usage-text", fill: "storage-usage-fill", path: "app/uploads" },
+        { text: "site-storage-usage-text", fill: "site-storage-usage-fill", path: `${SITE_FOLDER}/uploads` }
+    ].map(t => ({ textEl: document.getElementById(t.text), fillEl: document.getElementById(t.fill), path: t.path }))
+     .filter(t => t.textEl && t.fillEl);
+    if (targets.length === 0) return;
+    targets.forEach(t => { t.textEl.innerText = "جاري الحساب..."; });
+    smFetchRepoTree(true)
+        .then(tree => {
             const recommendedBytes = 1024 * 1024 * 1024; // 1GB
-            let pct = (usedBytes / recommendedBytes) * 100;
-            if (pct > 100) pct = 100;
-            const color = pct < 60 ? "var(--accent-color)" : (pct < 90 ? "#f39c12" : "#e74c3c");
-            fillEls.forEach(f => { f.style.width = pct + "%"; f.style.background = color; });
-            textEls.forEach(t => { t.innerText = `${smFormatSize(usedBytes)} من أصل 1 GB الموصى بها`; });
+            targets.forEach(t => {
+                const usedBytes = smSumFolderBytes(tree, t.path);
+                let pct = (usedBytes / recommendedBytes) * 100;
+                if (pct > 100) pct = 100;
+                if (usedBytes > 0 && pct < 1) pct = 1;
+                const color = pct < 60 ? "var(--accent-color)" : (pct < 90 ? "#f39c12" : "#e74c3c");
+                t.fillEl.style.width = pct + "%";
+                t.fillEl.style.background = color;
+                t.textEl.innerText = `${smFormatSize(usedBytes)} من أصل 1 GB الموصى بها`;
+            });
         })
-        .catch(() => { textEls.forEach(t => { t.innerText = "تعذر جلب حجم المستودع"; }); });
+        .catch(() => { targets.forEach(t => { t.textEl.innerText = "تعذر حساب حجم الملفات"; }); });
 }
 
 function smFetchItems(path) {
@@ -12403,6 +12620,11 @@ function smCopyLink(link) {
     smCopyToClipboard(link, "تم نسخ رابط الملف بنجاح");
 }
 
+function smIsAppUploadsPath(path) {
+    path = path || "";
+    return path === "app/uploads" || path.startsWith("app/uploads/");
+}
+
 /* ============ سقف التنقل: لا يُسمح بالرجوع أبعد من مجلد uploads الخاص بكل قسم ============ */
 function smGetCapForPath(path) {
     if (path === "app/uploads" || path.startsWith("app/uploads/")) return "app/uploads";
@@ -12452,10 +12674,12 @@ function smOpenFolder(path) {
 
 /* ============ إنشاء مجلد (عبر ملف .gitkeep placeholder لأن Git لا يدعم مجلدات فارغة) ============ */
 async function smCreateFolder(basePath) {
-    const uploadsRoot = smGetCapForPath(basePath) || basePath;
-    let currentFolderCount = 0;
-    try { currentFolderCount = smCountInsidePath(await smFetchRepoTree(), uploadsRoot).folders; } catch (e) { /* في حال فشل الجلب نسمح بالمتابعة */ }
-    if (!smCheckLimit(currentFolderCount, SM_LIMITS.maxUploadFolders, "إنشاء أكثر من 10 مجلدات للرفع")) return;
+    /* العدّ والحد المجاني يخصّان مجلد app/uploads فقط (مجلد site/uploads لا يُحسب ولا يُقيَّد هنا) */
+    if (smIsAppUploadsPath(basePath)) {
+        let currentFolderCount = 0;
+        try { currentFolderCount = smCountInsidePath(await smFetchRepoTree(), "app/uploads").folders; } catch (e) { /* في حال فشل الجلب نسمح بالمتابعة */ }
+        if (!smCheckLimit(currentFolderCount, SM_LIMITS.maxUploadFolders, "إنشاء أكثر من 10 مجلدات للرفع")) return;
+    }
     let folderName = prompt("أدخل اسم المجلد الجديد (يفضل بالإنجليزي بدون فراغات):");
     if (!folderName) return;
     folderName = folderName.trim().replace(/[\\/]+/g, "_");
@@ -12480,10 +12704,12 @@ async function smCreateFolder(basePath) {
 
 /* ============ رفع الملفات (نفس أسلوب رفع النسخة الاحتياطية: input مخفي يُفتح برمجيًا) ============ */
 async function smTriggerUpload(targetPath) {
-    const uploadsRoot = smGetCapForPath(targetPath) || targetPath;
-    let currentFileCount = 0;
-    try { currentFileCount = smCountInsidePath(await smFetchRepoTree(), uploadsRoot).files; } catch (e) { /* في حال فشل الجلب نسمح بالمتابعة */ }
-    if (!smCheckLimit(currentFileCount, SM_LIMITS.maxUploadFiles, "رفع أكثر من 10 ملفات")) return;
+    /* العدّ والحد المجاني يخصّان مجلد app/uploads فقط (مجلد site/uploads لا يُحسب ولا يُقيَّد هنا) */
+    if (smIsAppUploadsPath(targetPath)) {
+        let currentFileCount = 0;
+        try { currentFileCount = smCountInsidePath(await smFetchRepoTree(), "app/uploads").files; } catch (e) { /* في حال فشل الجلب نسمح بالمتابعة */ }
+        if (!smCheckLimit(currentFileCount, SM_LIMITS.maxUploadFiles, "رفع أكثر من 10 ملفات")) return;
+    }
     smUploadMode = "new";
     smUploadTargetPath = targetPath;
     const input = document.getElementById("storage-upload-input");
