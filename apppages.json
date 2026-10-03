@@ -1,54 +1,54 @@
 {
   "apk_version.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "app_linked_pages.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "apppages.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "board_version.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "checkser.json": {
-    "op": "update",
-    "timestamp": 1791053447964
+    "op": "sync",
+    "timestamp": 1791053454922
   },
   "home.html": {
-    "op": "update",
-    "timestamp": 1791048711103
+    "op": "sync",
+    "timestamp": 1791053454922
   },
   "order.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "settings.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "splash.html": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "splash_config.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "subkey.json": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "tl.html": {
     "op": "sync",
-    "timestamp": 1790443880965
+    "timestamp": 1791053454922
   },
   "version.txt": {
-    "op": "update",
-    "timestamp": 1791048715480
+    "op": "sync",
+    "timestamp": 1791053454922
   }
 }
