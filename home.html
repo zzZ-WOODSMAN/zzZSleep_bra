@@ -2,6 +2,140 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+
+    <!-- ============ RosTrick: بوابة الإنترنت الفعلي (DNS) — يجب أن تبقى أول شيء في الـ head ============ -->
+    <style id="rt-net-style">
+    html:not(.rt-net-ok){background:#0b1214 !important;}
+    html:not(.rt-net-ok) body, html.rt-net-lost body{visibility:hidden !important;}
+    #rtNetGate{display:none;position:fixed;inset:0;z-index:2147483647;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:#0b1214;color:#eafffb;direction:rtl;font-family:'IBM Plex Sans Arabic','Cairo',system-ui,sans-serif;touch-action:none;}
+    html:not(.rt-net-ok) #rtNetGate, html.rt-net-lost #rtNetGate{display:flex;}
+    #rtNetGate .rg-ico{width:76px;height:76px;border-radius:22px;display:grid;place-items:center;background:rgba(47,182,168,.12);border:1px solid rgba(127,227,212,.35);}
+    #rtNetGate .rg-ico svg{width:38px;height:38px;stroke:#7fe3d4;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    #rtNetGate h1{margin:0 !important;font-size:22px !important;font-weight:800 !important;color:#eafffb !important;}
+    #rtNetGate p{margin:0 !important;font-size:15px !important;color:#a9c9c3 !important;max-width:320px;line-height:1.8 !important;}
+    #rtNetGate button{margin-top:6px;padding:11px 28px !important;border-radius:999px !important;border:1px solid rgba(127,227,212,.5) !important;background:rgba(47,182,168,.18) !important;color:#eafffb !important;font-size:15px !important;font-weight:700 !important;font-family:inherit !important;cursor:pointer;width:auto !important;}
+    #rtNetGate button:active{background:rgba(47,182,168,.32) !important;}
+    #rtNetGate.checking button{display:none;}
+    </style>
+    <script>
+    (function () {
+        var de = document.documentElement;
+        var PROBES = [
+            'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A',
+            'https://dns.google/resolve?name=google.com&type=A'
+        ];
+        var TIMEOUT = 5000;
+
+        function probe(base) {
+            return new Promise(function (resolve) {
+                var ctrl = ('AbortController' in window) ? new AbortController() : null;
+                var timer = setTimeout(function () { if (ctrl) ctrl.abort(); resolve(false); }, TIMEOUT);
+                var url = base + '&random_padding=' + Date.now() + Math.random().toString(36).slice(2, 10);
+                fetch(url, { headers: { 'accept': 'application/dns-json' }, cache: 'no-store', credentials: 'omit', signal: ctrl ? ctrl.signal : undefined })
+                    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+                    .then(function (j) {
+                        clearTimeout(timer);
+                        // لا نقبل إلا ردّ DNS سليم: Status=0 وفيه سجل A بعنوان IPv4 حقيقي
+                        resolve(!!(j && j.Status === 0 && Array.isArray(j.Answer) && j.Answer.some(function (a) {
+                            return a && a.type === 1 && /^\d{1,3}(\.\d{1,3}){3}$/.test(a.data || '');
+                        })));
+                    })
+                    .catch(function () { clearTimeout(timer); resolve(false); });
+            });
+        }
+        function verifyInternet() {
+            if (navigator.onLine === false) return Promise.resolve(false);
+            return new Promise(function (resolve) {
+                var left = PROBES.length, done = false;
+                PROBES.forEach(function (p) {
+                    probe(p).then(function (ok) {
+                        if (done) return;
+                        if (ok) { done = true; resolve(true); }
+                        else if (--left === 0) { done = true; resolve(false); }
+                    });
+                });
+            });
+        }
+
+        // ---- واجهة البوابة (تُضاف خارج body حتى لا تتأثر بأي كود في اللوحة) ----
+        var gate = document.createElement('div');
+        gate.id = 'rtNetGate';
+        gate.className = 'checking';
+        gate.setAttribute('role', 'alert');
+        gate.innerHTML =
+            '<div class="rg-ico"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/><path class="rg-slash" d="M3 3l18 18" style="display:none"/></svg></div>' +
+            '<h1 class="rg-title">جارٍ التحقق من الاتصال…</h1>' +
+            '<p class="rg-msg">يتم التأكد من وجود اتصال فعلي بالإنترنت.</p>' +
+            '<button type="button" class="rg-retry">إعادة المحاولة</button>';
+        de.appendChild(gate);
+        var gTitle = gate.querySelector('.rg-title'), gMsg = gate.querySelector('.rg-msg'),
+            gSlash = gate.querySelector('.rg-slash'), gRetry = gate.querySelector('.rg-retry');
+
+        function showChecking() {
+            gate.className = 'checking'; gSlash.style.display = 'none';
+            gTitle.textContent = 'جارٍ التحقق من الاتصال…';
+            gMsg.textContent = 'يتم التأكد من وجود اتصال فعلي بالإنترنت.';
+        }
+        function showOffline(lostMidway) {
+            gate.className = 'offline'; gSlash.style.display = '';
+            gTitle.textContent = 'مطلوب اتصالك بالإنترنت';
+            gMsg.textContent = lostMidway
+                ? 'انقطع الاتصال بالإنترنت. ستعود اللوحة تلقائيًا كما كانت عند عودة الاتصال.'
+                : 'لا يوجد اتصال فعلي بالإنترنت. تأكد من الشبكة ثم أعد المحاولة.';
+        }
+
+        // ---- قفل اللوحة بالكامل (لا نقر ولا تركيز بالكيبورد) ----
+        var locked = true;
+        function setLock(on) {
+            locked = on;
+            try { if (document.body) document.body.inert = on; } catch (e) {}
+        }
+        document.addEventListener('DOMContentLoaded', function () { setLock(locked); });
+
+        var everOk = false,      // هل نجح التحقق مرة واحدة على الأقل (ظهرت اللوحة)؟
+            bootBlocked = false, // هل فُحص أول تحميل وفشل؟ (حينها نعيد التحميل عند العودة)
+            fails = 0, busy = false;
+
+        function onOk() {
+            fails = 0;
+            if (!everOk) {
+                // أول تحميل حُجب: اللوحة بدأت بدون إنترنت، فنعيد تحميلها من الصفر لتبدأ سليمة
+                if (bootBlocked) { location.reload(); return; }
+                everOk = true;
+                de.classList.add('rt-net-ok');
+            }
+            de.classList.remove('rt-net-lost');
+            setLock(false);
+        }
+        function onLost() {
+            if (!everOk) { bootBlocked = true; showOffline(false); setLock(true); return; }
+            de.classList.add('rt-net-lost');   // تجميد بدون إعادة تحميل: الحالة تبقى كما هي
+            showOffline(true);
+            setLock(true);
+        }
+
+        function check() {
+            if (busy) return;
+            busy = true;
+            var hardOffline = (navigator.onLine === false);
+            verifyInternet().then(function (ok) {
+                busy = false;
+                if (ok) { onOk(); return; }
+                fails++;
+                // قبل أول نجاح أو عند انقطاع صريح: حجب فوري. وأثناء الاستخدام: فشلان متتاليان تفاديًا للحجب الخاطئ
+                if (!everOk || hardOffline || fails >= 2) onLost();
+            });
+        }
+
+        gRetry.addEventListener('click', function () { if (!everOk) showChecking(); check(); });
+        window.addEventListener('online', function () { if (!everOk) showChecking(); check(); });
+        window.addEventListener('offline', function () { fails = 2; check(); });
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+        setInterval(check, 3000);
+        check();
+    })();
+    </script>
+
     <!-- ============ إعداد زر "ربط برابط خارجي" (قريبًا) — عدّل القيمة هنا فقط ============ -->
     <script>
     const linkedpagesoon = true; // true = الزر مغلق ويظهر توست "قريبًا ستُضَافْ" | false = الزر يعمل بشكل طبيعي
