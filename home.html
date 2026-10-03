@@ -1187,6 +1187,170 @@
             padding: 15px 0;
         }
     </style>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style id="sm-bp-legacy">
+/* نسخ قواعد الوضع الليلي/الممطر القديمة للثيمات الهندسية المقابلة (bp-dark / bp-rain) */
+html[data-theme="bp-dark"]{
+            --primary-color: #eef1f6;
+            --accent-color: #e3b166;
+            --bg-color: #030c18;
+            --card-bg: rgba(13,26,46,.6);
+            --text-color: #eef1f6;
+            --text-muted: #8fa3bd;
+            --border-color: rgba(120,190,255,.18);
+            --find-bar-bg: rgba(29,33,48,.5);
+            --item-hover: rgba(120,190,255,.08);
+            --btn-bg: rgba(29,33,48,.6);
+            --btn-color: #eef1f6;
+            --input-bg: rgba(29,33,48,.5);
+            --accent-soft: rgba(227,177,102,.14);
+        }
+html[data-theme="bp-rain"]{
+            --primary-color: #e7ecf2;
+            --accent-color: #7fb2e8;
+            --bg-color: #333c47;
+            --card-bg: rgba(45,53,64,.6);
+            --text-color: #e7ecf2;
+            --text-muted: #a7b2bf;
+            --border-color: rgba(180,200,220,.2);
+            --find-bar-bg: rgba(60,70,82,.5);
+            --item-hover: rgba(127,178,232,.1);
+            --btn-bg: rgba(60,70,82,.6);
+            --btn-color: #e7ecf2;
+            --input-bg: rgba(60,70,82,.5);
+            --accent-soft: rgba(127,178,232,.18);
+        }
+html[data-theme="bp-dark"] .bg-decor{ display:block; }
+@media (prefers-reduced-motion: reduce){}
+html[data-theme="bp-dark"] .bg-decor-forest{ display:none; }
+@media (prefers-reduced-motion: reduce){}
+@media (prefers-reduced-motion: reduce){}
+html[data-theme="bp-rain"] .bg-decor-rain{ display:block; }
+@media (prefers-reduced-motion: reduce){}
+html[data-theme="bp-dark"] .card:hover, html[data-theme="bp-rain"] .card:hover{
+            border-color: var(--accent-color);
+        }
+html[data-theme="bp-dark"] .btn-danger{
+            background: rgba(231,76,60,.18);
+            border-color: rgba(231,76,60,.4);
+            color: #ff9d8f;
+        }
+html[data-theme="bp-dark"] .btn-secondary{
+            background: rgba(120,190,255,.08);
+            color: var(--text-color);
+        }
+html[data-theme="bp-dark"] .btn-dark{
+            background: rgba(9,20,38,.7);
+            border-color: var(--border-color);
+        }
+html[data-theme="bp-dark"] .btn-primary, html[data-theme="bp-dark"] .btn.primary{
+            color: #221604 !important;
+        }
+html[data-theme="bp-dark"] .file-name{
+            color: #3498db;
+        }
+html[data-theme="bp-dark"] .custom-var-row{ background: rgba(255,255,255,0.02); }
+html[data-theme="bp-dark"] .range-field .range-value{ background: rgba(255,255,255,0.08); }
+html[data-theme="bp-dark"] #headerStyleOptionsPanel, html[data-theme="bp-dark"] #navToolStyleOptionsPanel, html[data-theme="bp-dark"] #header-scroll-color-fields{ background: rgba(255,255,255,0.03); }
+html[data-theme="bp-dark"] .build-app-sync-note{ background: rgba(26, 188, 156, 0.1); }
+html[data-theme="bp-dark"] .build-app-note{ background: rgba(255,255,255,0.04); }
+html[data-theme="bp-dark"] .build-app-highlight{ color: #f39c12; background: rgba(243, 156, 18, 0.18); }
+html[data-theme="bp-dark"] .build-app-warning{ background: rgba(231, 76, 60, 0.13); color: #ff9d8f; }
+html[data-theme="bp-dark"] .build-app-warning h4{ color: #ff6b5b; }
+html[data-theme="bp-dark"] .storage-warning-box{
+            background: #3a3220;
+            border-color: #6b5b2a;
+            color: #f0d999;
+        }
+html[data-theme="bp-dark"] .storage-warning-box strong{ color: #f5b041; }
+html[data-theme="bp-dark"] .storage-usage-bar{ background: rgba(255,255,255,0.12); }
+</style>
+<style id="sm-bp-themes">
+/* ===== ثيمات «اللوحة الهندسية»: bp-light / bp-dark / bp-rain — معزولة بالكامل عن الثيمات القديمة ===== */
+html[data-theme^="bp-"]{--danger:#e0343c; --font-head:'Readex Pro','IBM Plex Sans Arabic',sans-serif}
+html[data-theme="bp-light"]{
+  --primary-color:#0e1530; --accent-color:#2f4bff; --bg-color:#e8ecf4; --card-bg:#fff;
+  --text-color:#0e1530; --text-muted:#5a6685; --border-color:#c9d2e4; --find-bar-bg:#dde4f1;
+  --item-hover:#eef2fb; --btn-bg:#2f4bff; --btn-color:#fff; --input-bg:#f6f8fd; --accent-soft:rgba(47,75,255,.14);
+  --ink:#0e1530; --ink-fg:#fff; --grid:rgba(47,75,255,.06); --grid-major:rgba(47,75,255,.12);
+  --danger:#e0343c; --font-head:'Readex Pro','IBM Plex Sans Arabic',sans-serif;
+}
+html[data-theme="bp-dark"]{
+  --primary-color:#e6edff; --accent-color:#4cc9f0; --bg-color:#070d1c; --card-bg:#0d1730;
+  --text-color:#e6edff; --text-muted:#8c9bbd; --border-color:rgba(110,150,255,.22); --find-bar-bg:#0a1328;
+  --item-hover:rgba(76,201,240,.07); --btn-bg:#4cc9f0; --btn-color:#04121f; --input-bg:#0a1328; --accent-soft:rgba(76,201,240,.16);
+  --ink:#e6edff; --ink-fg:#070d1c; --grid:rgba(76,201,240,.055); --grid-major:rgba(76,201,240,.11);
+}
+html[data-theme="bp-rain"]{
+  --primary-color:#ececf1; --accent-color:#b79cff; --bg-color:#15171c; --card-bg:#1d2027;
+  --text-color:#ececf1; --text-muted:#9a9fae; --border-color:rgba(255,255,255,.11); --find-bar-bg:#181b21;
+  --item-hover:rgba(183,156,255,.08); --btn-bg:#b79cff; --btn-color:#140d26; --input-bg:#181b21; --accent-soft:rgba(183,156,255,.16);
+  --ink:#ececf1; --ink-fg:#15171c; --grid:rgba(255,255,255,.03); --grid-major:rgba(255,255,255,.065);
+}
+html[data-theme^="bp-"] .bg-decor,html[data-theme^="bp-"] .bg-decor-forest,html[data-theme^="bp-"] .bg-decor-rain{display:none !important}
+html[data-theme^="bp-"] body{
+  background-color:var(--bg-color);
+  background-image:linear-gradient(var(--grid-major) 1px,transparent 1px),linear-gradient(90deg,var(--grid-major) 1px,transparent 1px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:160px 160px,160px 160px,32px 32px,32px 32px; background-attachment:fixed;
+  padding:18px 14px 60px; line-height:1.65;
+}
+html[data-theme^="bp-"] .container{max-width:1040px}
+html[data-theme^="bp-"] h1,html[data-theme^="bp-"] h2,html[data-theme^="bp-"] h3,html[data-theme^="bp-"] .custom-dialog-title{font-family:var(--font-head); letter-spacing:0}
+html[data-theme^="bp-"] h2{font-size:1.05rem; font-weight:600; color:var(--text-color)}
+html[data-theme^="bp-"] .card{position:relative; border-radius:14px; padding:22px; margin-bottom:22px;
+  border:1px solid var(--border-color);
+  box-shadow:0 18px 34px -26px rgba(8,16,48,.55), 0 1px 0 rgba(255,255,255,.04) inset}
+html[data-theme^="bp-"] .card::before,html[data-theme^="bp-"] .card::after{content:""; position:absolute; width:12px; height:12px; pointer-events:none; border:2px solid var(--accent-color)}
+html[data-theme^="bp-"] .card::before{top:-1px; inset-inline-start:-1px; border-width:2px 0 0 2px; border-top-left-radius:14px}
+html[data-theme^="bp-"] .card::after{bottom:-1px; inset-inline-end:-1px; border-width:0 2px 2px 0; border-bottom-right-radius:14px}
+html[data-theme^="bp-"][dir="rtl"] .card::before{border-width:2px 2px 0 0; border-top-left-radius:0; border-top-right-radius:14px}
+html[data-theme^="bp-"][dir="rtl"] .card::after{border-width:0 0 2px 2px; border-bottom-right-radius:0; border-bottom-left-radius:14px}
+html[data-theme^="bp-"] .card:hover,html[data-theme^="bp-"] .card:hover{border-color:var(--border-color)}
+html[data-theme^="bp-"] .card-header-toggle{cursor:pointer}
+html[data-theme^="bp-"] .header-bar{padding:6px 2px 14px; margin-bottom:20px; border-bottom:1px dashed var(--border-color)}
+html[data-theme^="bp-"] .main-tabs-bar{background:var(--find-bar-bg); border:1px solid var(--border-color); border-radius:12px; padding:5px; gap:4px}
+html[data-theme^="bp-"] .main-tab-btn{font-family:var(--font-head); font-weight:500; border-radius:8px; color:var(--text-muted)}
+html[data-theme^="bp-"] .main-tab-btn:hover{color:var(--text-color)}
+html[data-theme^="bp-"] .main-tab-btn.active{background:var(--ink); color:var(--ink-fg); box-shadow:0 6px 14px -8px rgba(0,0,0,.6)}
+html[data-theme^="bp-"] label{color:var(--text-muted); font-weight:500; font-size:.86rem}
+html[data-theme^="bp-"] input[type="text"],html[data-theme^="bp-"] input[type="password"],html[data-theme^="bp-"] input[type="number"],html[data-theme^="bp-"] input[type="url"],html[data-theme^="bp-"] select,html[data-theme^="bp-"] textarea{
+  background:var(--input-bg); color:var(--text-color); border:1px solid var(--border-color); border-radius:9px; transition:border-color .15s, box-shadow .15s}
+html[data-theme^="bp-"] input[type="text"]:focus,html[data-theme^="bp-"] input[type="password"]:focus,html[data-theme^="bp-"] input[type="number"]:focus,html[data-theme^="bp-"] input[type="url"]:focus,html[data-theme^="bp-"] select:focus,html[data-theme^="bp-"] textarea:focus{
+  outline:0; border-color:var(--accent-color); box-shadow:0 0 0 3px var(--accent-soft)}
+html[data-theme^="bp-"] .find-replace-bar{background:var(--find-bar-bg); border:1px solid var(--border-color); border-radius:10px}
+html[data-theme^="bp-"] .btn{font-family:var(--font-head); font-weight:500; border-radius:9px; border:1px solid transparent;
+  background:var(--btn-bg); color:var(--btn-color);
+  box-shadow:0 2px 0 color-mix(in srgb,var(--btn-bg) 55%,#000); transition:transform .12s, box-shadow .12s, filter .12s}
+html[data-theme^="bp-"] .btn:hover{filter:brightness(1.07); border-color:transparent}
+html[data-theme^="bp-"] .btn:active{transform:translateY(2px); box-shadow:0 0 0 transparent}
+html[data-theme^="bp-"] .btn-secondary,html[data-theme^="bp-"] .btn-secondary{background:transparent; color:var(--text-color); border:1px solid var(--border-color); box-shadow:none}
+html[data-theme^="bp-"] .btn-secondary:hover,html[data-theme^="bp-"] .btn-secondary:hover{background:var(--item-hover); border-color:var(--accent-color)}
+html[data-theme^="bp-"] .btn-dark,html[data-theme^="bp-"] .btn-dark{background:var(--ink); color:var(--ink-fg); box-shadow:0 2px 0 rgba(0,0,0,.35)}
+html[data-theme^="bp-"] .btn-danger,html[data-theme^="bp-"] .btn-danger{background:var(--danger); color:#fff; box-shadow:0 2px 0 #8d1e24}
+html[data-theme^="bp-"] .btn-primary,html[data-theme^="bp-"] .btn.primary,html[data-theme^="bp-"] .btn-primary,html[data-theme^="bp-"] .btn.primary{background:var(--accent-color); color:var(--btn-color)}
+html[data-theme^="bp-"] .btn-arrow{background:var(--ink); color:var(--ink-fg); border-radius:7px; padding:5px 9px}
+html[data-theme^="bp-"] .btn:focus-visible,html[data-theme^="bp-"] .main-tab-btn:focus-visible,html[data-theme^="bp-"] .btn-arrow:focus-visible{outline:2px solid var(--accent-color); outline-offset:2px}
+html[data-theme^="bp-"] .file-list,html[data-theme^="bp-"] .order-list{display:flex; flex-direction:column; gap:8px}
+html[data-theme^="bp-"] .file-item,html[data-theme^="bp-"] .order-item{background:var(--card-bg); border:1px solid var(--border-color); border-radius:11px; padding:12px 14px;
+  border-inline-start:4px solid var(--border-color); transition:border-color .15s, background-color .15s, transform .15s}
+html[data-theme^="bp-"] .file-item:hover,html[data-theme^="bp-"] .order-item:hover{background:var(--item-hover); border-inline-start-color:var(--accent-color)}
+html[data-theme^="bp-"] .file-name,html[data-theme^="bp-"] .file-name{color:var(--text-color); font-weight:600; font-family:var(--font-head)}
+html[data-theme^="bp-"] .file-name:hover{color:var(--accent-color)}
+html[data-theme^="bp-"] .title-input{border-radius:7px; background:var(--input-bg); color:var(--text-color)}
+html[data-theme^="bp-"] .slider{background:var(--border-color)}
+html[data-theme^="bp-"] input:checked + .slider{background:var(--accent-color)}
+html[data-theme^="bp-"] .custom-dialog-overlay{background:rgba(6,10,24,.62) !important; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px)}
+html[data-theme^="bp-"] .custom-dialog-box{border-radius:16px; border:1px solid var(--border-color); box-shadow:0 30px 60px -20px rgba(0,0,0,.6); padding:22px}
+html[data-theme^="bp-"] .custom-dialog-title{font-size:1.12rem; font-weight:600; padding-bottom:12px; border-bottom:1px dashed var(--border-color)}
+html[data-theme^="bp-"] .custom-var-row,html[data-theme^="bp-"] .status-box,html[data-theme^="bp-"] .projects-selector-box,html[data-theme^="bp-"] #headerStyleOptionsPanel,html[data-theme^="bp-"] #navToolStyleOptionsPanel,html[data-theme^="bp-"] #header-scroll-color-fields{border-radius:11px; border-color:var(--border-color)}
+html[data-theme^="bp-"] .build-app-btn{border-radius:11px; font-family:var(--font-head)}
+html[data-theme^="bp-"] .preview-toggle-bar{border-radius:10px}
+html[data-theme^="bp-"] #login-container{max-width:460px; margin:7vh auto 0; padding:28px}
+html[data-theme^="bp-"] *{scrollbar-width:thin; scrollbar-color:var(--border-color) transparent}
+@media (max-width:600px){html[data-theme^="bp-"] body{padding:12px 10px 50px}
+html[data-theme^="bp-"] .card{padding:16px; border-radius:12px}}
+@media (prefers-reduced-motion:reduce){html[data-theme^="bp-"] *{transition:none !important; animation:none !important}}
+</style>
 </head>
 <body>
 
@@ -5429,10 +5593,11 @@ ${parts.body}
         localStorage.setItem("main_active_tab", isSite ? "site" : "app");
     }
 
-    const THEME_ORDER = ["light", "dark", "rain"];
+    const THEME_ORDER = ["light", "dark", "rain", "bp-light", "bp-dark", "bp-rain"];
 
     function initTheme() {
-        const savedTheme = localStorage.getItem("theme") || "light";
+        let savedTheme = localStorage.getItem("theme") || "light";
+        if (THEME_ORDER.indexOf(savedTheme) === -1) savedTheme = "light";
         document.documentElement.setAttribute("data-theme", savedTheme);
         updateThemeIcons(savedTheme);
         buildThemeDecor(savedTheme);
@@ -5450,27 +5615,31 @@ ${parts.body}
     }
 
     function buildThemeDecor(theme) {
+        if (String(theme).indexOf("bp-") === 0) return; // الثيمات الهندسية بلا زخارف خلفية (مخفية بالـ CSS)
         if (theme === "dark") buildOceanBubbles();
         else if (theme === "rain") buildRainDrops();
         else buildForestLeaves();
     }
 
+    // الأيقونة تعرض الثيم "التالي" في الدورة
+    const THEME_NEXT_INFO = {
+        "light":    { icon: "fa-solid fa-water",          title: "التبديل إلى الثيم البحري" },
+        "dark":     { icon: "fa-solid fa-cloud-rain",     title: "التبديل إلى ثيم السماء الممطرة" },
+        "rain":     { icon: "fa-solid fa-ruler-combined", title: "التبديل إلى «اللوحة الهندسية» (فاتح)" },
+        "bp-light": { icon: "fa-solid fa-moon",           title: "التبديل إلى «اللوحة الهندسية» (ليلي)" },
+        "bp-dark":  { icon: "fa-solid fa-cube",           title: "التبديل إلى «اللوحة الهندسية» (جرافيت)" },
+        "bp-rain":  { icon: "fa-solid fa-tree",           title: "التبديل إلى الثيم الطبيعي" }
+    };
+
     function updateThemeIcons(theme) {
-        const icons = { light: "fa-solid fa-water", dark: "fa-solid fa-cloud-rain", rain: "fa-solid fa-tree" };
-        const titles = {
-            light: "التبديل إلى الثيم البحري",
-            dark: "التبديل إلى ثيم السماء الممطرة",
-            rain: "التبديل إلى الثيم الطبيعي"
-        };
-        const iconClass = icons[theme] || icons.light;
-        const title = titles[theme] || titles.light;
+        const info = THEME_NEXT_INFO[theme] || THEME_NEXT_INFO.light;
         const btnIds = ["theme-toggle-login", "theme-toggle-main", "theme-toggle-editor"];
-        
+
         btnIds.forEach(id => {
             const btn = document.getElementById(id);
             if(btn) {
-                btn.innerHTML = `<i class="${iconClass}"></i>`;
-                btn.setAttribute("title", title);
+                btn.innerHTML = `<i class="${info.icon}"></i>`;
+                btn.setAttribute("title", info.title);
             }
         });
     }
