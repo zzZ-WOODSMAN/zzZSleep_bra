@@ -5,17 +5,17 @@
 
     <!-- ============ RosTrick: بوابة الإنترنت الفعلي (DNS) — يجب أن تبقى أول شيء في الـ head ============ -->
     <style id="rt-net-style">
-    html:not(.rt-net-ok){background:#0b1214 !important;}
-    html:not(.rt-net-ok) body, html.rt-net-lost body{visibility:hidden !important;}
+    html.rt-net-lost{background:#0b1214 !important;}
+    html.rt-net-lost body{visibility:hidden !important;}
     #rtNetGate{display:none;position:fixed;inset:0;z-index:2147483647;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:#0b1214;color:#eafffb;direction:rtl;font-family:'IBM Plex Sans Arabic','Cairo',system-ui,sans-serif;touch-action:none;}
-    html:not(.rt-net-ok) #rtNetGate, html.rt-net-lost #rtNetGate{display:flex;}
+    html.rt-net-lost #rtNetGate{display:flex;}
     #rtNetGate .rg-ico{width:76px;height:76px;border-radius:22px;display:grid;place-items:center;background:rgba(47,182,168,.12);border:1px solid rgba(127,227,212,.35);}
     #rtNetGate .rg-ico svg{width:38px;height:38px;stroke:#7fe3d4;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
     #rtNetGate h1{margin:0 !important;font-size:22px !important;font-weight:800 !important;color:#eafffb !important;}
     #rtNetGate p{margin:0 !important;font-size:15px !important;color:#a9c9c3 !important;max-width:320px;line-height:1.8 !important;}
     #rtNetGate button{margin-top:6px;padding:11px 28px !important;border-radius:999px !important;border:1px solid rgba(127,227,212,.5) !important;background:rgba(47,182,168,.18) !important;color:#eafffb !important;font-size:15px !important;font-weight:700 !important;font-family:inherit !important;cursor:pointer;width:auto !important;}
     #rtNetGate button:active{background:rgba(47,182,168,.32) !important;}
-    #rtNetGate.checking button{display:none;}
+    #rtNetGate button:disabled{opacity:.6;cursor:wait;}
     </style>
     <script>
     (function () {
@@ -58,77 +58,73 @@
         }
 
         // ---- واجهة البوابة (تُضاف خارج body حتى لا تتأثر بأي كود في اللوحة) ----
+        // المنطق: إن كان الجهاز غير متصل بالشبكة تُقفل اللوحة فورًا ثم يستمر فحص الإنترنت.
+        // وإن كان متصلاً بالشبكة تبقى اللوحة مفتوحة، ويُكمل فحص الإنترنت الفعلي في الخلفية، وتُقفل إن لم يوجد إنترنت.
         var gate = document.createElement('div');
         gate.id = 'rtNetGate';
-        gate.className = 'checking';
         gate.setAttribute('role', 'alert');
         gate.innerHTML =
-            '<div class="rg-ico"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/><path class="rg-slash" d="M3 3l18 18" style="display:none"/></svg></div>' +
-            '<h1 class="rg-title">جارٍ التحقق من الاتصال…</h1>' +
-            '<p class="rg-msg">يتم التأكد من وجود اتصال فعلي بالإنترنت.</p>' +
+            '<div class="rg-ico"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/><path class="rg-slash" d="M3 3l18 18"/></svg></div>' +
+            '<h1 class="rg-title">مطلوب اتصالك بالإنترنت</h1>' +
+            '<p class="rg-msg">لا يوجد اتصال فعلي بالإنترنت. تأكد من الشبكة ثم أعد المحاولة.</p>' +
             '<button type="button" class="rg-retry">إعادة المحاولة</button>';
         de.appendChild(gate);
-        var gTitle = gate.querySelector('.rg-title'), gMsg = gate.querySelector('.rg-msg'),
-            gSlash = gate.querySelector('.rg-slash'), gRetry = gate.querySelector('.rg-retry');
+        var gMsg = gate.querySelector('.rg-msg'), gRetry = gate.querySelector('.rg-retry');
 
-        function showChecking() {
-            gate.className = 'checking'; gSlash.style.display = 'none';
-            gTitle.textContent = 'جارٍ التحقق من الاتصال…';
-            gMsg.textContent = 'يتم التأكد من وجود اتصال فعلي بالإنترنت.';
-        }
         function showOffline(lostMidway) {
-            gate.className = 'offline'; gSlash.style.display = '';
-            gTitle.textContent = 'مطلوب اتصالك بالإنترنت';
             gMsg.textContent = lostMidway
                 ? 'انقطع الاتصال بالإنترنت. ستعود اللوحة تلقائيًا كما كانت عند عودة الاتصال.'
                 : 'لا يوجد اتصال فعلي بالإنترنت. تأكد من الشبكة ثم أعد المحاولة.';
         }
 
         // ---- قفل اللوحة بالكامل (لا نقر ولا تركيز بالكيبورد) ----
-        var locked = true;
+        var locked = false;
         function setLock(on) {
             locked = on;
             try { if (document.body) document.body.inert = on; } catch (e) {}
         }
         document.addEventListener('DOMContentLoaded', function () { setLock(locked); });
 
-        var everOk = false,      // هل نجح التحقق مرة واحدة على الأقل (ظهرت اللوحة)؟
-            bootBlocked = false, // هل فُحص أول تحميل وفشل؟ (حينها نعيد التحميل عند العودة)
+        var firstDone = false,   // هل اكتمل أول فحص للإنترنت؟
+            bootBlocked = false, // هل حُجبت اللوحة منذ فتحها؟ (حينها نعيد التحميل عند العودة)
             fails = 0, busy = false;
 
         function onOk() {
             fails = 0;
-            if (!everOk) {
-                // أول تحميل حُجب: اللوحة بدأت بدون إنترنت، فنعيد تحميلها من الصفر لتبدأ سليمة
-                if (bootBlocked) { location.reload(); return; }
-                everOk = true;
-                de.classList.add('rt-net-ok');
-            }
+            // اللوحة فُتحت بلا إنترنت فعلي: نعيد تحميلها من الصفر لتبدأ سليمة
+            if (bootBlocked) { location.reload(); return; }
+            firstDone = true;
             de.classList.remove('rt-net-lost');
             setLock(false);
         }
         function onLost() {
-            if (!everOk) { bootBlocked = true; showOffline(false); setLock(true); return; }
-            de.classList.add('rt-net-lost');   // تجميد بدون إعادة تحميل: الحالة تبقى كما هي
-            showOffline(true);
+            if (!firstDone) bootBlocked = true;
+            firstDone = true;
+            showOffline(!bootBlocked);   // تجميد بدون إعادة تحميل إن كانت اللوحة قد بدأت سليمة
+            de.classList.add('rt-net-lost');
             setLock(true);
         }
 
         function check() {
             if (busy) return;
             busy = true;
+            gRetry.disabled = true;
             var hardOffline = (navigator.onLine === false);
             verifyInternet().then(function (ok) {
                 busy = false;
+                gRetry.disabled = false;
                 if (ok) { onOk(); return; }
                 fails++;
-                // قبل أول نجاح أو عند انقطاع صريح: حجب فوري. وأثناء الاستخدام: فشلان متتاليان تفاديًا للحجب الخاطئ
-                if (!everOk || hardOffline || fails >= 2) onLost();
+                // أول فحص أو انقطاع صريح: حجب فوري. وأثناء الاستخدام: فشلان متتاليان تفاديًا للحجب الخاطئ
+                if (!firstDone || hardOffline || fails >= 2) onLost();
             });
         }
 
-        gRetry.addEventListener('click', function () { if (!everOk) showChecking(); check(); });
-        window.addEventListener('online', function () { if (!everOk) showChecking(); check(); });
+        // الجهاز غير متصل بالشبكة أصلاً: نقفل فورًا قبل أي رسم، ثم يكمل الفحص
+        if (navigator.onLine === false) { bootBlocked = true; onLost(); }
+
+        gRetry.addEventListener('click', function () { check(); });
+        window.addEventListener('online', function () { check(); });
         window.addEventListener('offline', function () { fails = 2; check(); });
         document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
         setInterval(check, 3000);
@@ -2202,7 +2198,21 @@ html[data-theme^="bp-"] .card{padding:16px; border-radius:12px}}
             <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
                 <span style="font-weight: bold; font-size: 0.95rem; color: #e74c3c;"><i class="fa-solid fa-wifi"></i> الاتصال بالإنترنت:</span>
                 <label style="display:inline-flex; align-items:center; gap:5px; cursor:pointer; font-weight:bold; font-size: 0.85rem;">
-                    <input type="checkbox" id="enable-offline-block"> تعطيل الصفحة عند عدم وجود إنترنت؟
+                    <input type="checkbox" id="enable-offline-block" onchange="toggleOfflineDesignBtn()"> تعطيل الصفحة عند عدم وجود إنترنت فعلي؟
+                </label>
+                <button type="button" class="btn btn-secondary btn-sm" id="offline-design-btn" style="display:none;" onclick="smOpenOfflineDesignDialog()"><i class="fa-solid fa-palette"></i> تخصيص التصميم</button>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                تبقى الصفحة مفتوحة طالما الجهاز متصل بالشبكة، ويُكمل التحقق من وجود إنترنت فعلي (فحص DNS) وتُقفل إن لم يوجد. وإن لم يكن الجهاز متصلاً بالشبكة تُقفل فورًا.
+            </div>
+        </div>
+
+        <!-- السماح بتكبير الشاشة: عند التفعيل يُحقن <meta name="allow-zoom" content="true"> داخل الصفحة -->
+        <div id="allow-zoom-section" class="drawer-pos-selector" style="width: 100%; box-sizing: border-box; flex-direction: column; align-items: flex-start; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                <span style="font-weight: bold; font-size: 0.95rem; color: #e74c3c;"><i class="fa-solid fa-magnifying-glass-plus"></i> تكبير الشاشة:</span>
+                <label style="display:inline-flex; align-items:center; gap:5px; cursor:pointer; font-weight:bold; font-size: 0.85rem;">
+                    <input type="checkbox" id="enable-allow-zoom"> السماح بتكبير الشاشة؟
                 </label>
             </div>
         </div>
@@ -10610,6 +10620,14 @@ function showEditorWarningBanner() {
 
             /* فحص حالة كود تعطيل الصفحة عند عدم وجود إنترنت (صفحات التطبيق فقط) */
             document.getElementById("enable-offline-block").checked = decodedContent.includes('id="offline-block-screen"');
+            try {
+                const oflMatch = decodedContent.match(/<!-- OFFLINE_DESIGN: (\S+) -->/);
+                offlineDesignState = smOflMerge(oflMatch ? JSON.parse(decodeURIComponent(oflMatch[1])) : null);
+            } catch (e) { offlineDesignState = smOflMerge(null); }
+            toggleOfflineDesignBtn();
+
+            /* فحص حالة السماح بتكبير الشاشة */
+            document.getElementById("enable-allow-zoom").checked = decodedContent.includes('name="allow-zoom"');
 
             if (decodedContent.includes('<!-- START ADMIN DRAWER -->')) {
                 document.getElementById("enable-header-toggle").checked = true;
@@ -10766,6 +10784,358 @@ function showEditorWarningBanner() {
         });
     }
 
+
+  /* ============ تخصيص شاشة تعطيل الصفحة عند عدم وجود إنترنت فعلي ============ */
+  const SM_OFL_DEFAULTS = {
+      themeMode: "auto",
+      light: { bg: "#f4f6f9", card: "#ffffff", title: "#2c3e50", text: "#7f8c8d", icon: "#e74c3c", border: "#e1e8ed", btnBg: "#e74c3c", btnText: "#ffffff" },
+      dark:  { bg: "#0f1419", card: "#1a2129", title: "#eaf0f6", text: "#9fb0c0", icon: "#ff6b5e", border: "#2a3541", btnBg: "#ff6b5e", btnText: "#1a2129" },
+      icon: "wifi",
+      title: "لا يوجد اتصال بالإنترنت",
+      message: "لا يمكن لهذه الصفحة أن تعمل بلا إنترنت، يرجى التحقق من اتصالك بالشبكة والمحاولة مجددًا.",
+      showRetry: true,
+      retryText: "إعادة المحاولة",
+      cardStyle: "card",
+      radius: 18,
+      cardWidth: 380,
+      iconSize: 50,
+      shadow: true,
+      fontPreset: "system",
+      fontInput: ""
+  };
+  const SM_OFL_SYSTEM_STACK = "system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif";
+  const SM_OFL_FONT_PRESETS = {
+      system: { label: "خط النظام (الافتراضي)", stack: SM_OFL_SYSTEM_STACK },
+      tahoma: { label: "Tahoma", stack: "Tahoma,'Segoe UI',sans-serif" },
+      arial:  { label: "Arial", stack: "Arial,Helvetica,sans-serif" },
+      serif:  { label: "خط بسيط بذيول (Serif)", stack: "Georgia,'Times New Roman',serif" },
+      mono:   { label: "خط أحادي المسافة (Monospace)", stack: "ui-monospace,Consolas,'Courier New',monospace" },
+      custom: { label: "خط مخصص (اسم / رابط / كود)", stack: "" }
+  };
+  /* أيقونات SVG مضمّنة (لا تعتمد على أي خط/ملف خارجي، فتظهر حتى عند انقطاع الإنترنت) */
+  const SM_OFL_ICONS = {
+      wifi:  { label: "واي فاي مقطوع", svg: '<path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/><path d="M3 3l18 18"/>' },
+      cloud: { label: "سحابة مقطوعة", svg: '<path d="M17.5 19H8a5 5 0 1 1 1.2-9.85A6 6 0 0 1 20.9 11.5 3.8 3.8 0 0 1 17.5 19z"/><path d="M3 3l18 18"/>' },
+      globe: { label: "كرة أرضية", svg: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/><path d="M4 4l16 16"/>' },
+      warn:  { label: "تحذير", svg: '<path d="M12 3L2 20h20L12 3z"/><path d="M12 10v5"/><path d="M12 18h.01"/>' },
+      ban:   { label: "ممنوع", svg: '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>' },
+      none:  { label: "بدون أيقونة", svg: "" }
+  };
+  const SM_OFL_COLOR_FIELDS = [["bg","الخلفية"],["card","البطاقة"],["title","العنوان"],["text","النص"],["icon","الأيقونة"],["border","الإطار"],["btnBg","الزر"],["btnText","نص الزر"]];
+
+  let offlineDesignState = JSON.parse(JSON.stringify(SM_OFL_DEFAULTS));
+  let oflDraft = null;
+  let oflPreviewDark = false;
+
+  function smOflClone(o) { return JSON.parse(JSON.stringify(o)); }
+  function smOflEsc(v) { return String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function smOflColor(v, fb) { return /^#[0-9a-fA-F]{3,8}$/.test(v) ? v : fb; }
+  function smOflNum(v, min, max, fb) { v = parseInt(v, 10); if (isNaN(v)) return fb; return Math.min(max, Math.max(min, v)); }
+  function smOflMerge(saved) {
+      const m = smOflClone(SM_OFL_DEFAULTS);
+      if (!saved || typeof saved !== "object") return m;
+      ["themeMode", "icon", "title", "message", "showRetry", "retryText", "cardStyle", "radius", "cardWidth", "iconSize", "shadow", "fontPreset", "fontInput"].forEach(function (k) {
+          if (saved[k] !== undefined && saved[k] !== null) m[k] = saved[k];
+      });
+      ["light", "dark"].forEach(function (g) {
+          if (saved[g] && typeof saved[g] === "object") {
+              Object.keys(m[g]).forEach(function (k) { if (typeof saved[g][k] === "string") m[g][k] = saved[g][k]; });
+          }
+      });
+      if (["auto", "light", "dark"].indexOf(m.themeMode) === -1) m.themeMode = "auto";
+      if (!SM_OFL_ICONS[m.icon]) m.icon = "wifi";
+      if (m.cardStyle !== "flat") m.cardStyle = "card";
+      if (!SM_OFL_FONT_PRESETS[m.fontPreset]) m.fontPreset = "system";
+      m.fontInput = String(m.fontInput || "").slice(0, 6000);
+      m.showRetry = !!m.showRetry; m.shadow = !!m.shadow;
+      m.radius = smOflNum(m.radius, 0, 40, 18); m.cardWidth = smOflNum(m.cardWidth, 260, 520, 380); m.iconSize = smOflNum(m.iconSize, 24, 96, 50);
+      return m;
+  }
+
+  function toggleOfflineDesignBtn() {
+      const cb = document.getElementById("enable-offline-block");
+      const btn = document.getElementById("offline-design-btn");
+      if (btn) btn.style.display = (cb && cb.checked) ? "" : "none";
+  }
+
+  /* هذه الدالة تُحوَّل إلى نص (toString) وتُحقن داخل الصفحة كما هي — لا تعتمد على أي متغير خارجها.
+     المنطق:
+     1) الجهاز غير متصل بالشبكة (navigator.onLine === false): تُقفل الصفحة فورًا ثم يستمر فحص الإنترنت.
+     2) الجهاز متصل بالشبكة: تبقى الصفحة مفتوحة، ويُكمل فحص الإنترنت الفعلي في الخلفية (DNS عبر Cloudflare وGoogle)،
+        وإن لم يوجد إنترنت فعلي تُقفل الصفحة. */
+  function smOfflineRuntime(MODE) {
+      var PROBES = [
+          'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A',
+          'https://dns.google/resolve?name=google.com&type=A'
+      ];
+      var TIMEOUT = 5000;
+      function probe(base) {
+          return new Promise(function (resolve) {
+              var ctrl = ('AbortController' in window) ? new AbortController() : null;
+              var timer = setTimeout(function () { if (ctrl) ctrl.abort(); resolve(false); }, TIMEOUT);
+              var url = base + '&random_padding=' + Date.now() + Math.random().toString(36).slice(2, 10);
+              fetch(url, { headers: { 'accept': 'application/dns-json' }, cache: 'no-store', credentials: 'omit', signal: ctrl ? ctrl.signal : undefined })
+                  .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+                  .then(function (j) {
+                      clearTimeout(timer);
+                      resolve(!!(j && j.Status === 0 && Array.isArray(j.Answer) && j.Answer.some(function (a) {
+                          return a && a.type === 1 && /^\d{1,3}(\.\d{1,3}){3}$/.test(a.data || '');
+                      })));
+                  })
+                  .catch(function () { clearTimeout(timer); resolve(false); });
+          });
+      }
+      function verifyInternet() {
+          if (navigator.onLine === false) return Promise.resolve(false);
+          return new Promise(function (resolve) {
+              var left = PROBES.length, done = false;
+              PROBES.forEach(function (p) {
+                  probe(p).then(function (ok) {
+                      if (done) return;
+                      if (ok) { done = true; resolve(true); }
+                      else if (--left === 0) { done = true; resolve(false); }
+                  });
+              });
+          });
+      }
+
+      var gate = document.getElementById('offline-block-screen');
+      if (!gate) return;
+      var btn = gate.querySelector('.ofl-retry');
+
+      function applyTheme() {
+          var dark;
+          if (MODE === 'dark') dark = true;
+          else if (MODE === 'light') dark = false;
+          else if (document.documentElement.getAttribute('data-user-theme') === 'dark') dark = true;
+          else if (document.getElementById('userThemeToggleBtn') || document.getElementById('admin-scripts')) {
+              /* صفحة تعمل بنظام الوضعين الخاص باللوحة: نقرأ القيمة المحفوظة مباشرة، لأن الصفحة قد تُقفل قبل أن يطبّق نظام الوضعين السمة */
+              var saved = null;
+              try { saved = localStorage.getItem('user-theme'); } catch (e) {}
+              dark = (saved === 'dark');
+          }
+          else dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          gate.setAttribute('data-ofl-theme', dark ? 'dark' : 'light');
+      }
+      function show(on) {
+          applyTheme();
+          if (on) gate.classList.add('active'); else gate.classList.remove('active');
+          if (document.body) { if (on) document.body.classList.add('offline-page-is-hidden'); else document.body.classList.remove('offline-page-is-hidden'); }
+      }
+
+      var firstDone = false, blockedAtBoot = false, fails = 0, busy = false;
+      function check() {
+          if (busy) return;
+          busy = true;
+          if (btn) btn.disabled = true;
+          var hardOffline = (navigator.onLine === false);
+          verifyInternet().then(function (ok) {
+              busy = false;
+              if (btn) btn.disabled = false;
+              if (ok) {
+                  fails = 0;
+                  /* كانت الصفحة محجوبة منذ فتحها بلا إنترنت: نعيد تحميلها لتبدأ سليمة */
+                  if (blockedAtBoot) { location.reload(); return; }
+                  firstDone = true;
+                  show(false);
+                  return;
+              }
+              fails++;
+              /* أول فحص أو انقطاع صريح: حجب فوري. وأثناء الاستخدام: فشلان متتاليان تفاديًا للحجب الخاطئ */
+              if (!firstDone || hardOffline || fails >= 2) {
+                  if (!firstDone) blockedAtBoot = true;
+                  firstDone = true;
+                  show(true);
+              }
+          });
+      }
+      function init() {
+          /* لا شيء يُقفل مسبقًا إلا عند غياب الشبكة تمامًا */
+          if (navigator.onLine === false) { blockedAtBoot = true; show(true); }
+          if (btn) btn.addEventListener('click', function () { check(); });
+          window.addEventListener('online', function () { check(); });
+          window.addEventListener('offline', function () { fails = 2; show(true); check(); });
+          document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+          try { new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-user-theme'] }); } catch (e) {}
+          window.addEventListener('storage', applyTheme);
+          applyTheme();
+          setInterval(function () { applyTheme(); check(); }, 3000);
+          check();
+      }
+      if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
+  }
+
+  /* يحوّل إعداد الخط إلى {stack, links, css}. الخط المخصص يستخدم نفس محلّل خط الهيدر (اسم / رابط / كود @font-face) */
+  function smOflResolveFont(cfg) {
+      const out = { stack: SM_OFL_SYSTEM_STACK, links: [], css: "" };
+      if (cfg.fontPreset !== "custom") {
+          out.stack = (SM_OFL_FONT_PRESETS[cfg.fontPreset] || SM_OFL_FONT_PRESETS.system).stack;
+          return out;
+      }
+      try {
+          const parsed = smParseHeaderFontInput(cfg.fontInput);
+          if (parsed) {
+              out.links = parsed.links || [];
+              out.css = parsed.css || "";
+              if (parsed.family) out.stack = '"' + parsed.family + '",' + SM_OFL_SYSTEM_STACK;
+          }
+      } catch (e) {}
+      return out;
+  }
+
+  function smBuildOfflineProtectionHtml(rawCfg) {
+      const cfg = smOflMerge(rawCfg);
+      const D0 = SM_OFL_DEFAULTS;
+      const vars = function (g, dg) {
+          return "--o-bg:" + smOflColor(g.bg, dg.bg) + ";--o-card:" + smOflColor(g.card, dg.card) + ";--o-title:" + smOflColor(g.title, dg.title) +
+                 ";--o-text:" + smOflColor(g.text, dg.text) + ";--o-icon:" + smOflColor(g.icon, dg.icon) + ";--o-border:" + smOflColor(g.border, dg.border) +
+                 ";--o-btnbg:" + smOflColor(g.btnBg, dg.btnBg) + ";--o-btntext:" + smOflColor(g.btnText, dg.btnText) + ";";
+      };
+      const flat = cfg.cardStyle === "flat";
+      const fontInfo = smOflResolveFont(cfg);
+      const fontStack = fontInfo.stack;
+      const css = (fontInfo.css ? fontInfo.css + "\n" : "") +
+          "#offline-block-screen{position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;text-align:center;" +
+          "font-family:" + fontStack + ";background:var(--o-bg);color:var(--o-title);" + vars(cfg.light, D0.light) + "}\n" +
+          "#offline-block-screen[data-ofl-theme=\"dark\"]{" + vars(cfg.dark, D0.dark) + "}\n" +
+          "#offline-block-screen.active{display:flex}\n" +
+          "#offline-block-screen .ofl-card{box-sizing:border-box;width:100%;max-width:" + cfg.cardWidth + "px;padding:40px 25px;border-radius:" + cfg.radius + "px;" +
+          (flat ? "background:transparent;border:none;box-shadow:none;" : "background:var(--o-card);border:1px solid var(--o-border);" + (cfg.shadow ? "box-shadow:0 10px 30px rgba(0,0,0,.12);" : "box-shadow:none;")) + "}\n" +
+          "#offline-block-screen .ofl-icon{width:" + cfg.iconSize + "px;height:" + cfg.iconSize + "px;margin:0 auto 18px;color:var(--o-icon)}\n" +
+          "#offline-block-screen .ofl-icon svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}\n" +
+          "#offline-block-screen .ofl-title{margin:0 0 10px;font-size:1.3rem;font-weight:700;color:var(--o-title);unicode-bidi:plaintext}\n" +
+          "#offline-block-screen .ofl-msg{margin:0;font-size:.95rem;line-height:1.7;color:var(--o-text);unicode-bidi:plaintext}\n" +
+          "#offline-block-screen .ofl-retry{margin-top:20px;padding:11px 28px;border-radius:999px;border:none;background:var(--o-btnbg);color:var(--o-btntext);font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit}\n" +
+          "#offline-block-screen .ofl-retry:disabled{opacity:.6;cursor:wait}\n" +
+          "body.offline-page-is-hidden > *:not(#offline-block-screen):not(#offline-protection-style):not(script){display:none !important}";
+      const iconDef = SM_OFL_ICONS[cfg.icon];
+      const iconHtml = (iconDef && iconDef.svg) ? '<div class="ofl-icon"><svg viewBox="0 0 24 24" aria-hidden="true">' + iconDef.svg + '</svg></div>' : "";
+      const btnHtml = cfg.showRetry ? '<button type="button" class="ofl-retry">' + smOflEsc(cfg.retryText) + '</button>' : "";
+      return '<!-- START OFFLINE PROTECTION -->\n' +
+          '<!-- OFFLINE_DESIGN: ' + encodeURIComponent(JSON.stringify(cfg)) + ' -->\n' +
+          fontInfo.links.map(function (u) { return '<link rel="stylesheet" href="' + smOflEsc(u) + '">\n'; }).join("") +
+          '<style id="offline-protection-style">\n' + css + '\n</style>\n' +
+          '<div id="offline-block-screen" data-ofl-theme="light" role="alert">\n' +
+          '  <div class="ofl-card">' + iconHtml +
+          '<h2 class="ofl-title">' + smOflEsc(cfg.title) + '</h2>' +
+          '<p class="ofl-msg">' + smOflEsc(cfg.message) + '</p>' + btnHtml + '</div>\n' +
+          '</div>\n' +
+          '<script>(' + smOfflineRuntime.toString() + ')(' + JSON.stringify(cfg.themeMode) + ');<\/script>\n' +
+          '<!-- END OFFLINE PROTECTION -->\n';
+  }
+
+  /* ---------- نافذة التخصيص ---------- */
+  function smOflPreviewHtml(d, dark) {
+      const g = dark ? d.dark : d.light, D = dark ? SM_OFL_DEFAULTS.dark : SM_OFL_DEFAULTS.light;
+      const c = function (k) { return smOflColor(g[k], D[k]); };
+      const flat = d.cardStyle === "flat";
+      const icon = SM_OFL_ICONS[d.icon] || SM_OFL_ICONS.wifi;
+      const sz = Math.round(smOflNum(d.iconSize, 24, 96, 50) * 0.7);
+      const cardCss = "box-sizing:border-box;width:100%;max-width:" + Math.min(smOflNum(d.cardWidth, 260, 520, 380), 360) + "px;padding:26px 18px;border-radius:" + smOflNum(d.radius, 0, 40, 18) + "px;" +
+          (flat ? "" : "background:" + c("card") + ";border:1px solid " + c("border") + ";" + (d.shadow ? "box-shadow:0 8px 22px rgba(0,0,0,.14);" : ""));
+      const fi = smOflResolveFont(d);
+      return fi.links.map(function (u) { return '<link rel="stylesheet" href="' + smOflEsc(u) + '">'; }).join("") +
+          (fi.css ? '<style>' + fi.css + '</style>' : '') +
+          '<div style="font-family:' + fi.stack.replace(/"/g, "'") + ';background:' + c("bg") + ';padding:18px;display:flex;justify-content:center;text-align:center;">' +
+          '<div style="' + cardCss + '">' +
+          (icon.svg ? '<div style="width:' + sz + 'px;height:' + sz + 'px;margin:0 auto 12px;color:' + c("icon") + ';"><svg viewBox="0 0 24 24" style="width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">' + icon.svg + '</svg></div>' : '') +
+          '<div style="font-weight:700;font-size:1.05rem;color:' + c("title") + ';margin-bottom:8px;">' + smOflEsc(d.title) + '</div>' +
+          '<div style="font-size:0.8rem;line-height:1.7;color:' + c("text") + ';">' + smOflEsc(d.message) + '</div>' +
+          (d.showRetry ? '<div style="display:inline-block;margin-top:14px;padding:8px 20px;border-radius:999px;background:' + c("btnBg") + ';color:' + c("btnText") + ';font-weight:700;font-size:0.82rem;">' + smOflEsc(d.retryText) + '</div>' : '') +
+          '</div></div>';
+  }
+  function smOflRenderPreview() {
+      const box = document.getElementById("oflPreviewWrap");
+      if (box && oflDraft) box.innerHTML = smOflPreviewHtml(oflDraft, oflPreviewDark);
+      const bL = document.getElementById("oflPrevLightBtn"), bD = document.getElementById("oflPrevDarkBtn");
+      if (bL) bL.style.opacity = oflPreviewDark ? "0.5" : "1";
+      if (bD) bD.style.opacity = oflPreviewDark ? "1" : "0.5";
+  }
+  function smOflSetPreviewDark(on) { oflPreviewDark = !!on; smOflRenderPreview(); }
+  function smOflApplyModeVisibility() {
+      const mode = oflDraft.themeMode;
+      const l = document.getElementById("oflSecLight"), d = document.getElementById("oflSecDark");
+      if (l) l.style.display = (mode === "dark") ? "none" : "";
+      if (d) d.style.display = (mode === "light") ? "none" : "";
+      if (mode === "dark") oflPreviewDark = true; else if (mode === "light") oflPreviewDark = false;
+      const tg = document.getElementById("oflPrevToggle");
+      if (tg) tg.style.display = (mode === "auto") ? "" : "none";
+  }
+  function smOflDlgInput(el) {
+      const g = el.dataset.grp, k = el.dataset.k;
+      let v;
+      if (el.type === "checkbox") v = el.checked;
+      else if (el.type === "range") v = parseInt(el.value, 10);
+      else v = el.value;
+      if (g === "root") oflDraft[k] = v; else oflDraft[g][k] = v;
+      if (el.type === "range") { const o = document.getElementById("oflVal_" + k); if (o) o.textContent = v; }
+      if (k === "themeMode") smOflApplyModeVisibility();
+      if (k === "fontPreset") { const w = document.getElementById("oflFontCustomWrap"); if (w) w.style.display = (v === "custom") ? "flex" : "none"; }
+      smOflRenderPreview();
+  }
+  function smOflRenderDialog() {
+      const d = oflDraft;
+      const colors = function (g) {
+          return '<div class="ofl-dlg-colors">' + SM_OFL_COLOR_FIELDS.map(function (f) {
+              return '<label class="ofl-dlg-color"><input type="color" data-grp="' + g + '" data-k="' + f[0] + '" value="' + smOflColor(d[g][f[0]], "#000000") + '" oninput="smOflDlgInput(this)"><span>' + f[1] + '</span></label>';
+          }).join("") + '</div>';
+      };
+      const range = function (k, label, min, max) {
+          return '<div class="ofl-dlg-row"><span>' + label + ': <b id="oflVal_' + k + '">' + d[k] + '</b></span><input type="range" data-grp="root" data-k="' + k + '" min="' + min + '" max="' + max + '" value="' + d[k] + '" oninput="smOflDlgInput(this)"></div>';
+      };
+      const iconOpts = Object.keys(SM_OFL_ICONS).map(function (k) { return '<option value="' + k + '"' + (d.icon === k ? " selected" : "") + '>' + SM_OFL_ICONS[k].label + '</option>'; }).join("");
+      const sel = function (v, cur) { return v === cur ? " selected" : ""; };
+      const fontOpts = Object.keys(SM_OFL_FONT_PRESETS).map(function (k) { return '<option value="' + k + '"' + (d.fontPreset === k ? " selected" : "") + '>' + SM_OFL_FONT_PRESETS[k].label + '</option>'; }).join("");
+      document.getElementById("oflDlgBody").innerHTML =
+          '<div id="oflPrevToggle" style="display:flex; gap:6px; margin-bottom:6px;">' +
+              '<button type="button" class="btn btn-secondary btn-sm" id="oflPrevLightBtn" onclick="smOflSetPreviewDark(false)">معاينة فاتح</button>' +
+              '<button type="button" class="btn btn-secondary btn-sm" id="oflPrevDarkBtn" onclick="smOflSetPreviewDark(true)">معاينة مظلم</button>' +
+          '</div>' +
+          '<div id="oflPreviewWrap"></div>' +
+          '<div class="ofl-dlg-sec"><h4>وضع الألوان</h4><div class="ofl-dlg-row"><select data-grp="root" data-k="themeMode" onchange="smOflDlgInput(this)">' +
+              '<option value="auto"' + sel("auto", d.themeMode) + '>تلقائي (يتبع وضع الصفحة، أو الجهاز إن لم يوجد زر تبديل)</option>' +
+              '<option value="light"' + sel("light", d.themeMode) + '>فاتح دائمًا</option>' +
+              '<option value="dark"' + sel("dark", d.themeMode) + '>مظلم دائمًا</option></select></div></div>' +
+          '<div class="ofl-dlg-sec"><h4>النصوص والأيقونة</h4>' +
+              '<div class="ofl-dlg-row"><span>الأيقونة</span><select data-grp="root" data-k="icon" onchange="smOflDlgInput(this)">' + iconOpts + '</select></div>' +
+              '<div class="ofl-dlg-row"><span>العنوان</span><input type="text" data-grp="root" data-k="title" value="' + smOflEsc(d.title) + '" oninput="smOflDlgInput(this)"></div>' +
+              '<div class="ofl-dlg-row"><span>الرسالة</span><textarea rows="3" data-grp="root" data-k="message" oninput="smOflDlgInput(this)">' + smOflEsc(d.message) + '</textarea></div>' +
+              '<label class="ofl-dlg-check"><input type="checkbox" data-grp="root" data-k="showRetry"' + (d.showRetry ? " checked" : "") + ' onchange="smOflDlgInput(this)"> إظهار زر إعادة المحاولة</label>' +
+              '<div class="ofl-dlg-row"><span>نص الزر</span><input type="text" data-grp="root" data-k="retryText" value="' + smOflEsc(d.retryText) + '" oninput="smOflDlgInput(this)"></div>' +
+          '</div>' +
+          '<div class="ofl-dlg-sec"><h4>الشكل</h4>' +
+              '<div class="ofl-dlg-row"><span>نمط البطاقة</span><select data-grp="root" data-k="cardStyle" onchange="smOflDlgInput(this)">' +
+                  '<option value="card"' + sel("card", d.cardStyle) + '>بطاقة (إطار وخلفية)</option><option value="flat"' + sel("flat", d.cardStyle) + '>بدون بطاقة (نص مباشر على الخلفية)</option></select></div>' +
+              range("radius", "استدارة الزوايا", 0, 40) + range("cardWidth", "عرض البطاقة", 260, 520) + range("iconSize", "حجم الأيقونة", 24, 96) +
+              '<label class="ofl-dlg-check"><input type="checkbox" data-grp="root" data-k="shadow"' + (d.shadow ? " checked" : "") + ' onchange="smOflDlgInput(this)"> ظل البطاقة</label>' +
+          '</div>' +
+          '<div class="ofl-dlg-sec"><h4>الخط</h4>' +
+              '<div class="ofl-dlg-row"><select data-grp="root" data-k="fontPreset" onchange="smOflDlgInput(this)">' + fontOpts + '</select></div>' +
+              '<div class="ofl-dlg-row" id="oflFontCustomWrap" style="display:' + (d.fontPreset === "custom" ? "flex" : "none") + ';">' +
+                  '<textarea id="oflFontInput" rows="3" dir="ltr" spellcheck="false" data-grp="root" data-k="fontInput" placeholder="اسم الخط (مثل: Cairo) أو رابط الخط أو كود @font-face" style="font-family:monospace;" onchange="smOflDlgInput(this)">' + smOflEsc(d.fontInput) + '</textarea>' +
+                  '<span style="font-size:0.72rem; color:var(--text-muted); line-height:1.7;">الخوط الخارجية (اسم/رابط) لا تظهر وقت انقطاع الإنترنت إلا إن كانت محفوظة في ذاكرة المتصفح. لضمان ظهورها دائمًا استخدم كود <b>@font-face</b> بصيغة base64 أو خطًا من النظام.</span>' +
+              '</div>' +
+          '</div>' +
+          '<div class="ofl-dlg-sec" id="oflSecLight"><h4>ألوان الوضع الفاتح</h4>' + colors("light") + '</div>' +
+          '<div class="ofl-dlg-sec" id="oflSecDark"><h4>ألوان الوضع المظلم</h4>' + colors("dark") + '</div>';
+      smOflApplyModeVisibility();
+      smOflRenderPreview();
+  }
+  function smOpenOfflineDesignDialog() {
+      oflDraft = smOflMerge(offlineDesignState);
+      oflPreviewDark = (oflDraft.themeMode === "dark");
+      smOflRenderDialog();
+      document.getElementById("offlineDesignDialog").classList.add("active");
+  }
+  function smCloseOfflineDesignDialog() { document.getElementById("offlineDesignDialog").classList.remove("active"); }
+  function smSaveOfflineDesignDialog() {
+      const fi = document.getElementById("oflFontInput");
+      if (fi && oflDraft) oflDraft.fontInput = fi.value;
+      offlineDesignState = smOflMerge(oflDraft);
+      smCloseOfflineDesignDialog();
+  }
+  function smOflResetDraft() { oflDraft = smOflMerge(null); oflPreviewDark = false; smOflRenderDialog(); }
+
   function buildFullContent(userContent, isPreviewMode) {
         isPreviewMode = !!isPreviewMode;
         const isSitePage = currentFilePath.startsWith(SITE_FOLDER + "/");
@@ -10779,6 +11149,7 @@ function showEditorWarningBanner() {
         const isPassEnabled = document.getElementById("enable-page-password").checked;
         const passValue = document.getElementById("page-password-input").value.trim();
         const isOfflineBlockEnabled = document.getElementById("enable-offline-block").checked;
+        const isAllowZoomEnabled = document.getElementById("enable-allow-zoom").checked;
 
         /* الطريقة الجديدة (دقيقة تماماً ولا يمكن أن تتطابق عرضياً مع كود كتبه المستخدم بنفسه، لأنها تعتمد على
            علامات فريدة تحيط بأي كتلة أضافتها اللوحة فقط) — تُزال أي كتلة محقونة حديثاً بالكامل دفعة واحدة */
@@ -11002,67 +11373,7 @@ function showEditorWarningBanner() {
 
         // حقن كود تعطيل الصفحة بالكامل عند عدم وجود إنترنت — خاص بصفحات التطبيق فقط (لا يُحقن أبداً لصفحات الموقع)
         if (!isSitePage && isOfflineBlockEnabled) {
-            const offlineProtectionHtml = '<!-- START OFFLINE PROTECTION -->\n' +
-            '<style id="offline-protection-style">\n' +
-            '    #offline-block-screen {\n' +
-            '        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;\n' +
-            '        background: #f4f6f9; color: #2c3e50; z-index: 99999999;\n' +
-            '        display: none; flex-direction: column; align-items: center; justify-content: center;\n' +
-            '        font-family: system-ui, -apple-system, \'Segoe UI\', Tahoma, sans-serif;\n' +
-            '        padding: 20px; box-sizing: border-box; text-align: center;\n' +
-            '    }\n' +
-            '    #offline-block-screen.active { display: flex; }\n' +
-            '    #offline-block-screen .offline-lock-card {\n' +
-            '        background: #ffffff; padding: 40px 25px; border-radius: 18px;\n' +
-            '        box-shadow: 0 10px 30px rgba(0,0,0,0.08); max-width: 380px; width: 100%;\n' +
-            '        border: 1px solid #e1e8ed;\n' +
-            '    }\n' +
-            '    #offline-block-screen .offline-lock-icon {\n' +
-            '        font-size: 50px; margin-bottom: 18px; color: #e74c3c;\n' +
-            '    }\n' +
-            '    #offline-block-screen h2 {\n' +
-            '        margin: 0 0 10px 0; font-size: 1.3rem; color: #2c3e50; font-weight: 700;\n' +
-            '    }\n' +
-            '    #offline-block-screen p {\n' +
-            '        margin: 0; font-size: 0.95rem; color: #7f8c8d; line-height: 1.6;\n' +
-            '    }\n' +
-            '    body.offline-page-is-hidden > *:not(#offline-block-screen):not(#offline-protection-style) {\n' +
-            '        display: none !important;\n' +
-            '    }\n' +
-            '</style>\n' +
-            '<div id="offline-block-screen">\n' +
-            '    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">\n' +
-            '    <div class="offline-lock-card">\n' +
-            '        <div class="offline-lock-icon"><i class="fa-solid fa-wifi"></i></div>\n' +
-            '        <h2>لا يوجد اتصال بالإنترنت</h2>\n' +
-            '        <p>لا يمكن لهذه الصفحة أن تعمل بلا إنترنت، يرجى التحقق من اتصالك بالشبكة والمحاولة مجددًا.</p>\n' +
-            '    </div>\n' +
-            '</div>\n' +
-            '<script>\n' +
-            '    (function() {\n' +
-            '        var offlineBlockScreenEl = null;\n' +
-            '        function offlineProtectionCheckState() {\n' +
-            '            if (!offlineBlockScreenEl) offlineBlockScreenEl = document.getElementById("offline-block-screen");\n' +
-            '            if (!offlineBlockScreenEl || !document.body) return;\n' +
-            '            if (navigator.onLine === false) {\n' +
-            '                offlineBlockScreenEl.classList.add("active");\n' +
-            '                document.body.classList.add("offline-page-is-hidden");\n' +
-            '            } else {\n' +
-            '                offlineBlockScreenEl.classList.remove("active");\n' +
-            '                document.body.classList.remove("offline-page-is-hidden");\n' +
-            '            }\n' +
-            '        }\n' +
-            '        window.addEventListener("online", offlineProtectionCheckState);\n' +
-            '        window.addEventListener("offline", offlineProtectionCheckState);\n' +
-            '        if (document.readyState === "loading") {\n' +
-            '            document.addEventListener("DOMContentLoaded", offlineProtectionCheckState);\n' +
-            '        } else {\n' +
-            '            offlineProtectionCheckState();\n' +
-            '        }\n' +
-            '        setInterval(offlineProtectionCheckState, 1000);\n' +
-            '    })();\n' +
-            '<\/script>\n' +
-            '<!-- END OFFLINE PROTECTION -->\n';
+            const offlineProtectionHtml = smBuildOfflineProtectionHtml(offlineDesignState);
 
             if (userContent.includes("<body>")) {
                 userContent = userContent.replace("<body>", "<body>\n" + offlineProtectionHtml);
@@ -11070,6 +11381,18 @@ function showEditorWarningBanner() {
                 userContent = userContent.replace(/<body([^>]*)>/, "<body$1>\n" + offlineProtectionHtml);
             } else {
                 userContent = offlineProtectionHtml + "\n" + userContent;
+            }
+        }
+
+        // حقن وسم السماح بتكبير الشاشة عند تفعيل الخيار (يُزال تلقائياً عند التعطيل بفضل علامات SM-AUTO-INJECTED)
+        if (isAllowZoomEnabled) {
+            const allowZoomMeta = '<!-- SM-AUTO-INJECTED:START:allow-zoom -->\n<meta name="allow-zoom" content="true">\n<!-- SM-AUTO-INJECTED:END:allow-zoom -->';
+            if (userContent.includes("</head>")) {
+                userContent = userContent.replace("</head>", allowZoomMeta + "\n</head>");
+            } else if (userContent.match(/<head[^>]*>/)) {
+                userContent = userContent.replace(/<head([^>]*)>/, "<head$1>\n" + allowZoomMeta);
+            } else {
+                userContent = allowZoomMeta + "\n" + userContent;
             }
         }
 
@@ -11927,6 +12250,9 @@ function showEditorWarningBanner() {
         document.getElementById("enable-page-password").checked = false;
         document.getElementById("page-password-input").value = "";
         document.getElementById("enable-offline-block").checked = false;
+        offlineDesignState = smOflMerge(null);
+        toggleOfflineDesignBtn();
+        document.getElementById("enable-allow-zoom").checked = false;
         togglePasswordInputVisibility();
         toggleHeaderControlsVisibility();
         applySavedHeaderStyleState();
@@ -12693,6 +13019,29 @@ function closeCustomDialog() {
     document.getElementById("customVarDialog").classList.remove("active");
 }
 </script>
+<!-- نافذة تخصيص تصميم شاشة "لا يوجد إنترنت" -->
+<style>
+    .ofl-dlg-sec { border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+    .ofl-dlg-sec h4 { margin: 0 0 8px; font-size: 0.9rem; color: var(--primary-color); }
+    .ofl-dlg-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; font-size: 0.82rem; }
+    .ofl-dlg-row input[type="text"], .ofl-dlg-row textarea, .ofl-dlg-row select { width: 100%; box-sizing: border-box; }
+    .ofl-dlg-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ofl-dlg-color { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; }
+    .ofl-dlg-color input[type="color"] { width: 34px; height: 28px; padding: 0; border: 1px solid var(--border-color); border-radius: 6px; background: none; flex-shrink: 0; }
+    .ofl-dlg-check { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; cursor: pointer; margin-bottom: 8px; }
+    #oflPreviewWrap { border-radius: 10px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--border-color); }
+</style>
+<div class="custom-dialog-overlay" id="offlineDesignDialog">
+    <div class="custom-dialog-box" style="max-width: 520px;">
+        <div class="custom-dialog-title"><i class="fa-solid fa-palette"></i> تخصيص شاشة «لا يوجد إنترنت»</div>
+        <div id="oflDlgBody" style="overflow-y: auto; flex: 1; min-height: 0; -webkit-overflow-scrolling: touch;"></div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-secondary btn-sm" onclick="smOflResetDraft()">استعادة الافتراضي</button>
+            <button class="btn btn-secondary btn-sm" onclick="smCloseOfflineDesignDialog()">إلغاء</button>
+            <button class="btn btn-sm" onclick="smSaveOfflineDesignDialog()">حفظ</button>
+        </div>
+    </div>
+</div>
 <!-- نافذة التنبيه الأمني قبل التصدير -->
 <div class="custom-dialog-overlay" id="exportSecurityModal">
     <div class="custom-dialog-box" style="border: 2px solid #e74c3c; max-width: 450px;">
