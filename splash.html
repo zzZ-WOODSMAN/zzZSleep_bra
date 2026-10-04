@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RosTrick</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+
+
+    </style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RosTrick</title>
@@ -292,30 +305,9 @@
     .skip-btn:hover{ border-color:rgba(127,227,212,.7); }
     .skip-btn:hover .skip-ico{ transform:translateX(-3px); }
   }
-
-  /* ===== بوابة الاتصال بالإنترنت ===== */
-  body:not(.go) .screen{display:none !important;}
-  #gate{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:#0b1214;color:#eafffb;direction:rtl;}
-  body.go #gate{display:none;}
-  body.paused #gate{display:flex;}
-  body.paused *,body.paused *::before,body.paused *::after{animation-play-state:paused !important;}
-  #gate .g-ico{width:76px;height:76px;border-radius:22px;display:grid;place-items:center;background:rgba(47,182,168,.12);border:1px solid rgba(127,227,212,.35);}
-  #gate .g-ico svg{width:38px;height:38px;stroke:#7fe3d4;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-  #gate h1{font-size:22px;font-weight:800;}
-  #gate p{font-size:15px;color:#a9c9c3;max-width:320px;line-height:1.8;}
-  #gate button{margin-top:6px;padding:11px 28px;border-radius:999px;border:1px solid rgba(127,227,212,.5);background:rgba(47,182,168,.18);color:#eafffb;font-size:15px;font-weight:700;cursor:pointer;}
-  #gate button:active{background:rgba(47,182,168,.32);}
-  #gate.checking button{display:none;}
-
 </style>
 </head>
 <body>
-<div id="gate" class="checking" role="alert">
-  <div class="g-ico"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/><path id="gSlash" d="M3 3l18 18" style="display:none"/></svg></div>
-  <h1 id="gTitle">جارٍ التحقق من الاتصال…</h1>
-  <p id="gMsg">يتم التأكد من وجود اتصال فعلي بالإنترنت.</p>
-  <button type="button" id="gRetry">إعادة المحاولة</button>
-</div>
 <div class="screen">
 
   <div class="scene-bg">
@@ -383,7 +375,7 @@
 </div>
 
 <script>
-function runSplash1(setTimeout,clearTimeout,setInterval,clearInterval,performance){
+(function(){
   var T = 9800, t0 = performance.now();
   function rnd(a,b){ return a + Math.random()*(b-a); }
 
@@ -497,9 +489,9 @@ function runSplash1(setTimeout,clearTimeout,setInterval,clearInterval,performanc
     for(var n=seq.length-1;n>si;n--){ if(t >= seq[n][0]){ si = n; st.textContent = seq[n][1]; st.className = seq[n][2]; ev.textContent = seq[n][3]; break; } }
     if(t > T) clearInterval(iv);
   }, 66);
-}
+})();
 
-function runSplash2(setTimeout,clearTimeout) {
+(function () {
   var VISIT_KEY = 'rostrick_splash_visits';
   var visits = parseInt(localStorage.getItem(VISIT_KEY) || '0', 10) + 1;
   try { localStorage.setItem(VISIT_KEY, visits); } catch (e) {}
@@ -529,148 +521,8 @@ function runSplash2(setTimeout,clearTimeout) {
   }
 
   function goHome() {
-    window.__gateRedirect();
+    window.location.href = 'home.html';
   }
-}
-
-// =====================================================================
-//  بوابة الإنترنت: لا يبدأ السبلاش ولا التحويل إلا بعد تحقق فعلي عبر
-//  استعلام DNS حيّ (DNS-over-HTTPS). عند الانقطاع أثناء العرض: يُجمَّد
-//  كل شيء (أنميشن + مؤقّتات) خلف شاشة الحجب، ويُستأنف من نفس النقطة.
-// =====================================================================
-(function () {
-  var PROBES = [
-    'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A',
-    'https://dns.google/resolve?name=google.com&type=A'
-  ];
-  var TIMEOUT = 5000;
-
-  function probe(base) {
-    return new Promise(function (resolve) {
-      var ctrl = ('AbortController' in window) ? new AbortController() : null;
-      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); resolve(false); }, TIMEOUT);
-      var url = base + '&random_padding=' + Date.now() + Math.random().toString(36).slice(2, 10);
-      fetch(url, { headers: { 'accept': 'application/dns-json' }, cache: 'no-store', credentials: 'omit', signal: ctrl ? ctrl.signal : undefined })
-        .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-        .then(function (j) {
-          clearTimeout(timer);
-          resolve(!!(j && j.Status === 0 && Array.isArray(j.Answer) && j.Answer.some(function (a) {
-            return a && a.type === 1 && /^\d{1,3}(\.\d{1,3}){3}$/.test(a.data || '');
-          })));
-        })
-        .catch(function () { clearTimeout(timer); resolve(false); });
-    });
-  }
-
-  function verifyInternet() {
-    if (navigator.onLine === false) return Promise.resolve(false);
-    return new Promise(function (resolve) {
-      var left = PROBES.length, done = false;
-      PROBES.forEach(function (p) {
-        probe(p).then(function (ok) {
-          if (done) return;
-          if (ok) { done = true; resolve(true); }
-          else if (--left === 0) { done = true; resolve(false); }
-        });
-      });
-    });
-  }
-
-  // <vclock> ساعة افتراضية: تتوقف وقت الإيقاف المؤقت فتتوقف كل المؤقّتات معها
-  var rST = window.setTimeout.bind(window), rCT = window.clearTimeout.bind(window), rn = function () { return performance.now(); };
-  var running = true, last = rn(), vt = 0, seq = 0, timers = {};
-  function now() { if (running) { var n = rn(); vt += n - last; last = n; } return vt; }
-  function arm(t) { rCT(t.h); if (!running) return; t.h = rST(function () { fire(t); }, Math.max(0, t.due - now())); }
-  function fire(t) {
-    if (!timers[t.id]) return;
-    if (t.iv) { t.due += t.ms; arm(t); } else { delete timers[t.id]; }
-    t.fn();
-  }
-  function add(fn, ms, iv) { var t = { id: ++seq, fn: fn, ms: ms || 0, iv: iv, due: now() + (ms || 0) }; timers[t.id] = t; arm(t); return t.id; }
-  function del(id) { var t = timers[id]; if (t) { rCT(t.h); delete timers[id]; } }
-  function vPause() { now(); running = false; Object.keys(timers).forEach(function (k) { rCT(timers[k].h); }); }
-  function vResume() { last = rn(); running = true; Object.keys(timers).forEach(function (k) { arm(timers[k]); }); }
-  // </vclock>
-  window.__vclock = { add: add, del: del, now: now, pause: vPause, resume: vResume };
-
-  var gate = document.getElementById('gate'),
-      gTitle = document.getElementById('gTitle'),
-      gMsg = document.getElementById('gMsg'),
-      gSlash = document.getElementById('gSlash'),
-      gRetry = document.getElementById('gRetry');
-  var started = false, paused = false, busy = false, redirecting = false, pendingRedirect = false;
-
-  function showChecking() {
-    gate.className = 'checking';
-    gSlash.style.display = 'none';
-    gTitle.textContent = 'جارٍ التحقق من الاتصال…';
-    gMsg.textContent = 'يتم التأكد من وجود اتصال فعلي بالإنترنت.';
-  }
-  function showOffline(isPause) {
-    gate.className = 'offline';
-    gSlash.style.display = '';
-    gTitle.textContent = 'مطلوب اتصالك بالإنترنت';
-    gMsg.textContent = isPause
-      ? 'انقطع الاتصال، لا يمكن الدخول لمحتوى التطبيق بلا إنترنت.'
-      : 'لا يوجد اتصال فعلي بالإنترنت. تأكد من الشبكة ثم أعد المحاولة.';
-  }
-
-  function start() {
-    if (started) return;
-    started = true;
-    document.body.classList.add('go');
-    runSplash1(
-      function (f, ms) { return add(f, ms, false); }, del,
-      function (f, ms) { return add(f, ms, true); }, del,
-      { now: now }
-    );
-    runSplash2(function (f, ms) { return add(f, ms, false); }, del);
-  }
-
-  function pause() {
-    if (!started || paused) return;
-    paused = true;
-    vPause();
-    document.body.classList.add('paused');   // يجمّد الأنميشن ويُظهر البوابة
-    showOffline(true);
-  }
-  function resume() {
-    if (!paused) return;
-    paused = false;
-    vResume();
-    document.body.classList.remove('paused');
-    if (pendingRedirect) { pendingRedirect = false; redirect(); }
-  }
-
-  // التحويل إلى home.html بعد تحقق أخير؛ إن فشل نتجمّد وننتظر عودة الإنترنت
-  function redirect() {
-    if (redirecting) return;
-    redirecting = true;
-    verifyInternet().then(function (ok) {
-      if (ok) { window.location.href = 'home.html'; return; }
-      redirecting = false;
-      pendingRedirect = true;
-      pause();
-    });
-  }
-  window.__gateRedirect = redirect;
-
-  function check() {
-    if (busy) return;
-    busy = true;
-    verifyInternet().then(function (ok) {
-      busy = false;
-      if (!started) { if (ok) start(); else showOffline(false); }
-      else if (paused) { if (ok) resume(); }
-      else if (!ok) { pause(); }
-    });
-  }
-
-  gRetry.addEventListener('click', function () { if (!started) showChecking(); check(); });
-  window.addEventListener('online', function () { if (!started) showChecking(); check(); });
-  window.addEventListener('offline', function () { if (started) pause(); else showOffline(false); });
-  setInterval(check, 3000);   // فحص دوري: يحجب عند الانقطاع ويستأنف عند العودة
-  check();
 })();
 </script>
 </body>
