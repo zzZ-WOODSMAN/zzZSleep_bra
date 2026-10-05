@@ -185,9 +185,19 @@
 
 /* ===== دوال بناء نافذة التحديث — مشتركة بين home و homePro (يجب أن تبقى متطابقة) ===== */
 function updEsc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
-function updColor(c, fb){ return /^#[0-9a-fA-F]{3,8}$/.test(String(c || "")) ? String(c) : fb; }
+function updColor(c, fb){ return /^#([0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(String(c || "")) ? String(c) : fb; }
 function updClamp(n, a, b, fb){ n = parseFloat(n); if (isNaN(n)) return fb; return Math.min(b, Math.max(a, n)); }
 function updIconClass(s){ s = String(s || "").trim(); return /^[a-zA-Z0-9 \-]{2,60}$/.test(s) ? s : "fa-solid fa-rocket"; }
+/* أيقونة اختيارية (لكل ميزة): تعيد الصنف إن كان صالحاً وإلا نصاً فارغاً */
+function updIconOpt(s){ s = String(s || "").trim(); return (/^[a-zA-Z0-9 \-]{2,60}$/.test(s) && s.indexOf("fa-") >= 0) ? s : ""; }
+function updFeat(f){ return (f && typeof f === "object") ? { text: String(f.text == null ? "" : f.text), icon: updIconOpt(f.icon) } : { text: String(f == null ? "" : f), icon: "" }; }
+function updHexToRgba(hex){
+    var h = String(hex || "").replace("#", "");
+    if (h.length === 3 || h.length === 4) h = h.split("").map(function(x){ return x + x; }).join("");
+    if (!/^([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(h)) return null;
+    return { r: parseInt(h.substr(0,2),16), g: parseInt(h.substr(2,2),16), b: parseInt(h.substr(4,2),16), a: h.length === 8 ? parseInt(h.substr(6,2),16) / 255 : 1 };
+}
+function updMuted(hex){ var c = updHexToRgba(hex) || { r:36, g:48, b:31, a:1 }; return "rgba(" + c.r + "," + c.g + "," + c.b + "," + (Math.round(c.a * 0.75 * 100) / 100) + ")"; }
 /* متغيرات CSS + أبعاد الصندوق من إعدادات التصميم */
 function updBoxStyle(d){
     d = d || {};
@@ -196,7 +206,7 @@ function updBoxStyle(d){
         var map = [["--card-bg","bg","#fffdf7"],["--text-color","text","#24301f"],["--primary-color","title","#1f3a2a"],
                    ["--accent-color","accent","#2f7d4a"],["--border-color","border","#d3ddc0"],["--btn-bg","btnBg","#2f7d4a"],["--btn-color","btnText","#ffffff"]];
         map.forEach(function(m){ s.push(m[0] + ":" + updColor(d[m[1]], m[2])); });
-        s.push("--text-muted:" + updColor(d.text, "#24301f") + "bb");
+        s.push("--text-muted:" + updMuted(updColor(d.text, "#24301f")));
     }
     s.push("border-radius:" + updClamp(d.radius, 0, 40, 12) + "px");
     s.push("max-width:" + updClamp(d.width, 280, 600, 400) + "px");
@@ -210,16 +220,19 @@ function updBodyHtml(cfg){
     var ls = ["bullet","check","number","none"].indexOf(d.listStyle) >= 0 ? d.listStyle : "bullet";
     var iconHtml = (d.showIcon === false) ? "" : '<i class="' + updIconClass(d.icon) + '" style="font-size:2.2rem; color:' + accentCss + ';"></i>';
     var msg = updEsc(cfg.message || "تم تحديث اللوحة إلى الإصدار {version}").replace(/\{version\}/g, updEsc(cfg.version));
-    var items = (cfg.features || []).filter(function(f){ return String(f || "").trim(); }).map(function(f){
-        if (ls === "check") return '<li style="list-style:none; margin-bottom:8px; line-height:1.7;"><i class="fa-solid fa-check" style="color:' + accentCss + '; margin-left:8px;"></i>' + updEsc(f) + '</li>';
-        return '<li style="margin-bottom:8px; line-height:1.7;">' + updEsc(f) + '</li>';
+    var feats = (cfg.features || []).map(updFeat).filter(function(f){ return f.text.trim(); });
+    var items = feats.map(function(f, i){
+        var marker = "";
+        if (f.icon) marker = '<i class="' + f.icon + '" style="color:' + accentCss + '; flex:0 0 auto;"></i>';
+        else if (ls === "check") marker = '<i class="fa-solid fa-check" style="color:' + accentCss + '; flex:0 0 auto;"></i>';
+        else if (ls === "number") marker = '<bdi style="color:' + accentCss + '; font-weight:600; flex:0 0 auto;">' + (i + 1) + '.</bdi>';
+        else if (ls === "bullet") marker = '<span style="color:' + accentCss + '; flex:0 0 auto;">&#8226;</span>';
+        return '<li style="display:flex; gap:8px; align-items:baseline; justify-content:' + (al === "center" ? "center" : "flex-start") + '; margin-bottom:8px; line-height:1.7;">' + marker + '<span>' + updEsc(f.text) + '</span></li>';
     }).join("");
-    var tag = ls === "number" ? "ol" : "ul";
-    var pad = (ls === "check" || ls === "none") ? "0" : "20px";
     return '<div style="text-align:center; padding:5px 0 15px;">' + iconHtml +
            '<h3 style="margin:10px 0 5px;">' + msg + '</h3>' +
            '<p style="color:var(--text-muted); font-size:0.9rem; margin:0;">أبرز ما جاء في هذا التحديث:</p></div>' +
-           (items ? '<' + tag + ' style="padding-right:' + pad + '; margin:0; color:var(--text-color); text-align:' + al + ';' + (ls === "none" ? ' list-style:none;' : '') + '">' + items + '</' + tag + '>' : '');
+           (items ? '<ul style="list-style:none; padding:0; margin:0; color:var(--text-color); text-align:' + al + ';">' + items + '</ul>' : '');
 }
 
     function smUpdDlgInjectCss() {
