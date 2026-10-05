@@ -1,5 +1,35 @@
 {
   "premium": false,
   "buy-link": "https://t.me/RosTrick_bot",
-  "price": "1.33$"
+  "price": "1.33$",
+  "update_dialog": {
+    "version": "1.0.0",
+    "title": "🎉 تحديث جديد للوحة",
+    "message": "تم تحديث اللوحة إلى الإصدار {version}",
+    "features": [
+      "تحسينات وإصلاحات",
+      "ثيمات جديدة : هندسية",
+      "ميزات جديدة : تكبير الشاشة والمزيد…",
+      "تحديث نسخة المستخدم بشكل أفضل!",
+      "تطوير ميزة الشبكة لتصبح تعطيل الصفحة عند عدم توفر الإنترنت وليس الشبكة فقط"
+    ],
+    "design": {
+      "showIcon": true,
+      "icon": "fa-solid fa-rocket",
+      "btnLabel": "حسنًا، الدخول للوحة",
+      "listStyle": "check",
+      "align": "right",
+      "width": 280,
+      "radius": 40,
+      "overlay": 5,
+      "customColors": false,
+      "bg": "#fffdf7",
+      "text": "#24301f",
+      "title": "#1f3a2a",
+      "accent": "#2f7d4a",
+      "border": "#d3ddc0",
+      "btnBg": "#2f7d4a",
+      "btnText": "#ffffff"
+    }
+  }
 }
