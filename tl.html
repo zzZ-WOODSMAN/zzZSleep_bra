@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html class="subs-off" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الثيمات المحفوظة</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   /* الثيم الطبيعي (غابة) — افتراضي */
@@ -25,6 +26,35 @@
   --ink:#e7ecf2; --ink-dim:#a7b2bf;
   --accent:#7fb2e8; --accent-soft:rgba(127,178,232,.18);
 }
+
+/* ============ ثيمات «اللوحة الهندسية» (bp-light / bp-dark / bp-rain) — نفس ألوان home.html ============ */
+html[data-theme="bp-light"]{
+  --bg:#e8ecf4; --panel:#ffffff; --panel-2:#dde4f1; --line:#c9d2e4;
+  --ink:#0e1530; --ink-dim:#5a6685; --accent:#2f4bff; --accent-soft:rgba(47,75,255,.14);
+  --grid:rgba(47,75,255,.06); --grid-major:rgba(47,75,255,.12);
+}
+html[data-theme="bp-dark"]{
+  --bg:#070d1c; --panel:#0d1730; --panel-2:#0a1328; --line:rgba(110,150,255,.22);
+  --ink:#e6edff; --ink-dim:#8c9bbd; --accent:#4cc9f0; --accent-soft:rgba(76,201,240,.16);
+  --grid:rgba(76,201,240,.055); --grid-major:rgba(76,201,240,.11);
+}
+html[data-theme="bp-rain"]{
+  --bg:#15171c; --panel:#1d2027; --panel-2:#181b21; --line:rgba(255,255,255,.11);
+  --ink:#ececf1; --ink-dim:#9a9fae; --accent:#b79cff; --accent-soft:rgba(183,156,255,.16);
+  --grid:rgba(255,255,255,.03); --grid-major:rgba(255,255,255,.065);
+}
+html[data-theme^="bp-"] .bg-decor, html[data-theme^="bp-"] .bg-decor-forest, html[data-theme^="bp-"] .bg-decor-rain{display:none !important;}
+html[data-theme^="bp-"] body{
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid-major) 1px,transparent 1px),linear-gradient(90deg,var(--grid-major) 1px,transparent 1px),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:160px 160px,160px 160px,32px 32px,32px 32px; background-attachment:fixed;
+}
+html[data-theme^="bp-"] h1, html[data-theme^="bp-"] h3{font-family:'Readex Pro','IBM Plex Sans Arabic',sans-serif;}
+html[data-theme="bp-light"] .sub-note.warn{color:#8a5a12; background:rgba(227,177,102,.16);}
+html[data-theme="bp-light"] .sub-note.ok{color:#13794a; background:rgba(89,201,190,.14);}
+
+/* عند تعطيل نظام الاشتراكات (أو قبل معرفة حالته) لا يظهر أي أثر للاشتراك في الصفحة */
+html.subs-off #subStatusBtn, html.subs-off .row .icon .pro-badge{display:none !important;}
 *{box-sizing:border-box; margin:0; padding:0;-webkit-tap-highlight-color: rgba(0,0,0,0) !important;user-select:none;}
 body{
   background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans Arabic',sans-serif;
@@ -582,12 +612,14 @@ document.getElementById("bubbleLayer").addEventListener("click", e => {
 const THEME_STORAGE_KEY = "theme";
 
 function initPageTheme() {
-  const saved = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+  let saved = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+  if (["light","dark","rain","bp-light","bp-dark","bp-rain"].indexOf(saved) === -1) saved = "dark";
   document.documentElement.setAttribute("data-theme", saved);
   buildThemeDecor(saved);
 }
 
 function buildThemeDecor(theme) {
+  if (String(theme).indexOf("bp-") === 0) return; // الثيمات الهندسية بلا زخارف خلفية
   if (theme === "dark") { buildReef(); buildBubbles(); }
   else if (theme === "rain") { buildRainDrops(); }
   else { buildForestLeaves(); }
@@ -769,6 +801,7 @@ const SM_FIREBASE_AUTH = "";
 
 let smLicenseSettings = { premium: true, buyLink: "n/a", price: "" };
 let smIsPro = false;
+let smLicenseSettingsLoaded = false; // قبل معرفة حالة نظام الاشتراكات لا يُعرض أي تلميح اشتراك
 let smCurrentProject = null; // { user, repo, name } — يُقرأ من sm_last_project، آخر مشروع فُتح من ind.html فقط
 
 /* ============ قراءة "آخر مشروع تم فتحه" — للعرض فقط، لا يمكن تغييره من هذه الصفحة ============ */
@@ -808,7 +841,8 @@ function smLoadLicenseSettings() {
       smLicenseSettings.buyLink = (data && (data["buy-link"] || data.buyLink)) || "n/a";
       smLicenseSettings.price = (data && data.price) ? String(data.price) : "";
     })
-    .catch(() => { /* في حال التعذر نفترض تفعيل الاشتراك (الوضع الأكثر أماناً) */ });
+    .catch(() => { /* في حال التعذر نفترض تفعيل الاشتراك (الوضع الأكثر أماناً) */ })
+    .finally(() => { smLicenseSettingsLoaded = true; smUpdateProUI(); });
 }
 
 function smFirebaseGetSubscription() {
@@ -882,9 +916,11 @@ function smDownloadAllowed(needsSub) {
 function smUpdateProUI() {
   const label = document.getElementById("subStatusLabel");
   const btn = document.getElementById("subStatusBtn");
+  /* الاشتراكات مقفلة (أو الحالة لم تُعرف بعد): إخفاء زر الاشتراك وشارات التاج بالكامل دون أي نص "مجاني" */
+  document.documentElement.classList.toggle("subs-off", !smLicenseSettingsLoaded || !smLicenseSettings.premium);
   if (!label || !btn) return;
   if (!smLicenseSettings.premium) {
-    label.textContent = "كل الثيمات مجانية حاليًا";
+    label.textContent = "";
     btn.style.borderColor = "";
   } else if (!smCurrentProject) {
     label.textContent = "لا يوجد تطبيق محدد";
@@ -1059,7 +1095,7 @@ function buildPreviewDoc(pkg) {
     .replace(/\{\{\s*APP_NAME\s*\}\}/g, appName)
     .replace(/\{\{\s*LOGO_URL\s*\}\}/g, "https://placehold.co/200x200/e3b166/1a1206?text=Logo");
 
-  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+  return `<!DOCTYPE html><html class="subs-off" lang="ar" dir="rtl"><head><meta charset="UTF-8">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{${varsCss}}
@@ -1220,7 +1256,7 @@ let smDownloadButtons = []; // كل أزرار "تنزيل" المعروضة ح�
 
 function smRenderDownloadBtnLabel(btn, needsSub, name) {
   if (smIsInstalled(name)) {
-    if (!smDownloadAllowed(needsSub)) {
+    if (!smDownloadAllowed(needsSub) && smLicenseSettingsLoaded) {
       // محمّل سابقًا (ربما بحساب مشترك) لكن الحساب الحالي غير مشترك والثيم Pro: يبقى مكتوب "محمّل" مع قفل، والضغط يفتح نافذة الاشتراك
       btn.innerHTML = `<i class="fa-solid fa-lock" style="color:#e0a860;"></i> محمّل`;
       btn.disabled = false;
@@ -1234,7 +1270,7 @@ function smRenderDownloadBtnLabel(btn, needsSub, name) {
   }
   btn.disabled = false;
   btn.style.cursor = "";
-  btn.innerHTML = smDownloadAllowed(needsSub)
+  btn.innerHTML = (smDownloadAllowed(needsSub) || !smLicenseSettingsLoaded)
     ? `<i class="fa-solid fa-download"></i> تنزيل`
     : `<i class="fa-solid fa-lock" style="color:#e0a860;"></i> تنزيل`;
 }
