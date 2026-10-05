@@ -178,10 +178,113 @@
         ]
     };
 
+    /* ============ تخصيص النافذة من homePro ============
+       homePro يحفظ الإعداد داخل settings.json (الحقل update_dialog) ويقدّمه الـ Worker، وهنا يُجلب ويُدمج فوق القيم المحلية أعلاه.
+       إن فشل الجلب أو لم يوجد الحقل تُستخدم القيم المحلية في ROSTRICK_VERSION_CONFIG كما كانت. */
+    var ROSTRICK_UPDATE_SETTINGS_URL = "https://zzzsleep-bra.rostrick.workers.dev/settings.json";
+
+/* ===== دوال بناء نافذة التحديث — مشتركة بين home و homePro (يجب أن تبقى متطابقة) ===== */
+function updEsc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function updColor(c, fb){ return /^#[0-9a-fA-F]{3,8}$/.test(String(c || "")) ? String(c) : fb; }
+function updClamp(n, a, b, fb){ n = parseFloat(n); if (isNaN(n)) return fb; return Math.min(b, Math.max(a, n)); }
+function updIconClass(s){ s = String(s || "").trim(); return /^[a-zA-Z0-9 \-]{2,60}$/.test(s) ? s : "fa-solid fa-rocket"; }
+/* متغيرات CSS + أبعاد الصندوق من إعدادات التصميم */
+function updBoxStyle(d){
+    d = d || {};
+    var s = [];
+    if (d.customColors) {
+        var map = [["--card-bg","bg","#fffdf7"],["--text-color","text","#24301f"],["--primary-color","title","#1f3a2a"],
+                   ["--accent-color","accent","#2f7d4a"],["--border-color","border","#d3ddc0"],["--btn-bg","btnBg","#2f7d4a"],["--btn-color","btnText","#ffffff"]];
+        map.forEach(function(m){ s.push(m[0] + ":" + updColor(d[m[1]], m[2])); });
+        s.push("--text-muted:" + updColor(d.text, "#24301f") + "bb");
+    }
+    s.push("border-radius:" + updClamp(d.radius, 0, 40, 12) + "px");
+    s.push("max-width:" + updClamp(d.width, 280, 600, 400) + "px");
+    s.push("--upd-align:" + (d.align === "center" ? "center" : "start"));
+    return s.join(";");
+}
+function updBodyHtml(cfg){
+    var d = cfg.design || {};
+    var accentCss = d.customColors ? updColor(d.accent, "#2f7d4a") : "var(--accent-color)";
+    var al = d.align === "center" ? "center" : "right";
+    var ls = ["bullet","check","number","none"].indexOf(d.listStyle) >= 0 ? d.listStyle : "bullet";
+    var iconHtml = (d.showIcon === false) ? "" : '<i class="' + updIconClass(d.icon) + '" style="font-size:2.2rem; color:' + accentCss + ';"></i>';
+    var msg = updEsc(cfg.message || "تم تحديث اللوحة إلى الإصدار {version}").replace(/\{version\}/g, updEsc(cfg.version));
+    var items = (cfg.features || []).filter(function(f){ return String(f || "").trim(); }).map(function(f){
+        if (ls === "check") return '<li style="list-style:none; margin-bottom:8px; line-height:1.7;"><i class="fa-solid fa-check" style="color:' + accentCss + '; margin-left:8px;"></i>' + updEsc(f) + '</li>';
+        return '<li style="margin-bottom:8px; line-height:1.7;">' + updEsc(f) + '</li>';
+    }).join("");
+    var tag = ls === "number" ? "ol" : "ul";
+    var pad = (ls === "check" || ls === "none") ? "0" : "20px";
+    return '<div style="text-align:center; padding:5px 0 15px;">' + iconHtml +
+           '<h3 style="margin:10px 0 5px;">' + msg + '</h3>' +
+           '<p style="color:var(--text-muted); font-size:0.9rem; margin:0;">أبرز ما جاء في هذا التحديث:</p></div>' +
+           (items ? '<' + tag + ' style="padding-right:' + pad + '; margin:0; color:var(--text-color); text-align:' + al + ';' + (ls === "none" ? ' list-style:none;' : '') + '">' + items + '</' + tag + '>' : '');
+}
+
+    function smUpdDlgInjectCss() {
+        if (document.getElementById("upd-dlg-style")) return;
+        var st = document.createElement("style");
+        st.id = "upd-dlg-style";
+        st.textContent =
+            ".custom-dialog-overlay.upd-ov{ background: rgba(0,0,0,var(--upd-ov,0.6)) !important; }" +
+            ".custom-dialog-box.upd-dlg .custom-dialog-title{ text-align: var(--upd-align, start); }" +
+            ".custom-dialog-box.upd-dlg #customDialogConfirmBtn{ background: var(--btn-bg) !important; color: var(--btn-color) !important; }";
+        document.head.appendChild(st);
+    }
+    function smUpdDlgApply(design) {
+        try {
+            smUpdDlgInjectCss();
+            var overlay = document.getElementById("customVarDialog");
+            var box = overlay && overlay.querySelector(".custom-dialog-box");
+            if (!overlay || !box) return;
+            box.classList.add("upd-dlg");
+            box.setAttribute("style", updBoxStyle(design));
+            overlay.classList.add("upd-ov");
+            overlay.style.setProperty("--upd-ov", String(updClamp((design || {}).overlay, 0, 90, 60) / 100));
+        } catch (e) {}
+    }
+    function smUpdDlgReset() {
+        try {
+            var overlay = document.getElementById("customVarDialog");
+            var box = overlay && overlay.querySelector(".custom-dialog-box");
+            if (box) { box.classList.remove("upd-dlg"); box.removeAttribute("style"); }
+            if (overlay) { overlay.classList.remove("upd-ov"); overlay.style.removeProperty("--upd-ov"); }
+        } catch (e) {}
+    }
+
+    /* جلب إعداد النافذة من الـ Worker (مهلة 6 ثوانٍ) — يعيد الكائن أو null عند أي فشل */
+    function smFetchRemoteUpdateConfig() {
+        return new Promise(function (resolve) {
+            var done = false;
+            var timer = setTimeout(function () { if (!done) { done = true; resolve(null); } }, 6000);
+            fetch(ROSTRICK_UPDATE_SETTINGS_URL + "?t=" + Date.now(), { cache: "no-cache" })
+                .then(function (r) { if (!r.ok) throw new Error("x"); return r.json(); })
+                .then(function (d) {
+                    var u = d && d.update_dialog;
+                    if (!done) { done = true; clearTimeout(timer); resolve(u && typeof u === "object" ? u : null); }
+                })
+                .catch(function () { if (!done) { done = true; clearTimeout(timer); resolve(null); } });
+        });
+    }
+
     function smCheckRosTrickVersionUpdate() {
+        smFetchRemoteUpdateConfig().then(function (remote) { smRunRosTrickVersionUpdate(remote); });
+    }
+
+    function smRunRosTrickVersionUpdate(remote) {
         try {
             var STORAGE_KEY = "version-RosTrick";
-            var current = String(ROSTRICK_VERSION_CONFIG.version);
+            var L = ROSTRICK_VERSION_CONFIG;
+            var R = remote || {};
+            var cfg = {
+                version: (R.version != null && String(R.version).trim()) ? String(R.version).trim() : String(L.version),
+                title: (R.title && String(R.title).trim()) ? String(R.title) : L.title,
+                message: (R.message && String(R.message).trim()) ? String(R.message) : "",
+                features: Array.isArray(R.features) ? R.features : (L.features || []),
+                design: (R.design && typeof R.design === "object") ? R.design : {}
+            };
+            var current = cfg.version;
             var saved = localStorage.getItem(STORAGE_KEY);
 
             // أول زيارة: سجّل الرقم فقط بدون إظهار نافذة
@@ -193,29 +296,20 @@
             // الرقم المحفوظ مطابق للحالي: لا شيء
             if (saved === current) return;
 
-            var featuresHtml = (ROSTRICK_VERSION_CONFIG.features || []).map(function (f) {
-                return '<li style="margin-bottom:8px; line-height:1.7;">' + f + '</li>';
-            }).join("");
-
-            var bodyHtml =
-                '<div style="text-align:center; padding: 5px 0 15px;">' +
-                    '<i class="fa-solid fa-rocket" style="font-size: 2.2rem; color: var(--accent-color);"></i>' +
-                    '<h3 style="margin: 10px 0 5px;">تم تحديث اللوحة إلى الإصدار ' + current + '</h3>' +
-                    '<p style="color: var(--text-muted); font-size:0.9rem; margin:0;">أبرز ما جاء في هذا التحديث:</p>' +
-                '</div>' +
-                '<ul style="padding-right: 20px; margin: 0; color: var(--text-color); text-align:right;">' + featuresHtml + '</ul>';
+            var bodyHtml = updBodyHtml(cfg);
 
             if (typeof openCustomDialog !== "function") { localStorage.setItem(STORAGE_KEY, current); return; }
             openCustomDialog(
-                ROSTRICK_VERSION_CONFIG.title,
+                cfg.title,
                 bodyHtml,
                 function () {
                     localStorage.setItem(STORAGE_KEY, current);
                     closeCustomDialog();
                 },
-                "حسنًا، الدخول للوحة",
+                (cfg.design.btnLabel && String(cfg.design.btnLabel).trim()) ? String(cfg.design.btnLabel) : "حسنًا، الدخول للوحة",
                 true
             );
+            smUpdDlgApply(cfg.design);
             // هذه النافذة إلزامية: لا زر إلغاء، فقط "حسنًا" لتحديث الرقم والدخول للوحة
             var cancelBtnEl = document.getElementById("customDialogCancelBtn");
             if (cancelBtnEl) cancelBtnEl.style.display = "none";
@@ -13017,6 +13111,7 @@ function openCustomDialog(title, bodyHtml, onConfirm, confirmBtnText, wide) {
 
 function closeCustomDialog() {
     document.getElementById("customVarDialog").classList.remove("active");
+    if (typeof smUpdDlgReset === "function") smUpdDlgReset(); // إزالة تخصيص نافذة التحديث حتى لا يتسرب لباقي النوافذ
 }
 </script>
 <!-- نافذة تخصيص تصميم شاشة "لا يوجد إنترنت" -->
