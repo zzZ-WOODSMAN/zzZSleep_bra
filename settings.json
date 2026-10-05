@@ -22,7 +22,7 @@
       "width": 280,
       "radius": 40,
       "overlay": 5,
-      "customColors": false,
+      "customColors": true,
       "bg": "#fffdf7",
       "text": "#24301f",
       "title": "#1f3a2a",
