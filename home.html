@@ -13991,6 +13991,8 @@ const SM_LIMITS = {
 let smLicenseSettings = { premium: true, buyLink: "n/a", price: "" }; // تُحمَّل من settings.json
 let smIsPro = false;
 let smLicenseSettingsLoaded = false;
+let smLicenseSettingsOk = false;      // true فقط إذا نجح جلب settings.json فعلاً (وليس الافتراضي)
+let smLicenseSettingsPromise = null;  // وعد التحميل الأول، تنتظره سياسة الإنفاذ قبل أي قرار
 
 /* --- مكتبة الأنماط المخصصة (هيدر/أداة تنقل): محلية (خاصة بالمشروع الحالي فقط لغير المشترك)
        أو عامة (لكل المشاريع، ومُزامنة مع GitHub، للمشترك فقط) --- */
@@ -14011,6 +14013,7 @@ function smLoadLicenseSettings() {
         .then(data => {
             const premiumRaw = data && (data.premium !== undefined ? data.premium : data["premium"]);
             smLicenseSettings.premium = (premiumRaw === true || premiumRaw === "true");
+            smLicenseSettingsOk = true;
             smLicenseSettings.buyLink = (data && (data["buy-link"] || data.buyLink)) || "n/a";
             smLicenseSettings.price = (data && data.price) ? String(data.price) : "";
         })
@@ -14413,7 +14416,55 @@ function smEnforcePageLimitBlock() {
    "active" فقط ⇐ ينفَّذ الحذف/الحجب. "unknown" (تعذر الاتصال بالسيرفر) ⇐
    لا يُنفَّذ أي حذف ولا حجب إطلاقاً، منعاً لمعاقبة مشترك فعلي ظلماً بسبب
    عطل بالسيرفر. */
+/* ============ تأخير دفاعي (12 ثانية) قبل أي حذف/حجب ============
+   المشكلة: عند التشغيل تكون إعدادات الاشتراك الافتراضية "مفعّل" وحالة المشترك "false" إلى أن يكتمل التحقق،
+   فكان يُحذف sps-pages.json و Closed.html وغيرها قبل أن نعرف أن الاشتراكات معطّلة أو أن المشروع مشترك.
+   الحل: (1) لا يبدأ الإنفاذ قبل اكتمال تحميل settings.json، (2) عند رصد مخالفة ننتظر 12 ثانية من بدء
+   الفحص، (3) ثم نعيد جلب settings.json وحالة الاشتراك مباشرةً، ولا ننفّذ شيئاً إلا بتأكيد صريح بنجاح الطلبين. */
+const SM_DEFENSE_DELAY_MS = 12000;
+let smEnforceRunId = 0;
+
+function smWaitLicenseReady() {
+    if (smLicenseSettingsLoaded) return Promise.resolve();
+    if (!smLicenseSettingsPromise) smLicenseSettingsPromise = smLoadLicenseSettings();
+    return smLicenseSettingsPromise;
+}
+
+/* جلب صارم لـ settings.json: يعيد premium (true/false) أو null عند أي فشل */
+function smFetchPremiumFlagStrict() {
+    return fetch(`${SM_LICENSE_WORKER_BASE}/settings.json?t=${Date.now()}`, { cache: "no-cache" })
+        .then(res => { if (!res.ok) throw new Error("settings fetch failed"); return res.json(); })
+        .then(data => {
+            const raw = data && (data.premium !== undefined ? data.premium : data["premium"]);
+            if (raw === undefined || raw === null) return null;
+            return (raw === true || raw === "true");
+        })
+        .catch(() => null);
+}
+
+/* يعيد true فقط إذا كان مسموحاً بتنفيذ الحذف/الحجب بعد الانتظار وإعادة التحقق */
+function smDefenseGate(startedAt, runId) {
+    const wait = Math.max(0, SM_DEFENSE_DELAY_MS - (Date.now() - startedAt));
+    return new Promise(r => setTimeout(r, wait)).then(() => {
+        if (runId !== smEnforceRunId) return false; // بدأ فحص أحدث، نتجاهل هذا
+        if (localStorage.getItem(smProStorageKey()) === "active") { smIsPro = true; smUpdateProUI(); smHideForceLimitScreen(); return false; }
+        return smFetchPremiumFlagStrict().then(premium => {
+            if (premium === null) return false;      // تعذر معرفة حالة نظام الاشتراكات: لا إجراء
+            smLicenseSettings.premium = premium;
+            if (!premium) { smUpdateProUI(); smHideForceLimitScreen(); return false; } // الاشتراكات معطّلة: لا حذف ولا حجب
+            return true;
+        });
+    });
+}
+
 function smEnforceFreeTierPolicy() {
+    if (!GITHUB_USER || !GITHUB_REPO || !GITHUB_TOKEN) return Promise.resolve();
+    const runId = ++smEnforceRunId;
+    const startedAt = Date.now();
+    return smWaitLicenseReady().then(() => smEnforceFreeTierPolicyInner(startedAt, runId));
+}
+
+function smEnforceFreeTierPolicyInner(startedAt, runId) {
     if (!GITHUB_USER || !GITHUB_REPO || !GITHUB_TOKEN) return Promise.resolve();
     if (!smLicenseSettings.premium) { smHideForceLimitScreen(); return Promise.resolve(); }
 
@@ -14446,24 +14497,29 @@ function smEnforceFreeTierPolicy() {
                 const linkedSiteCount = linkedPaths.filter(p => p.startsWith(sitePrefix)).length;
 
                 const overLimit = ((appPages.length + linkedAppCount) > SM_LIMITS.maxPages || (sitePages.length + linkedSiteCount) > SM_LIMITS.maxPages);
-                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, linkedMap);
+                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, linkedMap, startedAt, runId);
             })
             .catch(() => {
                 // تعذر جلب سجل الصفحات المرتبطة: نكمل بالاعتماد على الملفات الفعلية فقط دون حجب إضافي بسببه
                 const overLimit = (appPages.length > SM_LIMITS.maxPages || sitePages.length > SM_LIMITS.maxPages);
-                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, {});
+                return smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, {}, startedAt, runId);
             });
     }).catch(err => console.log("smEnforceFreeTierPolicy error: " + (err && err.message)));
 }
 
-function smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, linkedMap) {
+function smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sitePages, overLimit, linkedMap, startedAt, runId) {
     if (!hasRestrictedFiles && !overLimit) {
         smHideForceLimitScreen();
         return Promise.resolve();
     }
 
-    // وُجدت مخالفة محتملة: الآن فقط يُستهلك الفايربيس مباشرة عبر delete_block
-    return smCheckDeleteBlock().then(deleteBlock => {
+    // وُجدت مخالفة محتملة: انتظار 12 ثانية + إعادة التحقق من settings قبل أي فعل، ثم يُستهلك الفايربيس عبر delete_block
+    // (إن كانت الشاشة معروضة أصلاً ولا ملفات للحذف، فهذا مجرد تحديث لها فلا حاجة للانتظار)
+    const needGate = hasRestrictedFiles || !smForceLimitActive;
+    const gate = needGate ? smDefenseGate(startedAt || Date.now(), runId) : Promise.resolve(true);
+    return gate.then(allowed => {
+        if (!allowed) return;
+        return smCheckDeleteBlock().then(deleteBlock => {
         if (deleteBlock === "unknown") {
             // delete_block: unknown — تعذر الاتصال بالسيرفر، فلا يُنفَّذ أي حذف ولا أي حجب جديد إطلاقاً
             if (overLimit && smForceLimitActive) smShowForceLimitScreen(appPages, sitePages);
@@ -14491,6 +14547,7 @@ function smEnforceFreeTierPolicyContinue(tree, hasRestrictedFiles, appPages, sit
             } else {
                 smHideForceLimitScreen();
             }
+        });
         });
     });
 }
@@ -14939,7 +14996,7 @@ function smOpenLicenseDialog(triggeredByFeature) {
 
 /* ============ التهيئة عند تحميل الصفحة ============ */
 (function smInitLicenseModule() {
-    smLoadLicenseSettings().then(() => {
+    (smLicenseSettingsPromise = smLoadLicenseSettings()).then(() => {
         if (GITHUB_USER && GITHUB_REPO) smCheckProStatus(false).then(smInitCustomStyles).then(smEnforceFreeTierPolicy);
     });
     // إعادة الفحص كلما تغيّر المشروع (بعد تسجيل الدخول/التبديل)
