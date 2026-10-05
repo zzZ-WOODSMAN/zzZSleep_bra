@@ -5,7 +5,7 @@
   "update_dialog": {
     "version": "1.0.1",
     "title": "🎉 تحديث جديد للوحة",
-    "message": "تم تحديث اللوحة إلى الإصدار {version}",
+    "message": "{version}",
     "features": [
       {
         "text": "تحسينات وإصلاحات",
@@ -30,13 +30,13 @@
     ],
     "design": {
       "showIcon": true,
-      "icon": "fa-solid fa-rocket",
+      "icon": "fa-solid fa-award",
       "btnLabel": "حسنًا، الدخول للوحة",
       "listStyle": "check",
       "align": "right",
-      "width": 280,
-      "radius": 40,
-      "overlay": 5,
+      "width": 450,
+      "radius": 17,
+      "overlay": 0,
       "customColors": true,
       "bg": "#fffdf7",
       "text": "#24301f",
