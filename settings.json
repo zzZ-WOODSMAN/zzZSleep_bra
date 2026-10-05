@@ -3,7 +3,7 @@
   "buy-link": "https://t.me/RosTrick_bot",
   "price": "1.33$",
   "update_dialog": {
-    "version": "1.0.1",
+    "version": "1.0.0",
     "title": "🎉 تحديث جديد للوحة",
     "message": "{version}",
     "features": [
@@ -36,7 +36,7 @@
       "align": "right",
       "width": 450,
       "radius": 17,
-      "overlay": 0,
+      "overlay": 80,
       "customColors": true,
       "bg": "#fffdf7",
       "text": "#24301f",
